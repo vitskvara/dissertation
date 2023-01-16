@@ -1,0 +1,160 @@
+\usepackage[ddmmyyyy]{datetime}
+
+% ------------------------------------------------------------------------------
+% Packages
+% ------------------------------------------------------------------------------
+% Page setting
+\usepackage[explicit]{titlesec}
+\usepackage{sectsty}
+\usepackage{fancyhdr}
+
+% Text options
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+
+\usepackage{amsfonts}
+\usepackage{dsfont}
+\usepackage{pifont}
+\usepackage{kpfonts}
+
+% Graphics and colors
+\usepackage{graphicx}
+\usepackage{import}
+\usepackage{graphics}
+\usepackage{xcolor}
+
+\definecolor{myred}{RGB}{150,0,0}  
+\definecolor{mygreen}{RGB}{0,150,0}
+\definecolor{myblue}{RGB}{0, 101, 189}
+\definecolor{myyellow}{RGB}{220, 206, 0}
+\definecolor{myorange}{RGB}{255, 153, 51}
+\definecolor{mycyan}{RGB}{51, 204, 204}
+\definecolor{mypurple}{RGB}{204, 0, 153}
+
+\newcommand{\doccol}{\color{myblue}}
+
+% Hyperrefs
+\usepackage{hyperref}
+\hypersetup{
+  pdfusetitle,
+  unicode = true,
+  bookmarks = true,
+  bookmarksnumbered = false,
+  bookmarksopen = true,
+  breaklinks = false,
+  pdfborderstyle = {},
+  backref = false,
+  colorlinks = true,
+  linkcolor = myblue,
+  urlcolor = myred,
+  citecolor = mygreen,
+}
+
+% enumerate and itemize
+\usepackage{enumitem}
+
+% Appendix
+\usepackage[title, titletoc]{appendix}
+
+% Captions
+\usepackage{caption}
+\usepackage{subcaption}
+
+\captionsetup[figure]{position = bottom}
+\captionsetup[table]{position = bottom}
+
+% Figures
+
+% Tables
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{nicematrix}
+
+\renewcommand{\arraystretch}{1.5}
+
+\newcommand{\best}{\cellcolor{mygreen!25}}
+\newcommand{\besttotal}{\cellcolor{mygreen!50}}
+\newcommand{\longcell}[1]{\begin{tabular}{@{}c@{}}#1\end{tabular}}
+\newcommand{\rotatecell}[1]{\rotatebox{90}{\longcell{#1}}}
+
+% Algorithms
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+
+% Math
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{nicefrac}
+\usepackage{bm}
+\usepackage{thmtools}
+\usepackage{thm-restate}
+\usepackage{optidef}
+
+% Theorems
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage{xifthen}
+
+% Tikz and pfgplots
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
+\usetikzlibrary{shapes}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{intersections}
+
+\pgfplotsset{compat=newest}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{fillbetween}
+\usepgfplotslibrary{statistics}
+
+% tmp
+\usepackage{lipsum}
+\usepackage[color=myred!50]{todonotes}
+
+% ------------------------------------------------------------------------------
+% Math declarations
+% ------------------------------------------------------------------------------
+\newcommand{\Brac}[2][r]{%
+  \ifx r#1 \left(       #2 \right)       \else
+  \ifx c#1 \left\{      #2 \right\}      \else
+  \ifx s#1 \left[       #2 \right]       \else
+  \ifx v#1 \left\vert   #2 \right\vert   \else
+  \ifx a#1 \left\langle #2 \right\rangle \else
+  \ifx t#1 \left\lceil  #2 \right\rceil  \else
+  \ifx b#1 \left\lfloor #2 \right\rfloor \else
+  \ifx n#1 \left\|      #2 \right\|      \else
+  \mathrm{Illegal~option}%
+  \fi\fi\fi\fi\fi\fi\fi\fi
+}
+
+% ------------------------------------------------------------------------------
+% Neural nets with tikz
+% ------------------------------------------------------------------------------
+\usetikzlibrary{bayesnet}
+
+% latent node
+\tikzstyle{latent} = [circle,fill=white,draw=black,inner sep=1pt,
+minimum size=15pt, font=\fontsize{10}{10}\selectfont, node distance=1]
+
+% \edge
+\newcommand{\nedge}[3][]{ %
+  % Connect all nodes #2 to all nodes #3.
+  \foreach \x in {#2} { %
+    \foreach \y in {#3} { %
+      \path (\x) edge [->, >={latex}, #1] (\y) ;%
+\      %\draw[->,#1] (\x) -- (\y) ;%
+    } ;
+  } ;
+}
