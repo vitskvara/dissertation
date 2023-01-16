@@ -1,0 +1,13 @@
+\begin{algorithmic}[1]
+\Require{A training set $X=\lbrace x_j \rbrace \in \mathbb{R}^d$, maximum number of iterations $I\in\mathbb{N}$, batchsize $L \in \mathbb{N}$, the number of decoder samples $M$.}
+\State $\phi,\theta \gets $ Initialize parameters
+\State{$i \gets $ Iteration counter}
+\While{$i<I$ or $\phi,\theta$ are not converged}
+	\State{$X_L \gets$ A random batch of $L$ samples from $X$}
+	\State{$\lbrace \varepsilon_j \rbrace_{j=1}^L \gets$ Random samples from $\mathcal{N}(0,I)$}
+	\State$l \gets \frac{1}{L}\sum_{j=1}^L \mathcal{L}_\text{VAE}(x_j,\phi,\theta;\varepsilon_j), x_j \in X_L$
+	\State$\phi,\theta \gets $ Update parameters with gradients $\nabla_{\theta,\phi} l$ to maximize $l$
+	\State{$i \gets i+1$}
+\EndWhile
+\State{\textbf{return} encoder $q_{\phi}(z|x)$, decoder $p_{\theta}(x|z)$}
+\end{algorithmic}

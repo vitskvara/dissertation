@@ -1,0 +1,14 @@
+\begin{algorithmic}[1]
+\Require{A training set $X=\lbrace x_j \rbrace \in \mathbb{R}^d$, maximum number of iterations $I\in\mathbb{N}$, batchsize $L \in \mathbb{N}$, the number of decoder samples $M$, regularization coefficient $\lambda \in \mathbb{R}$, characteristic positive definite kernel $k$.}
+\State $\phi,\theta \gets $ Initialize parameters
+\State{$i \gets $ Iteration counter}
+\While{$i<I$ or $\phi,\theta$ are not converged}
+	\State{$X_L \gets$ A random batch of $L$ samples from $X$}
+	\State{$Z_L \gets$ A random batch of $L$ samples from $p(z)$}
+	\State{$\tilde{Z}_L \gets \lbrace\tilde{z}_j \sim q_{\phi}(z|x_j), x_j \in X_L \rbrace$ samples from $q_{\phi}(z|x)$}
+	\State$l \gets \frac{1}{L}\sum_{j=1}^L c(x_j,p_\theta(x|\tilde{z}_j))+\lambda \text{MMD}_k(Z_L,\tilde{Z}_L), x_j \in X_L, \tilde{z}_j \in \tilde{Z}_L$
+	\State$\phi,\theta \gets $ Update parameters with gradients $\nabla_{\theta,\phi} l$ to minimize $l$
+	\State{$i \gets i+1$}
+\EndWhile
+\State{\textbf{return} encoder $q_{\phi}(z|x)$, decoder $p_{\theta}(x|z)$}
+\end{algorithmic}

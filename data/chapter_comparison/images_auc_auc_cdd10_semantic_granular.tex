@@ -1,0 +1,21 @@
+\begin{tikzpicture}[scale=1.0] 
+  \draw (2.0,0) -- (9.0,0); 
+  \foreach \x in {2,...,9} \draw (\x,0.10) -- (\x,-0.10) node[anchor=north]{$\x$}; 
+  \draw (2.4,0) -- (2.4,0.19999999999999998) -- (1.9, 0.19999999999999998) node[anchor=east] {fmgn}; 
+  \draw (3.8,0) -- (3.8,0.5) -- (1.9, 0.5) node[anchor=east] {vae}; 
+  \draw (4.8,0) -- (4.8,0.7999999999999999) -- (1.9, 0.7999999999999999) node[anchor=east] {fano}; 
+  \draw (4.9,0) -- (4.9,1.0999999999999999) -- (1.9, 1.0999999999999999) node[anchor=east] {wae}; 
+  \draw (5.0,0) -- (5.0,1.4) -- (1.9, 1.4) node[anchor=east] {aae}; 
+  \draw (5.6,0) -- (5.6,1.6999999999999997) -- (1.9, 1.6999999999999997) node[anchor=east] {vaek}; 
+  \draw (6.2,0) -- (6.2,1.7) -- (9.1, 1.7) node[anchor=west] {dsvd}; 
+  \draw (6.6,0) -- (6.6,1.4) -- (9.1, 1.4) node[anchor=west] {vaeo}; 
+  \draw (7.8,0) -- (7.8,1.0999999999999999) -- (9.1, 1.0999999999999999) node[anchor=west] {skip}; 
+  \draw (7.8,0) -- (7.8,0.8) -- (9.1, 0.8) node[anchor=west] {\textcolor{gray}{knn}}; 
+  \draw (8.1,0) -- (8.1,0.5) -- (9.1, 0.5) node[anchor=west] {gano}; 
+  \draw (8.3,0) -- (8.3,0.2) -- (9.1, 0.2) node[anchor=west] {\textcolor{gray}{osvm}}; 
+  \draw[line width=0.06cm,color=black,draw opacity=1.0] (2.37,0.1) -- (5.63,0.1); 
+  \draw[line width=0.06cm,color=black,draw opacity=1.0] (3.77,0.3) -- (6.63,0.3); 
+  \draw[line width=0.06cm,color=black,draw opacity=1.0] (4.77,0.4) -- (8.129999999999999,0.4); 
+  \draw[line width=0.06cm,color=black,draw opacity=1.0] (4.87,0.2) -- (8.33,0.2); 
+  \node[anchor=center] at (5.5,-0.7) {average model rank};
+ \end{tikzpicture} 

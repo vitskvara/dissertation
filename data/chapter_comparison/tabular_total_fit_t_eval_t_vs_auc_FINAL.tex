@@ -1,0 +1,181 @@
+\begin{tikzpicture}[]
+\begin{groupplot}[group style={vertical sep = 0.0cm, horizontal sep = 0.2cm, group size=2 by 1}]
+
+\nextgroupplot [
+  xlabel = {avg. rank},
+  ylabel = {avg. training time rank},
+  ylabel near ticks, yticklabel pos=left,
+  ymin = 0.5, ymax=25,
+  width=4cm, height=6cm, scale only axis=true,
+  grid=major,
+  % title = {(fit time)}
+]
+
+\addplot+[
+  draw = none
+] coordinates {
+  (6.9, 11.3)
+  (11.4, 8.8)
+  (13.4, 12.7)
+  (19.8, 16.2)
+  (16.2, 10.9)
+  (11.4, 18.8)
+  (12.0, 16.2)
+  (10.3, 9.7)
+  (14.9, 4.4)
+  (14.5, 5.0)
+  (8.4, 2.4)
+  (16.1, 3.4)
+  (11.4, 2.6)
+  (8.9, 21.8)
+  % (22.3, 19.4)
+  (2.9, 3.4)
+  (14.3, 15.1)
+  (9.0, 23.3)
+  (12.1, 7.6)
+  (10.7, 23.0)
+  (6.5, 12.1)
+  (11.0, 16.3)
+  (6.8, 14.9)
+  (7.0, 20.1)
+};
+
+\node at (axis cs:8.2, 12.0) {aae};
+
+\node at (axis cs:13.1, 9.7) {abod};
+
+\node at (axis cs:13.9, 13.3) {avae};
+
+\node at (axis cs:18.9, 16.9) {dagm};
+
+\node at (axis cs:16.7, 11.8) {dsvd};
+
+\node at (axis cs:11.9, 19.5) {fmgn};
+
+\node at (axis cs:13.0, 17.0) {gan};
+
+\node at (axis cs:10.8, 10.3) {gano};
+
+\node at (axis cs:16.8, 5.1) {hbos};
+
+\node at (axis cs:14.1, 5.8) {if};
+
+\node at (axis cs:8.8, 3.2) {knn};
+
+\node at (axis cs:17.8, 2.9) {loda};
+
+\node at (axis cs:11.6, 3.4) {lof};
+
+\node at (axis cs:11.0, 21.8) {maf};
+
+% \node at (axis cs:22.8, 20.0) {mgal};
+
+\node at (axis cs:3.4, 4.1) {osvm};
+
+\node at (axis cs:14.8, 15.7) {pidf};
+
+\node at (axis cs:9.1, 24.0) {rnvp};
+
+\node at (axis cs:13.6, 8.0) {rpn};
+
+\node at (axis cs:12.8, 23.7) {sptn};
+
+\node at (axis cs:7.0, 12.7) {vae};
+
+\node at (axis cs:9.3, 17.0) {vaek};
+
+\node at (axis cs:7.3, 15.6) {vaeo};
+
+\node at (axis cs:7.5, 20.8) {wae};
+
+\nextgroupplot [
+  xlabel = {avg. rank},
+  ylabel = {avg. prediction time rank},
+  ylabel near ticks, yticklabel pos=right,
+  ymin = 0.5, ymax=25,
+  width=4cm, height=6cm, scale only axis=true,
+  % title = {(evaluation time)},
+  grid=major,
+  % yticklabels={}
+]
+
+\addplot+[
+  draw = none
+] coordinates {
+  (6.9, 13.3)    
+  (11.4, 23.8)    
+  (13.4, 21.8)
+  (19.8, 1.3)
+  (16.2, 7.0)
+  (11.4, 2.3)
+  (12.0, 2.2)
+  (10.3, 5.6)
+  (14.9, 4.4)
+  (14.5, 16.0)
+  (8.4, 15.1)
+  (16.1, 10.4)
+  (11.4, 11.5)
+  (8.9, 12.2)
+  % (22.3, 10.0)
+  (2.9, 10.1)
+  (14.3, 22.6)
+  (9.0, 8.7)
+  (12.1, 10.5)
+  (10.7, 17.0)
+  (6.5, 18.4)
+  (11.0, 18.0)
+  (6.8, 14.5)
+  (7.0, 19.1)
+};
+
+\node at (axis cs:5.5, 13.8) {aae};
+
+\node at (axis cs:11.9, 24.5) {abod};
+
+\node at (axis cs:11.9, 22.4) {avae};
+
+\node at (axis cs:18.3, 2.0) {dagm};
+
+\node at (axis cs:16.7, 7.8) {dsvd};
+
+\node at (axis cs:10.0, 3.0) {fmgn};
+
+\node at (axis cs:13.5, 2.9) {gan};
+
+\node at (axis cs:10.8, 6.3) {gano};
+
+\node at (axis cs:15.4, 5.2) {hbos};
+
+\node at (axis cs:15.1, 16.8) {if};
+
+\node at (axis cs:8.9, 16.0) {knn};
+
+\node at (axis cs:16.6, 11.2) {loda};
+
+\node at (axis cs:12.3, 12.3) {lof};
+
+\node at (axis cs:9.4, 12.8) {maf};
+
+% \node at (axis cs:22.8, 10.7) {mgal};
+
+\node at (axis cs:3.4, 10.7) {osvm};
+
+\node at (axis cs:14.8, 23.3) {pidf};
+
+\node at (axis cs:9.5, 9.3) {rnvp};
+
+\node at (axis cs:13.7, 9.8) {rpn};
+
+\node at (axis cs:8.9, 17.5) {sptn};
+
+\node at (axis cs:5.0, 19.0) {vae};
+
+\node at (axis cs:11.5, 18.9) {vaek};
+
+\node at (axis cs:6.0, 15.2) {vaeo};
+
+\node at (axis cs:5.5, 19.8) {wae};
+
+\end{groupplot}
+\end{tikzpicture}
+

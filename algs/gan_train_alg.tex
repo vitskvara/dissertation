@@ -1,0 +1,15 @@
+\begin{algorithmic}[1]
+\Require{A training set $X=\lbrace x_j \rbrace \in \mathbb{R}^d$, maximum number of iterations $I\in\mathbb{N}$, batchsize $L \in \mathbb{N}$.}
+\State $\phi,\theta \gets $ Initialize parameters
+\State{$i \gets $ Iteration counter}
+\While{$i<I$ or $\phi,\theta$ are not converged}
+	\State{$X_L \gets$ A random batch of $L$ samples from $X$}
+	\State{$Z_L \gets$ A random batch of $L$ samples from $p(z)$}
+	\State$l_d \gets \frac{1}{L}\sum_{j=1}^L \mathcal{L}_d(x_j,z_j,\theta), x_j \in X_L, z_j \in Z_L$
+	\State$\theta \gets $ Update parameters with gradients $\nabla_{\theta} l_d$ to maximize $l_d$
+	\State$l_g \gets \frac{1}{L}\sum_{j=1}^L \mathcal{L}_g (z_j,\phi), z_j \in Z_L$
+	\State$\phi \gets $ Update parameters with gradients $\nabla_{\phi} l_g$ to maximize $l_g$
+	\State{$i \gets i+1$}
+\EndWhile
+\State{\textbf{return} generator $g_{\phi}(z)$, discriminator $d_{\theta}(x)$}
+\end{algorithmic}

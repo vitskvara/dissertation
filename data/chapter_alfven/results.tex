@@ -1,0 +1,14 @@
+\begin{tabular}{c c c}
+	S1 regularization & S2 model & AUC  \\
+	\hline
+	-- & kNN & 0.791$\pm$0.063 \\
+	KLD & kNN & 0.709$\pm$0.043 \\
+	MMD & kNN & 0.777$\pm$0.054 \\
+GAN & kNN & 0.782$\pm$0.088 \\
+GAN + MMD & kNN & \textbf{0.864}$\pm$\textbf{0.064} \\
+-- & GMM & 0.687$\pm$0.077 \\
+	KLD & GMM & 0.704$\pm$0.081 \\
+	MMD & GMM & 0.668$\pm$0.117 \\
+GAN & GMM & 0.688$\pm$0.074 \\
+GAN + MMD & GMM & 0.741$\pm$0.135 
+\end{tabular}

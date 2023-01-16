@@ -1,0 +1,390 @@
+\begin{tikzpicture}[]
+\begin{groupplot}[group style={vertical sep = 0.5cm, horizontal sep = 1.0cm, group size=3 by 1}]
+
+\nextgroupplot [
+  % legend style = {at={(0.3,1.30)}, anchor=west},
+  ylabel = {avg. AUC},
+  width=5cm, height=7cm, scale only axis=true, 
+  xtick={1,2,3,4,5,6,7,8}, 
+  xticklabels={clean,$PR@\%0.01$,$PR@\%0.1$,$PR@\%1$,$PR@\%5$,$PR@\%10$,$PR@\%20$,$AUC_{val}$},
+  width=5cm, height=7cm, scale only axis=true,
+  x tick label style={rotate=50,anchor=east},
+  title = {(tabular)},
+  % title style={at={(current bounding box.north)}, anchor=west},
+]
+
+\addplot+ coordinates {
+  (1.0, 0.72375)
+  (2.0, 0.762)
+  (3.0, 0.754)
+  (4.0, 0.8047500000000001)
+  (5.0, 0.83925)
+  (6.0, 0.844)
+  (7.0, 0.8562500000000002)
+  (8.0, 0.8845000000000001)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.607)
+  (2.0, 0.52475)
+  (3.0, 0.5587500000000001)
+  (4.0, 0.5867500000000001)
+  (5.0, 0.6585)
+  (6.0, 0.71375)
+  (7.0, 0.7232500000000001)
+  (8.0, 0.7502500000000001)
+};
+
+\addplot+ coordinates {};
+
+\addplot+ coordinates {
+  (1.0, 0.6375)
+  (2.0, 0.66375)
+  (3.0, 0.6797500000000001)
+  (4.0, 0.6940000000000001)
+  (5.0, 0.75325)
+  (6.0, 0.7837500000000001)
+  (7.0, 0.8067500000000001)
+  (8.0, 0.8380000000000001)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.8087500000000002)
+  (2.0, 0.8290000000000001)
+  (3.0, 0.8310000000000001)
+  (4.0, 0.8329999999999999)
+  (5.0, 0.8362499999999999)
+  (6.0, 0.8357499999999998)
+  (7.0, 0.8454999999999998)
+  (8.0, 0.8517499999999998)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.8145)
+  (2.0, 0.7222500000000001)
+  (3.0, 0.7222500000000001)
+  (4.0, 0.77225)
+  (5.0, 0.8247500000000001)
+  (6.0, 0.8727499999999999)
+  (7.0, 0.8854999999999998)
+  (8.0, 0.9112500000000001)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.7329999999999999)
+  (2.0, 0.7945)
+  (3.0, 0.7665)
+  (4.0, 0.7812500000000001)
+  (5.0, 0.8154999999999999)
+  (6.0, 0.8247499999999999)
+  (7.0, 0.8310000000000001)
+  (8.0, 0.8714999999999999)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.7372500000000001)
+  (2.0, 0.5530000000000002)
+  (3.0, 0.5897500000000002)
+  (4.0, 0.6622499999999999)
+  (5.0, 0.7882499999999999)
+  (6.0, 0.79475)
+  (7.0, 0.84175)
+  (8.0, 0.8825)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.7842499999999999)
+  (2.0, 0.7955000000000002)
+  (3.0, 0.7945)
+  (4.0, 0.79525)
+  (5.0, 0.826)
+  (6.0, 0.836)
+  (7.0, 0.853)
+  (8.0, 0.8647499999999999)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.7967500000000001)
+  (2.0, 0.7994999999999999)
+  (3.0, 0.8039999999999999)
+  (4.0, 0.7997500000000002)
+  (5.0, 0.8217500000000001)
+  (6.0, 0.82675)
+  (7.0, 0.8344999999999999)
+  (8.0, 0.8482500000000002)
+};
+
+% \legend{{}{aae}, {}{dsvd}, {}{fmgn}, {}{knn}, {}{osvm}, {}{vae}, {}{vaeo}, {}{wae}, {}{rnvp}}
+
+\nextgroupplot [
+  legend columns = -1,
+  legend style = {at={(0.5,1.2)}, anchor=center},
+  legend entries = {aae, dsvd, fano, fmgn, knn, osvm, vae, vaeo, wae, rnvp},
+  width=5cm, height=7cm, scale only axis=true, 
+  xtick={1,2,3,4,5,6,7,8}, 
+  xticklabels={clean,$PR@\%0.01$,$PR@\%0.1$,$PR@\%1$,$PR@\%5$,$PR@\%10$,$PR@\%20$,$AUC_{val}$},
+  width=5cm, height=7cm, scale only axis=true,
+  x tick label style={rotate=50,anchor=east},
+  title = {(statistical)},
+  % title style={at={(current bounding box.north)}, anchor=west},
+]
+
+\addplot+ coordinates {
+  (1.0, 0.8664864864864865)
+  (2.0, 0.867837837837838)
+  (3.0, 0.8791891891891892)
+  (4.0, 0.8999999999999999)
+  (5.0, 0.8981081081081083)
+  (6.0, 0.8978378378378378)
+  (7.0, 0.901891891891892)
+  (8.0, 0.908918918918919)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.654054054054054)
+  (2.0, 0.7918918918918918)
+  (3.0, 0.8108108108108109)
+  (4.0, 0.8327027027027026)
+  (5.0, 0.841891891891892)
+  (6.0, 0.8543243243243243)
+  (7.0, 0.8597297297297297)
+  (8.0, 0.8802702702702703)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.841891891891892)
+  (2.0, 0.8527027027027027)
+  (3.0, 0.8589189189189189)
+  (4.0, 0.8727027027027027)
+  (5.0, 0.8891891891891893)
+  (6.0, 0.8959459459459459)
+  (7.0, 0.9045945945945946)
+  (8.0, 0.9275675675675675)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.5199999999999999)
+  (2.0, 0.5445945945945946)
+  (3.0, 0.5948648648648649)
+  (4.0, 0.6775675675675675)
+  (5.0, 0.73)
+  (6.0, 0.7454054054054053)
+  (7.0, 0.8075675675675675)
+  (8.0, 0.8856756756756757)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.8262162162162162)
+  (2.0, 0.8670270270270269)
+  (3.0, 0.8708108108108108)
+  (4.0, 0.8781081081081081)
+  (5.0, 0.8781081081081081)
+  (6.0, 0.8783783783783784)
+  (7.0, 0.8799999999999999)
+  (8.0, 0.8856756756756757)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.7997297297297298)
+  (2.0, 0.7021621621621621)
+  (3.0, 0.7032432432432432)
+  (4.0, 0.7451351351351351)
+  (5.0, 0.7983783783783783)
+  (6.0, 0.8308108108108109)
+  (7.0, 0.8394594594594594)
+  (8.0, 0.8824324324324324)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.8856756756756757)
+  (2.0, 0.7954054054054054)
+  (3.0, 0.8127027027027027)
+  (4.0, 0.828918918918919)
+  (5.0, 0.8727027027027027)
+  (6.0, 0.897027027027027)
+  (7.0, 0.905945945945946)
+  (8.0, 0.9205405405405408)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.8164864864864865)
+  (2.0, 0.687027027027027)
+  (3.0, 0.6967567567567567)
+  (4.0, 0.7478378378378379)
+  (5.0, 0.851081081081081)
+  (6.0, 0.8794594594594595)
+  (7.0, 0.9013513513513514)
+  (8.0, 0.929189189189189)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.8916216216216215)
+  (2.0, 0.8862162162162162)
+  (3.0, 0.8986486486486487)
+  (4.0, 0.8997297297297298)
+  (5.0, 0.9183783783783783)
+  (6.0, 0.9205405405405406)
+  (7.0, 0.9224324324324323)
+  (8.0, 0.9289189189189189)
+};
+
+% has to be set manually to match the marker style of the flow (9th in the entries bellow)
+\addlegendimage{red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamond*} 
+% \legend{{}{aae}, {}{dsvd}, {}{fano}, {}{fmgn}, {}{knn}, {}{osvm}, {}{vae}, {}{vaeo}, {}{wae}}
+
+%%% the color 
+% blue,every mark/.append style={fill=blue!80!black},mark=*\\
+% red,every mark/.append style={fill=red!80!black},mark=square*\\
+% brown!60!black,every mark/.append style={fill=brown!80!black},mark=otimes*\\
+% black,mark=star\\
+% blue,every mark/.append style={fill=blue!80!black},mark=diamond*\\
+% red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=*\\
+% brown!60!black,densely dashed,every mark/.append style={
+% solid,fill=brown!80!black},mark=square*\\
+% black,densely dashed,every mark/.append style={solid,fill=gray},mark=otimes*\\
+% blue,densely dashed,mark=star,every mark/.append style=solid\\
+% red,densely dashed,every mark/.append style={solid,fill=red!80!black},mark=diamond*\\
+
+\nextgroupplot [
+  % legend style = {at={(0.3,1.30)}, anchor=west},
+  width=5cm, height=7cm, scale only axis=true, 
+  xtick={1,2,3,4,5,6,7,8}, 
+  xticklabels={clean,$PR@\%0.01$,$PR@\%0.1$,$PR@\%1$,$PR@\%5$,$PR@\%10$,$PR@\%20$,$AUC_{val}$},
+  width=5cm, height=7cm, scale only axis=true,
+  x tick label style={rotate=50,anchor=east},
+  title = {(semantic)},
+  % title style={at={(current bounding box.north)}, anchor=west},
+]
+
+\addplot+ coordinates {
+  (1.0, 0.5649999999999998)
+  (2.0, 0.584)
+  (3.0, 0.5745000000000001)
+  (4.0, 0.5934999999999999)
+  (5.0, 0.6)
+  (6.0, 0.6079999999999999)
+  (7.0, 0.614)
+  (8.0, 0.6224999999999999)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.5920000000000001)
+  (2.0, 0.575)
+  (3.0, 0.5685)
+  (4.0, 0.5975000000000001)
+  (5.0, 0.6250000000000001)
+  (6.0, 0.6320000000000001)
+  (7.0, 0.6325000000000001)
+  (8.0, 0.638)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.5595000000000001)
+  (2.0, 0.541)
+  (3.0, 0.5544999999999999)
+  (4.0, 0.5899999999999999)
+  (5.0, 0.5955)
+  (6.0, 0.61)
+  (7.0, 0.633)
+  (8.0, 0.6424999999999998)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.5)
+  (2.0, 0.4885)
+  (3.0, 0.49799999999999994)
+  (4.0, 0.6194999999999999)
+  (5.0, 0.6765)
+  (6.0, 0.7)
+  (7.0, 0.7249999999999999)
+  (8.0, 0.729)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.5730000000000001)
+  (2.0, 0.5834999999999999)
+  (3.0, 0.5824999999999999)
+  (4.0, 0.5890000000000001)
+  (5.0, 0.5945)
+  (6.0, 0.5985)
+  (7.0, 0.599)
+  (8.0, 0.6015)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.5760000000000001)
+  (2.0, 0.5090000000000001)
+  (3.0, 0.536)
+  (4.0, 0.5625)
+  (5.0, 0.5860000000000001)
+  (6.0, 0.5925)
+  (7.0, 0.5975000000000001)
+  (8.0, 0.6045)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.552)
+  (2.0, 0.5469999999999999)
+  (3.0, 0.5625)
+  (4.0, 0.5995000000000001)
+  (5.0, 0.6210000000000002)
+  (6.0, 0.6315000000000001)
+  (7.0, 0.6315)
+  (8.0, 0.6439999999999999)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.5735000000000001)
+  (2.0, 0.558)
+  (3.0, 0.5574999999999999)
+  (4.0, 0.574)
+  (5.0, 0.588)
+  (6.0, 0.5994999999999999)
+  (7.0, 0.6035000000000001)
+  (8.0, 0.619)
+};
+
+\addplot+ coordinates {
+  (1.0, 0.549)
+  (2.0, 0.5820000000000002)
+  (3.0, 0.5705)
+  (4.0, 0.6065)
+  (5.0, 0.614)
+  (6.0, 0.615)
+  (7.0, 0.625)
+  (8.0, 0.6305)
+};
+
+% \legend{{}{aae}, {}{dsvd}, {}{fano}, {}{fmgn}, {}{knn}, {}{osvm}, {}{vae}, {}{vaeo}, {}{wae}}
+
+\end{groupplot}
+
+\end{tikzpicture}
+
+
+% \begin{tikzpicture}[xscale=.4, yscale=.4]
+%     \begin{axis}[
+%        width = 10 cm,
+%        height = 7 cm,
+%        label style={font=\huge},
+%        legend style={draw={none},font=\huge},
+%                legend entries={HI, BYE},
+%            legend style={/tikz/every even column/.append style={column sep=0.2cm}},
+%            legend cell align=left,        
+%            legend style={at={(0,1.2)},
+%            anchor=north west,
+%            legend columns=3,
+%           cells={align=left}},]
+
+%        \addplot[only marks, mark=square*, mark options={scale=1.8, fill=green}]
+%        coordinates{
+%    (0, 2.388854806)
+%        };
+
+%    %     \addplot[only marks, mark=diamond*, mark options={scale=1.8, fill=blue}]
+%    %     coordinates{ 
+%    % (NaN,NaN)    };
+%        \addlegendimage{only marks, mark=diamond*, mark options={scale=1.8, fill=blue}}
+
+%      \end{axis}
+% \end{tikzpicture}

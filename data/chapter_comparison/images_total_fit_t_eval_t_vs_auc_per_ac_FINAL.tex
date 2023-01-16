@@ -1,0 +1,109 @@
+\begin{tikzpicture}[]
+\begin{groupplot}[group style={vertical sep = 0.0cm, horizontal sep = 0.2cm, group size=2 by 1}]
+
+\nextgroupplot [
+  xlabel = {avg. rank},
+  ylabel = {avg. training time rank},
+  ylabel near ticks, yticklabel pos=left,
+  ymin = 0.5, ymax=13,
+  width=4cm, height=6cm, scale only axis=true,
+  grid=major,
+  % title = {(fit time)}
+]
+
+\addplot+[
+  draw = none
+] coordinates {
+  (4.1, 5.0)
+  (4.8, 6.5)
+  (3.8, 11.8)
+  (5.7, 11.2)
+  (6.2, 6.8)
+  (6.2, 1.6)
+  (7.1, 1.8)
+  (8.6, 5.2)
+  (3.4, 7.3)
+  (5.7, 5.4)
+  (5.5, 5.6)
+  (3.6, 9.9)
+};
+
+\node at (axis cs:4.4, 5.5) {aae};
+
+\node at (axis cs:5.0, 7.0) {dsvd};
+
+\node at (axis cs:4.3, 12.3) {fano};
+
+\node at (axis cs:6.2, 11.7) {fmgn};
+
+\node at (axis cs:6.6, 7.3) {gano};
+
+\node at (axis cs:6.0, 2.2) {knn};
+
+\node at (axis cs:7.6, 2.2) {osvm};
+
+\node at (axis cs:8.2, 5.8) {skip};
+
+\node at (axis cs:3.7, 7.8) {vae};
+
+\node at (axis cs:6.5, 5.5) {vaek};
+
+\node at (axis cs:6.1, 5.8) {vaeo};
+
+\node at (axis cs:3.9, 10.4) {wae};
+
+\nextgroupplot [
+  xlabel = {avg. rank},
+  ylabel = {avg. prediction time rank},
+  ylabel near ticks, yticklabel pos=right,
+  ymin = 0.5, ymax=13,
+  width=4cm, height=6cm, scale only axis=true,
+  % title = {(evaluation time)},
+  grid=major,
+  % yticklabels={}
+]
+
+\addplot+[
+  draw = none
+] coordinates {
+  (4.1, 7.6)
+  (4.8, 2.4)
+  (3.8, 8.8)
+  (5.7, 1.0)
+  (6.2, 4.8)
+  (6.2, 11.1)
+  (7.1, 11.3)
+  (8.6, 3.8)
+  (3.4, 4.6)
+  (5.7, 7.7)
+  (5.5, 9.6)
+  (3.6, 5.5)
+};
+
+\node at (axis cs:4.4, 8.1) {aae};
+
+\node at (axis cs:5.3, 3.1) {dsvd};
+
+\node at (axis cs:4.3, 9.5) {fano};
+
+\node at (axis cs:6.2, 1.7) {fmgn};
+
+\node at (axis cs:6.7, 5.3) {gano};
+
+\node at (axis cs:6.0, 11.6) {knn};
+
+\node at (axis cs:7.4, 11.8) {osvm};
+
+\node at (axis cs:8.5, 4.5) {skip};
+
+\node at (axis cs:3.9, 5.0) {vae};
+
+\node at (axis cs:6.2, 8.4) {vaek};
+
+\node at (axis cs:6.0, 10.0) {vaeo};
+
+\node at (axis cs:4.1, 6.0) {wae};
+
+\end{groupplot}
+\end{tikzpicture}
+
