@@ -1,0 +1,11 @@
+\begin{algorithmic}[1]
+\Require image $x$, encoder means $\mu_{i,\phi}$, decoders $g_{i,\theta}$, $i \in \lbrace m, b, f \rbrace$
+\State $\left(z_m, z_b, z_f \right) \leftarrow \left(\mu_{m,\phi}(x), \mu_{b,\phi}(x), \mu_{f,\phi}(x) \right)$
+\State $J \leftarrow 0$
+\For{$i \in \lbrace m, b, f \rbrace$}
+    \State $J_i \leftarrow \frac{\partial g\left(z_m, z_b, z_f \right)}{\partial z_i}$
+    \State $(U_i,S_i,V_i) \leftarrow \text{SVD}(J_i)$
+    \State $J \stackrel{+}\leftarrow \sum_{j,S_{i,j} \neq 0} 2 \log S_{i,j}$
+\EndFor
+\State $J_d(x) \leftarrow J$
+\end{algorithmic}

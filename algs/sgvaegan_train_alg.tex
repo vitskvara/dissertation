@@ -1,0 +1,23 @@
+\begin{algorithmic}[1]
+\Require Training set, $(\phi, \theta, \varphi) = $ (encoder, decoder, discriminator) parameters.
+\State $(\phi, \theta, \varphi)  \leftarrow $ initialize parameters
+\While{$(\phi, \theta, \varphi)$ not converged or budget exhausted}
+\State $X \leftarrow $ batch of $L$ samples from the dataset
+\State // Computation of prior, reconstruction and auxilliary losses
+\State $(Z_m, Z_f, Z_b) \leftarrow $ encodings of $X$
+\State $\mathcal{L}_{\text{prior}} \leftarrow \sum_{i \in \lbrace m, f, b \rbrace} D_\text{KL} (q_{i,\phi} (Z_i \vert \vert X) \vert p(Z_i))$  
+\State $(X_m,X_f,X_b) \leftarrow (g_{m, \theta}(Z_m), g_{f, \theta}(Z_f), g_{b, \theta}(Z_b))$ 
+\State $X' \leftarrow c(X_m,X_f,X_b)$
+\State $\mathcal{L}_{\text{rec}} \leftarrow \vert \vert d_l(X) - d_l(X') \vert \vert_2$
+\State $\mathcal{L}_{\text{aux}} \leftarrow \lambda_{\text{bin}}\mathcal{L}_{\text{bin}}(M) + \lambda_{\text{mask}}\mathcal{L}_{\text{mask}}(M) + \lambda_{\text{text}}\mathcal{L}_{\text{text}}(M,F,X).$
+\State // Adversarial loss 
+\State $(\tilde{Z}_m, \tilde{Z}_f, \tilde{Z}_b) \leftarrow $ samples from the prior
+\State $(\tilde{X}_m,\tilde{X}_f,\tilde{X}_b) \leftarrow (g_{m, \theta}(\tilde{Z}_m), g_{f, \theta}(\tilde{Z}_f), g_{b, \theta}(\tilde{Z}_b))$ 
+\State $\tilde{X} \leftarrow C(\tilde{X}_m,\tilde{X}_f,\tilde{X}_b)$
+\State $\mathcal{L}_{\text{GAN}} \leftarrow - \log d(X) - \log (1 - d(X')) - \log (1-d(\tilde{X}))$
+\State // Update of the parameters
+\State $\phi \stackrel{+}\leftarrow -\nabla_{\phi} (\lambda_{\text{rec}} \mathcal{L}_{\text{rec}} + \mathcal{L}_{\text{aux}} + \mathcal{L}_{\text{prior}})$
+\State $\theta \stackrel{+}\leftarrow -\nabla_{\theta} (\lambda_{\text{rec}} \mathcal{L}_{\text{rec}} + \mathcal{L}_{\text{aux}} - \mathcal{L}_{\text{GAN}})$
+\State $\varphi \stackrel{+}\leftarrow -\nabla_{\varphi} \mathcal{L}_{\text{GAN}}$
+\EndWhile
+\end{algorithmic}
