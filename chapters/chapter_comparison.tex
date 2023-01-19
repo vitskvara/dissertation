@@ -1,4 +1,5 @@
-\chapter{Empirical comparison of anomaly detectors}
+\chapter{Empirical comparison of anomaly detectors} \label{sec:chapter_comparison}
+
 Deep generative models are challenging the classical methods in the field of anomaly detection nowadays. Every newly published method provides evidence of outperforming its predecessors, sometimes with contradictory results. The objective of this paper is twofold: to compare anomaly detection methods of various paradigms with a focus on deep generative models and identification of sources of variability that can yield different results. The methods were compared on popular tabular and image datasets. We identified that the main sources of variability are the experimental conditions: i) the type of dataset (tabular or image) and the nature of anomalies (statistical or semantic), and ii) strategy of selection of hyperparameters, especially the number of available anomalies in the validation set. Methods perform differently in different contexts, i.e. under a different combination of experimental conditions together with computational time. This explains the variability of the previous results and highlights the importance of careful specification of the context in the publication of a new method. All our code and results are available for download.
 
 \section{Introduction}
