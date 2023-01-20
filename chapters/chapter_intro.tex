@@ -67,32 +67,15 @@ Different types of anomalies which require different approaches have been identi
 \end{itemize}
 
 We can think of any anomaly detection model as providing a function that produces ranking of the individual data points with respect to their anomalousness. This is called an \textbf{anomaly score} $s:\mathcal{X}\rightarrow\mathbb{R}$ of a model. In certain contexts~\cite{pedregosa2011scikit}, anomaly score might be called \textit{decision }or \textit{scoring function}. In this text we will assume that a higher anomaly score is attributed to a point more likely to be anomalous. As is evident from the definition, the anomaly score function does not need to be a probability in the sense of its function values lying in the interval $\left[0,1\right]$ -- in fact, some models can produce negative anomaly scores. To be able to use an anomaly score for decision making, one must choose threshold $\tau\in\mathbb{R}$. From~\eqref{eq:anomaly_set}, a sample $x$ is considered to be an anomaly if $s(x)>=\tau$ and normal otherwise. The selection of $\tau$ can sometimes be a process more complicated than the fitting of the actual model. Finally, we define the \textbf{contamination rate} of a dataset $X$, which is a finite collection of samples from $\mathcal{X}$ as
-\begin{equation}
+\begin{equation}\label{eq:contamination_rate}
 C(\mathcal{X})=\frac{|\{x_{i}|x_{i}\in \mathcal{A} \wedge x_i \in X \}|}{|\{x_{i}|x_{i}\in X\}|},
 \end{equation}
 i.e. the ratio of the number of anomalies to the total size of the dataset.
 
-\section{Metrics for anomaly detector comparison}
+\section{Comparing anomaly detectors}
+Comparing different models on the same set of data is a basic requirement in practical and research problems. As already mentioned at the beginning of this chapter, anomaly detection has some common ground with binary classification tasks. For one, we can readily apply the evaluation metrics that are used to evaluate these tasks in comparisons of anomaly detectors. However, there are specifics of anomaly detection problems, mainly the often encountered large imbalance of labeled normal and anomalous samples, that we have to keep in mind. Also, with one exception, all the metrics that will be described here require at least some labeled anomalous samples, no matter how difficult it might be to obtain them.
 
-However the authors never ask the question if the way the methods are compared to each other is appropriate for the anomaly detection setting. The area under receiver operating characteristic curve (ROC AUC or just AUC in this text) seems to be the gold-standard of the field, as it allows to compare models by a single number. In \cite{vanderlooy2008critical}, the authors compare "soft" variants of AUC in which the contribution of a sample to the total value of AUC is weighted by the degree in which it is labeled correctly or incorrectly. They demonstrate that none of these alternatives can systematically outperform the conventional AUC, however they do so on a set of binary classification experiments, without any consideration for the specifics of anomaly detection.
-
-
-While AUC is a darling performance measure of anomaly detection of researchers, practitioners rely on other measures better reflecting their needs. For example in intrusion detection, precision@k is popular \cite{grill2016learning}, since the security officer can investigate at most $k$-most anomalous samples a day and he wishes to find as many dangerous security incidents present in the data as possible. Similarly, the true positive rate at a fixed false positive rate is used in tuning anti-virus engines, as these applications need to be certain not to raise too many alarms to the users (discussions with experts from the field suggests the tolerable false positive rate to be in order $10^{-4}$). Other security application domains, fraud detection, control of industrial and environmental processes, and others have similar application constraints emphasizing low false positive rates. We believe not to exaggerate if we state that for the purpose of anomaly detection, the region of low false positive rates in the ROC curve might be the most critical for evaluating the performance of a method. 
-
-Imagine now a data-scientist developing new anomaly detection tools supporting the above applications. They wish to implement a state of the art algorithm, which can represent a significant time investment, yet all papers available to them compare the proposed detectors using AUC. How does AUC help them to decide which method to implement, if he is interested in performance measured by precision@k? AUC may be misleading since it is an integral over all possible thresholds, putting equal emphasis on each threshold, where most of them are far off his point of interest. How much are they certain that the proposed detector is not degenerated, as is shown in Figure~\ref{fig:bad_auc}?
-
-We admit that other measures than AUC are sometimes reported. In \cite{mahadevan2010anomaly}, equal error rate is reported together with AUC. In \cite{lazarevic2003comparative}, detection rate is used to compare methods. In the anomaly detection survey \cite{campos2016evaluation}, average precision and precision@k adjusted for class imbalance are reported together with AUC and it is concluded that their behaviour is very dataset-dependent and less stable than that of AUC, but no deeper insight is given.
-
-In this paper the subject of interest are performance measures instead of anomaly detection algorithms themselves. Our goal is to shed more light on behavior of different measures. Particularly we want to quantify how different measures are correlated with each other and what happens if a detector is selected using a different measure than the one that is used in the application. Our endeavor is to suggest an alternative measure which would be more descriptive of the performance for practitioners. 
-
-While the problem of choosing the right measure seems to be solvable using some variants of AUC, we also demonstrate a more profound problem: if the validation set contains examples of anomalies with different statistical properties (probability distributions) than anomalies in the testing set, the performance measures are not informative. The only exception is the volume of decision region, which does not rely on anomalous samples and is theoretically justified \cite{steinwart2005classification}. Unfortunately, the volume of decision region is difficult to estimate in higher dimensions.
-
-The original scenario in which the receiver operating characteristic (ROC) curve \cite{egan1975signal} and the corresponding area under the curve (AUC) was used as a performance measure is binary classification, which is closest to supervised anomaly detection setting. However, it is commonly used for evaluation in all of the three separate settings without any hesitation, even though there is no real second class in the semi- and unsupervised cases. The typical argument justifying its use is that the precise application conditions enabling to measure detection accuracy at a precise false positive rate are unknown, therefore AUC offers a good solution as it summarizes all application conditions. While this is true, it also means that these other application conditions are very different from those of our interest, which possibly negatively influences our decision. 
-
-We assume that for an input $x$ an anomaly detection algorithm produces a real-valued anomaly score instead of a binary value, i.e. it is a projection $f:\mathcal{X} \rightarrow \mathbb{R}$ from the sample space $\mathcal{X}$. We also assume that higher score corresponds to samples more likely to be anomalous. Anomaly score does not have to be a probability in the range $[0, 1]$ or even a positive number (e.g. in the OC-SVM model). 
-
-When a sample is to be labeled as normal / anomalous, the output of the detector is compared to a threshold. Its value is typically determined on basis of tolerated false positive rate and an estimate of the true contamination rate of a dataset $X$, which we define as $C(X)=\frac{P}{P+N}$, where $P$ and $N$ is the total number of positive and negative samples in $X$.
-
+When a sample is to be labeled as normal / anomalous, the output of the detector is compared to a threshold. Its value is typically determined on the basis of tolerated false positive rate and an estimate of the true contamination rate of a dataset~\eqref{eq:contamination_rate}.
 \begin{table}
 \centering
 	\begin{tabular}{c | c c}
@@ -104,19 +87,17 @@ When a sample is to be labeled as normal / anomalous, the output of the detector
 	\caption{A confusion matrix of a model.}
 	\label{tab:conf_ex}
 \end{table}
-
 Table~\ref{tab:conf_ex} displays the confusion table that introduces basic concepts and notation needed below. It summarizes the performance of an algorithm with a particular threshold by presenting the total number of correctly (tp = true positives and tn = true negative) and incorrectly (fp = false positives and fn = false negatives) identified samples. 
 
-
-\subsection{Area under the ROC curve}
-The most widely used measure in the field of anomaly detection is the area under the ROC curve (the acronym AUC will be used in the following text for the sake of brevity). The ROC curve is a parametric curve describing the trade-off between true positive rate $\text{TPR}(\tau) = \frac{\text{tp}}{\text{tp+fn}}(\tau)$ and false positive rate $\text{FPR}(\tau) = \frac{\text{fp}}{\text{fp+tn}}(\tau)$ for different values of the decision threshold $\tau$. A ROC curve can be easily computed on a dataset from the knowledge of the true labels and anomaly scores of the samples. 
+\paragraph{AUC}
+The most widely used measure in the field of anomaly detection is the area under the ROC (receiver operating characteristic) curve. The acronym AUC will be used in this text for the sake of brevity). The ROC curve is a parametric curve describing the trade-off between \textbf{true positive rate} (sometimes also called \textbf{recall}) $\text{TPR}(\tau) = \frac{\text{tp}}{\text{tp+fn}}(\tau)$ and \textbf{false positive rate} $\text{FPR}(\tau) = \frac{\text{fp}}{\text{fp+tn}}(\tau)$ for different values of the decision threshold $\tau$. 
 
 Then, the area under the curve is calculated as the following integral
 \begin{equation}
 \label{eq:auc}
 \text{AUC}=\int_{\mathbb{R}}\text{TPR}(\tau)d\text{FPR}^{\prime}(\tau)d\tau = \int_0^1\text{TPR}(\text{FPR})d\text{FPR}.
 \end{equation}
-The last integral that uses $\text{TPR}(\cdot)$ as a function of the corresponding FPR shows the simple concept behind the AUC that can be easily discerned from a ROC curve drawn in a graph. An example of a ROC curve and the corresponding AUC is in Figure \ref{fig:ROC}. In practice, the corresponding AUC is estimated from an empirical ROC curve using some numerical integration scheme, e.g. the trapezoidal rule.
+The last integral that uses $\text{TPR}(\cdot)$ as a function of the corresponding FPR shows the simple concept behind the AUC that can be easily discerned from an ROC curve drawn in a graph. An example of an ROC curve and the corresponding AUC is in Figure~\ref{fig:ROC}. In practice, the corresponding AUC is estimated from an empirical ROC curve using some numerical integration scheme, e.g. the trapezoidal rule.
 
 As mentioned above, the main advantage of AUC is that it does not depend on the choice of a particular decision threshold. Also, the measure has a straightforward interpretation -- it is an estimate of the probability that a randomly chosen positive sample is ranked higher than a randomly chosen negative sample \cite{hand2001simple}. However a lot of information is lost when the whole ROC curve is summarized into a single number. This is especially concerning for the case of anomaly detection, where usually the region of low false positive rates is of interest, since anomalies are sparse with respect to normal data and we strive to achieve a low false positive rate. It is frequent in security applications to draw ROC curve with a logarithmic scale on the x-axis.
 
@@ -127,91 +108,29 @@ As mentioned above, the main advantage of AUC is that it does not depend on the 
 \label{fig:ROC}
 \end{figure}
 
-\subsection{\auca}
-A simple alternative to AUC is calculated only up to some value of false positive rate $\alpha$. Numerically, it is important to interpolate the ROC curve for a given $\alpha$ before computing the integral, especially for datasets with a small number of samples. In illustration on Figure~\ref{fig:ROC}, AUC@0.1 corresponds to the darker gray region. \auca\ can be easily normalized by dividing by the chosen $\alpha$, in which case the best detector has $\auca = 1$ similarly to AUC.
+\paragraph{AUPRC}
+The Area Under the Precision--Recall Curve is very similar to AUC, as it is given by computing the \textbf{precision} $\text{PREC}(\tau)=\frac{\text{tp}}{\text{tp + fp}}(\tau)$ and recall for different values of classification threshold $\tau$ and then integrating the area under the resulting curve. A PR curve has at most as many unique recall values as positive samples in the dataset. This is problematic for anomaly detection, where the number of anomalies is low, which leads to a very sparse estimate of the true PR curve. In fact, using the same trained anomaly detector and changing the contamination rate of a testing dataset produces different AUPRC results, which then makes any analysis based on AUPRC useless when the true contamination rate is unknown. Furthermore, a correct PR curve lacks a universal starting point unlike ROC, because precision is undefined for zero recall, making the computation and normalization of the area under the PR curve and the comparison between datasets even more complicated. Further critique of AUPRC compared to ROC--based measures are described in \cite{flach2015precision} -- there is no universal baseline given by a completely random detector, PR curves cannot be interpolated, the AUPRC has no other than geometric meaning etc. Finally, it has been shown \cite{davis2006relationship} that PR and ROC curves contain the same points. It is still a metric that is reported very often besides the AUC.
 
-\subsection{\tpra}
-Another performance measure popular among practitioners (anti-virus engine vendors) is simply the true positive rate (TPR) evaluated at a given false positive rate (FPR) $\alpha.$ This measure can be easily read from a ROC curve, and as in the case of \auca, in practice it is necessary to interpolate the ROC curve since FPR has discrete values.
+\paragraph{Areas of low TPR}
+The two already mentioned metrics put the same weight on all areas on the x-axis. This might not be always ideal for the purposes of anomaly detection, as low FPR areas might be more interesting -- after all, when reporting detected anomalies for manual check, there is always a limit on how many samples can be realistically processed. A simple alternative to AUC is \textbf{\auca}, which is the area under the ROC curve calculated only up to some value of false positive rate $\alpha \in [0,1]$. Numerically, it is important to interpolate the ROC curve for a given $\alpha$ before computing the integral, especially for datasets with a small number of samples. In illustration on Figure~\ref{fig:ROC}, AUC@0.1 corresponds to the darker gray region. \auca\ can be easily normalized by dividing by the chosen $\alpha$, in which case the best detector has $\auca = 1$ similarly to AUC.
 
-\subsection{Weighted AUC}
-\tpra~belongs to a class of Neyman Pearson measures \cite{scott2007performance}, where the goal is to find a classifier minimizing error of one type while the error of the other is bound by some value. It has been shown in \cite{scott2007performance}, that for a given bound on the false positive rate $\alpha$, the best classifier $f$ from a class of classifiers $\mathcal{F}$ consistently minimizing the true positive rate can be found as
-\begin{equation}
-\arg \min_{f\in\mathcal{F}} \frac{1}{\alpha} \max\{\text{FPR}(f) - \alpha, 0\} + (1 - \text{TPR}(f)),
-\end{equation}   
-where $\text{FPR}(\cdot)$ and $\text{TPR}(\cdot)$ denotes the false and true positive rate of a particular classifier.
+Another performance measure popular among practitioners (anti-virus engine vendors) is \textbf{\tpra}, which is simply the true positive rate (TPR) evaluated at a given false positive rate (FPR) $\alpha.$ This measure can be easily read from an ROC curve, and as in the case of \auca, in practice it is necessary to interpolate the ROC curve since FPR has discrete values.
 
-This puts more weight on the region of low FPR values proportionate to $1/\text{FPR}(\alpha)$. In a manner similar to the definition of AUC~\eqref{eq:auc}, we can define the weighted AUC as an integral over all values $\alpha$ as
-\begin{equation}
-\aucw=\int_0^1\text{TPR}(\text{FPR})\text{FPR}^{-1}d\text{FPR},
-\label{eq:AUCw}
-\end{equation}
-where we define $\text{FPR} = 0$ as $\text{TPR}(\text{FPR})\text{FPR}^{-1} = 0$, which makes the integral proper. While it might seem that this definition may still result in an arbitrary large number, in practice, the FPR in the ROC curve changes by a given finite increment that equals $1/p$, where $p$ is the total number of positive samples. This means that \aucw~attains comparable values, although it is not easily normalized like the remaining measures described here, which might create some issues in the former analysis.
-
-Figure \ref{fig:AUCw} illustrates the motivation behind \aucw~showing ROC curves of two detectors. First detector with the ROC curve drawn with solid has a higher AUC than the second detector with ROC curve drawn in dashed line. If we base the selection on AUC, we would choose the first detector. Yet, this detector has inferior performance in the area of low false positive rate, where the second is better. If the decision would be based on the \aucw, the second detector would be selected. 
-
-\begin{figure}
-\centering
-\includegraphics[scale=0.85]{data/chapter_intro/fig_auc_weighted.pdf}
-\caption{Two ROC curves with different AUC and \aucw.}
-\label{fig:AUCw}
-\end{figure}
-
-\subsection{\preca} \label{preca}
-In binary classification, the precision, given a real--valued threshold $\tau$, is defined as $\text{PREC}(\tau)=\frac{\text{tp}}{\text{tp + fp}}(\tau)$. To make this measure more appropriate for anomaly detection setting, only $p\%$ most anomalous samples can be taken into account. Unfortunately, this measure is difficult to compare across datasets, because it depends on the proportion of anomalies with respect to normal samples. To make the measure comparable, the definition has been adapted as follows. First, anomalies are randomly removed from the testing dataset on which we want to evaluate the detector such that their proportion is $p$\%. This sub-sampled testing dataset is denoted $X$, and the \preca~is calculated as follows
-\begin{equation}
-  \text{Precision@}p = \frac{|\lbrace x \in X_p \land \text{ true label of } x \text{ is positive}  \rbrace|}{|X_p|},
-\end{equation}
-where $X_p$ is the set of $p\%$ most anomalous samples in $X$. With a perfect detector, $X_p$ should contain all the anomalies and nothing else, thus yielding \preca = 1.
-
-\subsection{Volume of decision region}
+\paragraph{Volume of decision region}
 \begin{figure}
 \centering
 \includegraphics[scale=0.8]{data/chapter_intro/fig_vol_example.pdf}
 \caption{An example of a detector and the decision region for differing values of FPR $\alpha$. The decision boundary is drawn as a white isoline at level $\tau(\alpha)$ with the estimated enclosed volume $\text{VOL@}\alpha$, black and red dots represent normal and anomalous samples in the training set. Clearly, smaller tolerance of false positives forces us to set a higher threshold which results in higher decision region volume.}
 \label{fig:vol_example}
 \end{figure}
-All of the previous measures originate from evaluation of performance of binary detectors. Since semi- and unsupervised anomaly detection is closer to one-class classification or density estimation, a measure that does not require labels for its evaluation might be more useful and better describe behaviour on unknown samples. If the goal is to compare two models supposed to characterize the normal class, it makes sense to choose the model enclosing the training data more tightly. This corresponds to calculating  the volume inside the model's decision boundary in a similar fashion to \cite{clemenccon2013scoring}, where a theoretical justification is given. This decision boundary can be chosen to correspond to a certain level of false positive rate. We define the volume of decision region as
+All of the previous measures originate from evaluation of performance of binary detectors. Since anomaly detection is closer to one-class classification or density estimation, a measure that does not require labels for its evaluation might be more useful and better describe behaviour on unknown samples. If the goal is to compare two models supposed to characterize the normal class, it makes sense to choose the model enclosing the training data more tightly. This corresponds to calculating  the volume inside the model's decision boundary in a similar fashion to \cite{clemenccon2013scoring}, where a theoretical justification is given. This decision boundary can be chosen to correspond to a certain level of false positive rate. We define the \textbf{volume of decision region} as
 \begin{equation}
-  \text{VOL}(\alpha) = \int_{\mathcal{X}} \mathds{1}_{\lbrace x\in\mathcal{X}|f(x) <= \tau\rbrace} \left( x \right) dx  \text{ s.t. } \text{FPR}(\tau)=\alpha,
+  \text{VOL}(\alpha) = \int_{\mathcal{X}} \mathds{1}_{\lbrace x\in\mathcal{X}|s(x) <= \tau\rbrace} \left( x \right) dx  \text{ s.t. } \text{FPR}(\tau)=\alpha,
 \end{equation}
-where $\mathcal{X}$ is the input space, $f(x)$ is a decision function, $\tau$ is the decision boundary (threshold) and $\alpha$ is a given false positive rate. In other words, $\text{VOL}(\alpha)$ is the volume of subset of input space where classifier returns "normal" answer. An example of a model and its decision region for different values of $\alpha$ is shown in Fig.~\ref{fig:vol_example}. It should be noted that the idea of minizing the enclosed volume is native to some models, e.g. the OC-SVM algorithm \cite{scholkopf2001estimating}.
+where $\mathcal{X}$ is the input space, $s(x)$ is an anomaly score, and $\alpha$ is a given false positive rate. In other words, $\text{VOL}(\alpha)$ is the volume of subset of input space where classifier returns "normal" answer. An example of a model and its decision region for different values of $\alpha$ is shown in Fig.~\ref{fig:vol_example}. It should be noted that the idea of minizing the enclosed volume is native to some models, e.g. the OC-SVM algorithm \cite{scholkopf2001estimating}.
 
-\begin{algorithm}
-    \caption{Volume of decision region computation}
-    \label{alg:vol}
-    \begin{algorithmic}[1]
-    \Require{FPR $\alpha \in \left[0,1\right]$, a set of samples $X=\lbrace x_i \rbrace \in\mathbb{R}^d$, vector of true labels $y=\lbrace y_i\rbrace$, vector of anomaly scores $a=\lbrace a_i\rbrace$, number of samples $N \in \mathbb{N}$, a decision function $f(x)$}
-    \State{$\text{TPR},\text{FPR} \gets$ Compute the ROC curve from $y$ and $a$.}
-    \State{$\tau \gets$ Interpolate the ROC curve using $\alpha$ to estimate the corresponding decision threshold}
-    \State$b_{min} \gets \left\{ \min_{i}(x_{ij}),j\in\hat{d}\right\}$ lower sampling boundaries
-    \State$b_{max} \gets \left\{ \max_{i}(x_{ij}),j\in\hat{d}\right\}$ upper sampling boundaries
-    \State{$k \gets 0$} Normal samples counter
-    \For{$n\in\lbrace1,2,\dots,N\rbrace$}
-      \State{$x \gets $ Sample drawn from uniform distribution $\mathcal{U}(b_{min}$,$b_{max})$}
-      \State{$a_x \gets f(x)$ anomaly score of $x$}
-      \If{$a_x<\tau$}
-        \State{$k \gets k+1$}
-      \EndIf
-    \EndFor
-    \State{\textbf{return} $\text{VOL@}\alpha=\frac{k}{N}$}
-    \end{algorithmic}
-\end{algorithm}
+Computing the empirical $\text{VOL}(\alpha)$ in data space $\mathcal{X}$ is numerically estimated by Monte-Carlo methods. This comes with its downsides. Mainly, the number of samples required to cover $r$--dimensional sample space grows exponentially with $r$. This issue has been adressed in \cite{goix2016evaluate}, where the volume is computed multiple times for different subsampling of input features, however this does not seem to be optimal as it requires training a new model for each subset of features.
 
-Computing the empirical $\text{VOL}(\alpha)$ in data space $\mathcal{X}$ is difficult and is numerically estimated by Monte-Carlo methods. In this work, we have adopted the algorithm as described in Alg. \ref{alg:vol}. From the definition, it is clear that the empirical measure is already normalized any can be compared across models as long as the input set of samples $X$ or the sampling boundaries are kept fixed. A preferable model yields a lower \vola. Therefore the search for an optimal model is a minimization problem. This is in contrast with the measures that were described above, which are always maximized. To make the further analysis simpler, we define the complementary normalized volume outside of the decision boundary
-  \begin{equation}
-    \cvola = 1-\vola
-  \end{equation}
-
-The main issue with VOL@$\alpha$ is the computational cost. Firstly, the number of samples required to cover $r$--dimensional sample space grows exponentially with $r$. Secondly, it requires $N$ evaluations of the anomaly score, which might be prohibitively expensive for some models. The first issue has been adressed in \cite{goix2016evaluate}, where the volume is computed multiple times for different subsampling of input features, however this does not seem to be optimal as it requires training a new model for each subset of features, therefore it has not been done in this paper.
-
-\subsection{Other measures}
-There are other measures that are sometimes considered for evaluation of anomaly detection models. Here we will shortly mention two of them and give reasoning for why they were not included in the experimental analysis.
-
-\textbf{AUPRC}, or Area Under the Precision--Recall Curve, is given by computing precision (see the definition in \ref{preca}) and recall $\text{REC}(\tau) = \frac{\text{tp}}{\text{p}}(\tau)$ for different values of classification threshold $\tau$ and then integrating the area under the resulting curve. A PR curve has at most as many unique recall values as positive samples in the dataset. This is problematic for anomaly detection, where the number of anomalies is low, which leads to a very sparse estimate of the true PR curve. Also, our experiments make extensive comparison across different datasets with varying amount of anomalies, to which a PR curve is very sensitive. In fact, using the same trained anomaly detector and changing the contamination rate of a testing dataset produces different AUPRC results, which then makes any analysis based on AUPRC useless when the true contamination rate is unknown. Furthermore, a correct PR curve lacks a universal starting point unlike ROC, because precision is undefined for zero recall, making the computation and normalization of the area under the PR curve and the comparison between datasets even more complicated. Further critique of AUPRC compared to ROC--based measures do not have are described in \cite{flach2015precision} -- there is no universal baseline given by a completely random detector, PR curves cannot be interpolated, the AUPRC has no other than geometric meaning etc. Finally, it has been shown \cite{davis2006relationship} that PR and ROC curves contain the same points. Therefore we ommit AUPRC from our experiments.
-
-% http://pages.cs.wisc.edu/~boyd/aucpr_final.pdf claims that PR curve -> (0,1) if highest score is a positive sample and -> (0,0) if it is not
-
-\textbf{F1--score} is a single number computed as $\text{F}_1(\tau) = \frac{\text{2tp}}{\text{2tp+fp+fn}}(\tau)$ \cite{chinchor1992muc}. It was designed for unbalanced datasets as it is a harmonic mean of precision and recall. However, the same issues arise for comparison between datasets containing a different number of anomalies. Also, F1--score puts equal weight on precision and recall. This is however in direct contrast with common practice in anomaly detection, where the focus is usually only on one of these.
 
 \section{Anomaly detectors taxonomy}
 
@@ -246,7 +165,7 @@ One of the more popular models is the \textbf{one-class SVM} (OCSVM)\,\cite{scho
 which estimates the support of the normal (non--anomalous) data with
 the use of non--linear kernel functions.
 
-\subsection{One Class Support Vector Machines (OC-SVM)}
+\paragraph{One Class Support Vector Machines (OC-SVM)}
 OC-SVM \cite{scholkopf2001estimating} estimates the support of the training data distribution to be able to decide whether an unlabeled sample belongs to it or not. It uses a non-linear kernel function to compute the projection from the original input space to a feature space of higher dimension, in which it is possible to linearly separate the bulk of the training data by a hyperplane. The anomaly score is then the signed distance of a point from the hyperplane.  The RBF kernel will be used and the inverse of the width of the kernel $\gamma$ will be tuned. In our experiments, the hyperparametr $\nu$, which acts as an upper bound on the number of anomalies in training data, will not be tuned and will have the value 0.5 as we believe that the value of $\gamma$ is more critical to the performance.
 
 
@@ -261,7 +180,7 @@ different proximity measures are described in\,\cite{harmeling2006outliers}.
 Despite its simplicity, it has been shown e.g. in\,\cite{campos2016evaluation}
 that it is one of the most universal unsupervised models.
 
-\subsection{k-Nearest Neighbours (kNN)}
+\paragraph{k-Nearest Neighbours (kNN)}
 The kNN algorithm \cite{ramaswamy2000efficient} is a simple but efficient model. A measure of anomalousness is the distance of a sample $x$ to its $k$-nearest neighbours. In this paper, three different ways to compute the kNN anomaly score are going to be used in accordance with \cite{harmeling2006outliers}. These are sometimes treated as different algorithms, however we are going to treat them as hyperparameters.
 \begin{itemize}
   \item $\kappa(x)$: the anomaly score is the distance between $x$ and its $k$th-nearest neighbor.
@@ -271,7 +190,7 @@ The kNN algorithm \cite{ramaswamy2000efficient} is a simple but efficient model.
 
 
 
-\subsection{Local Outlier Factor (LOF)}
+\paragraph{Local Outlier Factor (LOF)}
 The LOF algorithm \cite{breunig2000lof} is based on comparing the local density of a sample $x$ with the local density of its $k$--nearest neighbours. To correctly describe the way in which the density is defined and the anomaly score is computed, let's define $k$-distance $k\text{-dist}(x)=\max_{y \in N_k(x)} d(x,y)$, where $N_k(x)$ is the set of the $k$--nearest neighbours (which can, in this context, actually contain more than k samples if some are tied at the $k$-dist$(x)$) of $x$. Also, $d(x,y)$ is the distance between $x$ and $y$ (e.g. Euclidean distance). Then we can define reachability distance $\text{rd}_k(x,y)$ as $$\text{rd}_k(x,y)=\max \lbrace k\text{-dist}(y), d(x,y) \rbrace.$$ This formula can be used to define the \textit{local reachability density} as 
 \begin{equation}
   \text{LRD}_k(x)=\frac{|N_k(x)|}{\sum_{y\in N_k(x)}\text{rd}_k(x,y)}.
@@ -301,7 +220,7 @@ of splits and therefore it lies on a branch closer to the root of
 the tree. The anomaly score is then the number of splits of a sample
 averaged over multiple randomly initialized trees in the ensemble.
 
-\subsection{Isolation Forest (IF)}
+\paragraph{Isolation Forest (IF)}
 Isolation Forest \cite{liu2008isolation} is an algorithm based on random forests. During training, the input space is recursively and randomly cut into multidimensional boxes so that all training data points are isolated. A single cut can be expressed in terms of a tree structure with data points on the tips of the branches. An Isolation Forest instance consists of a number of such trees. It can be shown that anomalies usually require less cuts to be isolated -- in other words they are more likely to be on branches that are shorter. Therefore, an anomaly score is computed from the average path length from the root of the tree to the datapoint. The hyperparameter to be optimized is the number of trees $N_t$.
 
 \subsection{Reconstruction-based}
