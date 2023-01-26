@@ -103,8 +103,21 @@ As mentioned above, the main advantage of AUC is that it does not depend on the 
 
 \begin{figure}
 \centering
-\includegraphics[scale=0.85]{data/chapter_intro/fig_roc.pdf}
-\caption{An example of ROC curve and the derived measures based on FPR=0.1. AUC is the whole shaded area under the ROC curve. The darker shading corresponds to AUC@0.1.}
+\begin{subfigure}[b]{0.45\textwidth} 
+	\centering
+	\includegraphics[width=\textwidth]{data/chapter_intro/roc_example.pdf}
+	\caption{ROC curve}
+	\label{fig:roc_example}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.45\textwidth}
+	\centering
+	\includegraphics[width=\textwidth]{data/chapter_intro/prc_example.pdf}
+	\caption{PR curve}
+	 \label{fig:prc_example}
+\end{subfigure}
+
+\caption{An example of an ROC curve and the derived measures based on FPR=0.1. AUC is the whole shaded area under the ROC curve. The darker shading corresponds to AUC@0.1. On the left, the PR curve of the same detector is shown.}
 \label{fig:ROC}
 \end{figure}
 
@@ -136,7 +149,7 @@ Computing the empirical $\text{VOL}(\alpha)$ in data space $\mathcal{X}$ is nume
 
 Anomaly detection methods are based on a wide range of paradigms. In this, section we will follow the taxonomy outlined in publications~\cite{pimentel2014review, ruff2020unifying}, which divide shallow (not based on neural networks) and deep (based on neural networks) detectors into groups based on their common traits. Examples of methods will be given since their knowledge will be useful in the later chapters of this text, but the list is far from complete. For a complete overview of the landscape of anomaly detection methods, see the surveys~\cite{pimentel2014review, campos2016evaluation, goldstein2016comparative, moustafa2019holistic, kwon2019survey, fernandes2019comprehensive, wang2019progress, chalapathy2019deep,ruff2020unifying}.
 
-\subsection{Probabilistic}
+\subsection{Probabilistic  methods}
 Since we have defined anomaly detection as detecting samples that deviate from the normal distribution $P^+$, it is straightforward to try to model the distribution by modelling its probability distribution function (pdf). One of the simplest such methods is the Grubbs' test~\cite{grubbs1969procedures}, which assumes a Gaussian distribution of the normal one-dimensional data and declares a sample to be anomalous if its distance from the mean is larger than some threshold (e.g. three standard deviations). Many such methods based on statistical tests have been proposed~\cite{barnett1994outliers}, but we will focus on advanced modelling probabilistic techniques.
 
 \subsubsection{Shallow methods}
@@ -171,15 +184,13 @@ The recent advent of neural networks has given rise to many novel methods that a
 \begin{equation} \label{eq:ebm}
 	p_{\theta}(x) =  \frac{1}{Z(\theta)} \exp (- E_{\theta}(x)),
 \end{equation}
-where $Z(\theta)$ is the partition function to ensure proper normalization of $p_{\theta}(x)$. Although the partition function usually cannot be directly computed, an EBM can still be trained via gradient descent coupled with Markov Chain Monte Carlo estimation~\cite{hinton2002training}, which is however also the reason for its ineffectiveness relative to more novel approaches. The anomaly score is then the energy function $E_{\theta}(x)$. Although the direct use of the early examples of EBMs such as \textbf{Deep Belief Networks}~\cite{hinton2006fast} and \textbf{Deep Boltzmann Machines}~\cite{salakhutdinov2010efficient} was impractical for anomaly detection, they were eventually refined and successfully used for anomaly detection in~\cite{zhai2016deep}. 
+where $Z(\theta)$ is the partition function to ensure proper normalization of $p_{\theta}(x)$. Although the partition function usually cannot be directly computed, an EBM can still be trained via gradient descent coupled with Markov Chain Monte Carlo estimation~\cite{hinton2002training}, which is however also the reason for its ineffectiveness relative to more novel approaches, as the MCMC is computationally costly. The anomaly score is then the energy function $E_{\theta}(x)$. Although the direct use of the early examples of EBMs such as \textbf{Deep Belief Networks}~\cite{hinton2006fast} and \textbf{Deep Boltzmann Machines}~\cite{salakhutdinov2010efficient} was impractical for anomaly detection, they were eventually refined and successfully used on anomaly detection benchmarks in~\cite{zhai2016deep}. 
 
 Finally, the most recent advancements in anomaly detection were achieved with the use of deep generative models that model the distribution of the data via a generative process, where is is assumed that the data is generated from a hidden latent variable. \textbf{Flow models}~\cite{dinh2014nice}, \textbf{Variational autoencoders}~\cite{kingma2013vae} and \textbf{Generative Adversarial Networks}~\cite{goodfellow2014gan}  will be described in greater detail in Chapter~\ref{sec:chapter_survey}.
 
-\subsection{Distance-based}
-
-kNN, HighDoD, LOF, LOCI, k-means?, ABOD, IF, 
-
-Instead of modelling the probability distribution of the normal data, distance-based anomaly detectors use heuristics that compute a well-defined similarity measure between two data points. One of the simplest but often very powerful~\cite{campos2016evaluation} models is the \textbf{k-Nearest Neighbor} (kNN)~\cite{ramaswamy2000efficient} model where the anomaly score of a sample is its proximity to its k--nearest samples. Different proximity measures are described in~\cite{harmeling2006outliers}, which uses the Euclidean distance as the similarity measure and defines the set $X_{k}(x)$ as the set of $k$-nearest neighbors of $x$.
+\subsection{Distance-based methods}
+Instead of modelling the probability distribution of the normal data, distance-based anomaly detectors use heuristics that compute a well-defined similarity measure between two data points. One of the simplest such models is the \textbf{k-Nearest Neighbor} (kNN)~\cite{ramaswamy2000efficient} model where the anomaly score of a sample is based on its proximity to its $k$--nearest neighbours from the training dataset. Different proximity measures are described in~\cite{harmeling2006outliers}, where 
+the Euclidean distance is used as the similarity measure and the set $X_{k}(x)$ is defined as the set of $k$-nearest neighbors of $x$ from a training dataset $X = \lbrace x_1, x_2, \ldots, x_n \rbrace \subset \mathbb{R}^d$.
 \begin{itemize}
 	\item $\kappa(x)$: the anomaly score is the distance between $x$ and its $k$th-nearest neighbor,
 	\begin{equation} \label{eq:knn_kappa}
@@ -191,58 +202,50 @@ Instead of modelling the probability distribution of the normal data, distance-b
 	\end{equation}
 	\item $\delta(x)$: the anomaly score is the length of the mean of the vectors pointing from $x$ to its $k$-nearest neighbours,
 	\begin{equation} \label{eq:knn_delta}
-		s_{\delta}(x) =  \left| \left| \frac{1}{k} \sum_{x_j \in X_k(x)} (x - x_j) \right| \right|_2.
+		s_{\delta}(x) =  \left| \left| \frac{1}{k} \sum_{x_j \in X_k(x)} (x_j - x) \right| \right|_2.
 	\end{equation}
 \end{itemize}
-All these definitions presume that normal data lie in concentrated regions of the data space $\mathcal{X}$, according to~\eqref{eq:normal_concentration}, while anomalies lie outside of them.
+All these definitions presume that normal data lie in concentrated regions of the data space $\mathcal{X}$, according to~\eqref{eq:normal_concentration}, while anomalies lie outside of them. The kNN anomaly detector is very popular thanks to its simplicity and performance~\cite{campos2016evaluation}. The biggest disadvantage is the computational cost. Even though there is no actual training procedure, the prediction complexity is $O(ndk)$. This can be ameliorated by the construction of a $k$-d tree~\cite{bentley1975multidimensional}, which partitions the space of the training data to speed-up prediction, or using GPU-based similarity search techniques such as~\cite{johnson2019billion}.
 
-
-\paragraph{Local Outlier Factor (LOF)}
-The LOF algorithm \cite{breunig2000lof} is based on comparing the local density of a sample $x$ with the local density of its $k$--nearest neighbours. To correctly describe the way in which the density is defined and the anomaly score is computed, let's define $k$-distance $k\text{-dist}(x)=\max_{y \in N_k(x)} d(x,y)$, where $N_k(x)$ is the set of the $k$--nearest neighbours (which can, in this context, actually contain more than k samples if some are tied at the $k$-dist$(x)$) of $x$. Also, $d(x,y)$ is the distance between $x$ and $y$ (e.g. Euclidean distance). Then we can define reachability distance $\text{rd}_k(x,y)$ as $$\text{rd}_k(x,y)=\max \lbrace k\text{-dist}(y), d(x,y) \rbrace.$$ This formula can be used to define the \textit{local reachability density} as 
+The \textbf{Local Outlier Factor} (LOF) algorithm~\cite{breunig2000lof} is based on comparing the local density of a sample $x$ with the local density of its $k$--nearest neighbours. To correctly describe the way in which the density is defined and the anomaly score is computed, we use the formula~\eqref{eq:knn_kappa}. Then we define the \textit{local reachability density} as 
 \begin{equation}
-  \text{LRD}_k(x)=\frac{|N_k(x)|}{\sum_{y\in N_k(x)}\text{rd}_k(x,y)}.
+  \text{LRD}_k(x)=\frac{|X_k(x)|}{\sum_{x_j\in X_k(x)} \max \lbrace s_{\kappa}(x), \vert \vert x - x_j \vert \vert_2 \rbrace }.
 \end{equation}
-It is in fact the inverse of average reachability--distance of $x$ and its neighbours. Finally, anomaly score of $x$ is given by comparing the $\text{LRD}_k(.)$ of $x$ and its neighbours 
+Since this is basically the inverse of an average distance between $x$ and its neighbours, the closer the neighbours are to $x$, the higher this approximation of local density is. Finally, anomaly score of $x$ is given by comparing the $\text{LRD}_k(.)$ of $x$ and its neighbours 
 \begin{equation}
-  \text{LOF}_k(x)=\frac{\sum_{y\in N_k(x)} \text{LRD}_k(y)}{\text{LRD}_k(x) |N_k(x)|}.
+  s_{\text{LOF}}(x)=\frac{\sum_{x_j\in X_k(x)} \text{LRD}_k(x_j)}{\text{LRD}_k(x) |X_k(x)|}.
 \end{equation}
+The rationale behind the formula is that if the local density of the neighbours is higher or the local density of $x$ is lower, than the more likely it is for $x$ to be an anomaly. Similar methods to LOF are the \textbf{connectivity--based outlier factor} (COF)\,\cite{tang2002enhancing} or \textbf{clustering--based local outlier factor} (CBLOF)\,\cite{he2003discovering}.
 
+A different approach is taken by the \textbf{isolation forest }(IF) model~\cite{liu2008isolation} where an ensemble of $N_t$ isolation trees is constructed for the whole dataset. Isolation trees are constructed in such a way as to isolate each individual datapoint from the rest of the dataset using consecutive splits on different features. It is presumed that an anomaly can be isolated using a smaller number of splits and therefore it lies on a branch closer to the root of the tree. The anomaly score is then based on the number of splits of a sample averaged over multiple randomly initialized trees in the ensemble.
 
+In \textbf{Angle-Based Outlier Detection} (ABOD)~\cite{kriegel2008angle} presumes that outliers lie far from clusters of normal data, therefore the viewing angle that covers a cluster of normal datapoints when "looking" at it from a sample $x$ is smaller when $x$ is anomalous. More concretely, the method computes the angles between $x$ and all pairs of points in the training dataset, and the anomaly score is inversely proportional to the variance of these angles -- the more varied the angles are, the more likely $x$ is close to some cluster of normal data and the anomaly score is thus lower. In the original paper, the method is lauded for the lack of hyperparameters that need to be tuned and ability to operate in high-dimensional data spaces. However, in the experiments in Chapter~\ref{sec:chapter_comparison}, it proves to be the method with one of the worst prediction times.
 
-
-A different way of local density estimation is used in the \textbf{local
-outlier factor} (LOF) algorithm\,\cite{breunig2000lof}, which is
-based on comparing the local density of a sample with local densities
-of its k--nearest neighbors. Similar methods are the \textbf{connectivity--based
-outlier factor} (COF)\,\cite{tang2002enhancing} or \textbf{clustering--based
-local outlier factor} (CBLOF)\,\cite{he2003discovering}.
-
-A different approach is taken by the \textbf{isolation forest }(IF)
-model\,\cite{liu2008isolation} where a forest of isolation trees
-is constructed for the whole dataset. Isolation trees are constructed
-in such a way as to isolate each individual datapoint from the rest
-of the dataset using consecutive splits on different features. It
-is presumed that an anomaly can be isolated using a smaller number
-of splits and therefore it lies on a branch closer to the root of
-the tree. The anomaly score is then the number of splits of a sample
-averaged over multiple randomly initialized trees in the ensemble.
-
-\paragraph{Isolation Forest (IF)}
-Isolation Forest \cite{liu2008isolation} is an algorithm based on random forests. During training, the input space is recursively and randomly cut into multidimensional boxes so that all training data points are isolated. A single cut can be expressed in terms of a tree structure with data points on the tips of the branches. An Isolation Forest instance consists of a number of such trees. It can be shown that anomalies usually require less cuts to be isolated -- in other words they are more likely to be on branches that are shorter. Therefore, an anomaly score is computed from the average path length from the root of the tree to the datapoint. The hyperparameter to be optimized is the number of trees $N_t$.
-
-
-\subsection{Domain-based/Classification}
+\subsection{Domain-based  methods}
 
 OCSVM, SVDD, HSC
 
+\subsubsection{Shallow methods}
+In domain-based models, the data space is partitioned into subspaces by a decision boundary. Instead of estimating the density of the whole training dataset, they only consider a few samples from it, which are called \textit{support vectors}, and which are used to define the decision boundary. A very simple example is an anomaly detector which, for a training set $X = \lbrace x_1, x_2, \ldots, x_n \rbrace \subset \mathbb{R}^d$, constructs a hypersphere with center $c \in \mathbb{R}^d$ and radius $R>0$ that encloses the training data. It is found by solving the objective
+\begin{alignat}{1}
+\mathclap{
+	\begin{aligned}
+	\min_{R,c,\xi} R^2 & + \frac{1}{\nu n}\sum_{i=1}^n \xi_i \\
+	\text{s.t.} \vert \vert x_i - c \vert \vert_2 & \leq R^2 + \xi_i, \xi_i \geq 0, \forall i
+\end{aligned}
+} \label{eq:hypersphere}
+\end{alignat}
+where $\xi_i$ are slack variables that allow some data points to lie outside of the hypersphere. The ratio of the maximum number outliers is controlled by the variable $\nu \in (0,1]$, which is at the same time a lower bound on the number of support vectors, which are samples $x_i$ that lie exactly on the boundary of the hypersphere. The solution to~\eqref{eq:hypersphere} is given by solving the dual problem. Notice that a simple criterion $\vert \vert x_i - c \vert \vert_2  \leq R^2$ already gives a decision whether the point $x$ is already inside the sphere. To convert this to a continuous anomaly score, we can compute the distance of $x$ from the boundary
+\begin{equation}
+	s(x) = \vert \vert x_i - c \vert \vert_2 - R^2
+\end{equation}
+which is negative for points inside and positive for points outside the hypersphere.
+
+Abstracting the above, one can use kernel functions~\cite{shawe2004kernel} to move the problem~\eqref{eq:hypersphere} from the original input space to a transformed kernel space with higher dimension. This is the basis for the \textbf{Support Vector Data Descriptor} (SVDD) anomaly detector. By solving the problem in a space of higher dimensionality, it is possible to find a decision boundary (hypershpere) for datapoints which would otherwise not be separable in the original dimension. In comparison, the \textbf{One-Class Support Vector Machine} (OCSVM)~\cite{scholkopf2001estimating} does not construct a hypershpere, but instead aims to find a separating hyperplane in the kernel space. Unlike in traditional SVM~\cite{cortes1995support}, which is used to separate two classes in a binary classification problem, OCSVM instead aims to find a hyperplane that maximizes the separation of the majority of the training data from the origin in the kernel space. Apart from $\nu$, a very important hyperparameter of the model is the kernel scale parameter $\gamma_{\text{OCSVM}}$.
+
+\subsubsection{Deep methods}
+
 GT, GDAD, DSVDD, OCNN, Discriminator
-
-One of the more popular models is the \textbf{one-class SVM} (OCSVM)\,\cite{scholkopf2001estimating}
-which estimates the support of the normal (non--anomalous) data with
-the use of non--linear kernel functions.
-
-\paragraph{One Class Support Vector Machines (OC-SVM)}
-OC-SVM \cite{scholkopf2001estimating} estimates the support of the training data distribution to be able to decide whether an unlabeled sample belongs to it or not. It uses a non-linear kernel function to compute the projection from the original input space to a feature space of higher dimension, in which it is possible to linearly separate the bulk of the training data by a hyperplane. The anomaly score is then the signed distance of a point from the hyperplane.  The RBF kernel will be used and the inverse of the width of the kernel $\gamma$ will be tuned. In our experiments, the hyperparametr $\nu$, which acts as an upper bound on the number of anomalies in training data, will not be tuned and will have the value 0.5 as we believe that the value of $\gamma$ is more critical to the performance.
 
 
 \subsection{Reconstruction-based}
