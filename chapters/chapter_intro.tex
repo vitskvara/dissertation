@@ -221,24 +221,24 @@ A different approach is taken by the \textbf{isolation forest }(IF) model~\cite{
 
 In \textbf{Angle-Based Outlier Detection} (ABOD)~\cite{kriegel2008angle} presumes that outliers lie far from clusters of normal data, therefore the viewing angle that covers a cluster of normal datapoints when "looking" at it from a sample $x$ is smaller when $x$ is anomalous. More concretely, the method computes the angles between $x$ and all pairs of points in the training dataset, and the anomaly score is inversely proportional to the variance of these angles -- the more varied the angles are, the more likely $x$ is close to some cluster of normal data and the anomaly score is thus lower. In the original paper, the method is lauded for the lack of hyperparameters that need to be tuned and ability to operate in high-dimensional data spaces. However, in the experiments in Chapter~\ref{sec:chapter_comparison}, it proves to be the method with one of the worst prediction times.
 
-\subsection{Domain-based  methods}
+\subsection{Domain-based  methods} \label{sec:domain_methods}
 \subsubsection{Shallow methods}
 In domain-based models, the data space is partitioned into subspaces by a decision boundary. Instead of estimating the density of the whole training dataset, they only consider a few samples from it, which are called \textit{support vectors}, and which are used to define the decision boundary. A very simple example is an anomaly detector which, for a training set $X = \lbrace x_1, x_2, \ldots, x_n \rbrace \subset \mathbb{R}^d$, constructs a hypersphere with center $c \in \mathbb{R}^d$ and radius $R>0$ that encloses the training data. It is found by solving the objective
 \begin{alignat}{1}
 \mathclap{
 	\begin{aligned}
 	\min_{R,c,\xi} R^2 & + \frac{1}{\nu n}\sum_{i=1}^n \xi_i \\
-	\text{s.t.} \vert \vert x_i - c \vert \vert_2 & \leq R^2 + \xi_i, \xi_i \geq 0, \forall i
+	\text{s.t.} \vert \vert x_i - c \vert \vert_2^2 & \leq R^2 + \xi_i, \xi_i \geq 0, \forall i
 \end{aligned}
 } \label{eq:hypersphere}
 \end{alignat}
-where $\xi_i$ are slack variables that allow some data points to lie outside of the hypersphere. The ratio of the maximum number outliers is controlled by the variable $\nu \in (0,1]$, which is at the same time a lower bound on the number of support vectors, which are samples $x_i$ that lie exactly on the boundary of the hypersphere. The solution to~\eqref{eq:hypersphere} is given by solving the dual problem. Notice that a simple criterion $\vert \vert x - c \vert \vert_2  \leq R^2$ already gives a decision whether the point $x$ is already inside the sphere. To convert this to a continuous anomaly score, we can compute the distance of $x$ from the boundary
+where $\xi_i$ are slack variables that allow some data points to lie outside of the hypersphere. The ratio of the maximum number outliers is controlled by the variable $\nu \in (0,1]$, which is at the same time a lower bound on the number of support vectors, which are samples $x_i$ that lie exactly on the boundary of the hypersphere. The solution to~\eqref{eq:hypersphere} is given by solving the dual problem. Notice that a simple criterion $\vert \vert x - c \vert \vert_2^2  \leq R^2$ already gives a decision whether the point $x$ is already inside the sphere. To convert this to a continuous anomaly score, we can compute the distance of $x$ from the boundary
 \begin{equation} \label{eq:hypersphere_score}
-	s(x) = \vert \vert x - c \vert \vert_2 - R^2
+	s(x) = \vert \vert x - c \vert \vert_2^2 - R^2
 \end{equation}
 which is negative for points inside and positive for points outside the hypersphere.
 
-Abstracting the above, one can use \textit{kernel functions}~\cite{shawe2004kernel} to move the problem~\eqref{eq:hypersphere} from the original input space to a transformed kernel space. The kernel is a function $k:\mathbb{R}^d \times \mathbb{R}^d \rightarrow \mathbb{R}$, with which we associate a \textit{feature map} $\Phi: \mathbb{R}^d \rightarrow \mathcal{F}_k$ such that the relation defined by the inner product $k(x,y)=\langle \Phi(x), \Phi(y) \rangle$ is true for all $x,y$. The space $\mathcal{F}_k$ is a reproducing kernel Hilbert space and we choose the kernel in such a way that its dimensionality is higher than $d$. This is the basis for the \textbf{Support Vector Data Descriptor} (SVDD) anomaly detector, where the inequality condition in~\eqref{eq:hypersphere_score} is replaced by $\vert \vert \Phi(x_i) - c \vert \vert_2 \leq R^2 + \xi_i$. By solving the problem in a space of higher dimensionality, it is possible to find a decision boundary (hypershpere) for datapoints which would otherwise not be separable in the original space. In comparison, the \textbf{One-Class Support Vector Machine} (OCSVM)~\cite{scholkopf2001estimating} does not construct a hypersphere, but instead aims to find a separating hyperplane in the kernel space. Unlike in traditional SVM~\cite{cortes1995support}, which is used to separate two classes in a binary classification problem, OCSVM instead aims to find a hyperplane that maximizes the separation of the majority of the training data from the origin in the kernel space. The anomaly score of an OCSVM detector is, similarly to~\eqref{eq:hypersphere_score}, the distance from the separating hyperplane. Apart from $\nu$, a very important hyperparameter of the model is the kernel scale parameter $\gamma_{\text{OCSVM}}$. Many variants of both of the presented approaches were introduced over the years, sucha as \textbf{Minimum Volume Ellipsoid}~\cite{van2009minimum}, \textbf{Multi-sphere SVDD}~\cite{gornitz2017support} or \textbf{Bayesian Data Description}~\cite{ghasemi2012bayesian}.
+Abstracting the above, one can use \textit{kernel functions}~\cite{shawe2004kernel} to move the problem~\eqref{eq:hypersphere} from the original input space to a transformed kernel space. The kernel is a function $k:\mathbb{R}^d \times \mathbb{R}^d \rightarrow \mathbb{R}$, with which we associate a \textit{feature map} $\Phi: \mathbb{R}^d \rightarrow \mathcal{F}_k$ such that the relation defined by the inner product $k(x,y)=\langle \Phi(x), \Phi(y) \rangle$ is true for all $x,y$. The space $\mathcal{F}_k$ is a reproducing kernel Hilbert space and we choose the kernel in such a way that its dimensionality is higher than $d$. This is the basis for the \textbf{Support Vector Data Descriptor} (SVDD) anomaly detector, where the inequality condition in~\eqref{eq:hypersphere_score} is replaced by $\vert \vert \Phi(x_i) - c \vert \vert_2^2 \leq R^2 + \xi_i$. By solving the problem in a space of higher dimensionality, it is possible to find a decision boundary (hypershpere) for datapoints which would otherwise not be separable in the original space. In comparison, the \textbf{One-Class Support Vector Machine} (OCSVM)~\cite{scholkopf2001estimating} does not construct a hypersphere, but instead aims to find a separating hyperplane in the kernel space. Unlike in traditional SVM~\cite{cortes1995support}, which is used to separate two classes in a binary classification problem, OCSVM instead aims to find a hyperplane that maximizes the separation of the majority of the training data from the origin in the kernel space. The anomaly score of an OCSVM detector is, similarly to~\eqref{eq:hypersphere_score}, the distance from the separating hyperplane. Apart from $\nu$, a very important hyperparameter of the model is the kernel scale parameter $\gamma_{\text{OCSVM}}$. Many variants of both of the presented approaches were introduced over the years, sucha as \textbf{Minimum Volume Ellipsoid}~\cite{van2009minimum}, \textbf{Multi-sphere SVDD}~\cite{gornitz2017support} or \textbf{Bayesian Data Description}~\cite{ghasemi2012bayesian}.
 
 \subsubsection{Deep methods}
 Instead of choosing a kernel and its parameters manually, one can instead parametrize the feature maps $\Phi$ using neural networks and train them using standard gradient descent techniques, or use pretrained networks from related tasks. This is the basis for deep OCSVM methods such as \textbf{One-class Neural Network} (OCNN)~\cite{chalapathy2018anomaly} or~\cite{erfani2016high}, or methods based on the SVDD formulation~\cite{ghafoori2020deep}. In \textbf{Deep SVDD} (DSVDD)~\cite{ruff2018deep}, the objective~\eqref{eq:hypersphere} is reformulated without the slack variables $\xi_i$, which means that the hypersphere is expected to enclosed all datapoints in the training dataset. This simplification leads to a faster convergence and yet still prove to be an effective anomaly detector. However, all the deep methods have a basic flaw. Without any further restrictions, the solution $\Phi(x) = c$ is valid, but does not provide a useful detector. This behaviour is called  the \textit{feature map collapse}. In order to prevent this, many techniques such as freezing the neural networks that provide the feature map, architectural choices or using adversarial learning are used (for an extensive list of possibilities, see~\cite{ruff2020unifying}).
@@ -250,110 +250,41 @@ Outlier exposure is a form of \textbf{weak supervision}~\cite{zhou2018brief}, wh
 
 Another paradigm where the model is trained in the presence of additional data is \textbf{self-supervision}~\cite{kolesnikov2019revisiting}, where the model solves an auxilliary task, such as prediction of transformations applied to the image~\cite{chen2020simple}. The important distinction between this approach end outlier exposure is that the transformed data is obtained from the normal training dataset by applying random translations, scalings, rotations etc. Transforming the data in a controled manner, the anomaly detector is then a multiclass classifier that predicts the correct transformation applied to the data. The anomaly score of of such a model is then based on the softmax activations in the output layer -- if the prediction uncertainty is high, the scored sample is more likely to be an anomaly. This was very succesfully used in the \textbf{Geometric Transformations} (GT)~\cite{golan2018deep} anomaly detector. Furthermore, the \textbf{GOAD} method~\cite{bergman2020classification} extends this approach to non-image data.
 
-\subsection{Reconstruction-based}
+\subsection{Reconstruction-based methods}
+One of the most popular approaches to anomaly detection is to build a model that learns to reconstruct input samples. When this model is trained on normal data and learns to reconstruct them well, it is expected that it will be able to identify anomalies by failing to reconstruct them properly, since they have properties unseen by the model at training time. To formalize this, a reconstruction-based anomaly detector consists of an \textit{encoder}, which is a mapping $e_{\phi}:\mathcal{X} \rightarrow \mathcal{Z}$, and a \textit{decoder} $g_{\theta}: \mathcal{Z} \rightarrow \mathcal{X}$. Here, $\mathcal{X} \subset \mathbb{R}^d$ is the input space, $\mathcal{Z} \subset \mathbb{R}^h$ is a so called \textit{latent} space and $\phi,\theta$ are parameters. A \textit{latent representation} or \textit{encoding} of a sample $x$ is $z = e_{\phi}(x)$. Reconstruction-based methods then try to match the original sample $x$ with its reconstruction $x' = g_{\theta}(z)=g_{\theta}(e_{\phi}(x))$. This is done by finding such parameters $\phi, \theta$ as to minimize the reconstruction objective
+\begin{equation} \label{eq:reconstruction_objective}
+	\min_{\phi, \theta} \vert \vert x - g_{\theta}(e_{\phi}(x)) \vert \vert_2^2 + \mathcal{R},
+\end{equation}
+where $\mathcal{R}$ is a regularization term. Some sort of regularization is needed in order to prevent the decoding function $(g_{\theta} \circ e_{\phi})(x)$ to become an identity function, in which case the detector would be useless. The anomaly score of reconstruction-based methods is the \textit{reconstruction error}
+\begin{equation} \label{eq:reconstruction_error}
+	s(x) = \vert \vert x - g_{\theta}(e_{\phi}(x)) \vert \vert_2^2.
+\end{equation}
 
-PCA, vQ, Kmeans?, 
 
-AE, CAEs, DAEs, VAEs, Generator
-
-Methods based on the \textbf{PCA }transformation\,\cite{shyu2003novel,aggarwal2015outlier}\textbf{
-}are also available for anomaly detection. It is presumed that normal
-data lie on a lower dimensional manifold in the data space which is
-extracted by selecting the covariance matrix eigenvectors with highest
-corresponding eigenvalues. The distance to this manifold is then used
-as anomaly score.
-
+The \textbf{Principal Component Analysis} (PCA)~\cite{shyu2003novel,aggarwal2015outlier}, although not originally developed for this purpose, is an example of a reconstruction anomaly detection method. It is assumed that the normal data lie on a lower-dimensional manifold in the data space, which is an assumption also used in other methods. This means that theoretically, they can be represented by a transformation into a lower dimensional latent space, and the eventual differences between the reconstructions from the latent back to the data space and the original samples are only due to noise that is present in the data, and therefore the latent representation contains all the relevant information of a sample. PCA seeks to represent the data by finding an orthonormal basis $W \in \mathbb{R}^{h,d}$ that maximizes the empirical variance of the data $X= \lbrace x_1, x_2, \ldots, x_n \rbrace \subset \mathcal{X}$. The original objective of PCA can be reformulated with~\eqref{eq:reconstruction_objective} in mind, which yields 
+\begin{equation} \label{eq:pca}
+	\max_W \sum_{i=1}^n \vert \vert x_i -  W^TW x_i \vert \vert_2^2, \text{s.t.} WW^T = I.
+\end{equation}
+Thus, this means $z = e_{\phi}(x) = Wx \in \mathbb{R}^h$ is the encoding represented by the first $h$ \textit{principal components}, while the decoder is $g_{\theta}(z) = W^Tz$. The solution to~\eqref{eq:pca} is obtained by collecting the first $h$ eigenvectors of the covariance matrix of the training data, e.g. through its eigendecomposition, or by computing the \textit{singular value decomposition} of the data matrix. Like in the domain-based methods in Sec.~\ref{sec:domain_methods}, soem of the restrictions imposed by the linear formulation of classical PCA are circumvented by using a \textbf{kernel PCA} (kPCA)~\cite{scholkopf1998nonlinear}, where $x$ is replaced by its nonlinear transformation $\Phi(x)$. This was used for anomaly detection e.g. in~\cite{xiao2013l1}.
 
 \begin{figure}
 \begin{centering}
 \input{data/chapter_intro/ae.tex}
 \par\end{centering}
-\centering{}\caption{An example of an autoencoder consisting of fully connected layers.
-The latent code $z\in\mathbb{R}^{2}$ is computed by propagating the
-input $x\in\mathbb{R}^{4}$ through the encoder $e_{\phi}(x)$ and
-then used to produce the reconstruction $\hat{x}\in\mathbb{R}^{4}$
-via the decoder $d_{\theta}(z)$.}
+\centering{}\caption{An example of an autoencoder consisting of fully connected layers. The latent code $z\in\mathbb{R}^{2}$ is computed by propagating the input $x\in\mathbb{R}^{4}$ through the encoder $e_{\phi}(x)$ and then used to produce the reconstruction $x'\in\mathbb{R}^{4}$ via the decoder $g_{\theta}(z)$.}
 \label{fig:ae}
 \end{figure}
 
-The basic idea of using an \textbf{autoencoder} (AE) for anomaly detection
-is simple and was used e.g. in \cite{sakurada2014anomaly,thompson2002implicit}.
-An autoencoder is a neural net that tries to propagate an input data
-sample through multiple layers and produce an output that is as similar
-to the input as possible. While this seems to be rather uninteresting,
-the trick is that the architecture of an autoencoder is usually constrained
-in such a way that the hidden layers contain less neurons than the
-input and output layers, therefore preventing the autoencoder from
-learning identity and forcing it to compress the data in the most
-efficient way. A standard autoencoder architecture can be seen in\,\ref{fig:ae}.
-It usually consists of two parts -- the decoder and encoder. Suppose
-that $\mathcal{X}$ is the space of the input data and $x\in\mathcal{X}$
-is an element of that space, while $\mathcal{Z}$ is the space of
-samples produced by the encoder, also called the latent space. Then
-we can define the encoder as a projection $e_{\phi}:\mathcal{X}\rightarrow\mathcal{Z}$
-and the decoder as $d_{\theta}:\mathcal{Z}\rightarrow\mathcal{X}$.
-Trainable hidden parameters (weights) of the neural network are denoted
-by $\phi$ and $\theta$. Both parts of an autoencoder are trained
-(the weights are adapted) using backpropagation\,\cite{werbos1982applications}
-to minimize the reconstruction error with respect to $\phi$ and $\theta$
+An \textbf{autoencoder} (AE)~\cite{kramer1991nonlinear} is in its basic principle a nonlinear PCA, where the encoder $e_{\phi}$ and decoder $g_{\theta}$ are neural networks and the parameters $\phi,\theta$ are the trainable parameters of these networks. The nonlinearity comes from the use of nonlinear activation functions between the individual layers of the neural networks. An example of an AE network is in Fig.~\ref{fig:ae}.  To find the parameters of the neural networks, the reconstruction error ~\eqref{eq:reconstruction_error} is minimized with respect to $\phi,\theta$ using a gradient descent technique, such as ADAM~\cite{kingma2014adam} or AMSGrad~\cite{reddi2019convergence}, which use backpropagation~\cite{werbos1982applications}. Note that the explicit regularization term $\mathcal{R}$ from~\eqref{eq:reconstruction_objective} here is ommited, and instead the regularization is enforced by creating a \textit{bottleneck} $h < d$, which again forces the model to find the optimal reprezentation of data on a manifold of the data space, as is demonstrated in Fig.~\ref{fig:ae}. Other types of regularizations include sparse autoencoders~\cite{deng2013sparse}, where sparsity of encodings is enforced, or denoising autoencoders~\cite{lu2013speech}, which reconstruct samples with added artificial noise. The process of training an autoencoder is described in Alg.~\ref{alg:ae_train}. Autoencoders were used for anomaly detection e.g. in~\cite{sakurada2014anomaly,thompson2002implicit}, where the reconstruction error~\eqref{eq:reconstruction_error} is used as the anomaly score, and also as a powerful nonlinear dimensionality reduction technique coupled with traditional method in a two-stage approach, as in~\cite{erfani2016high, amarbayasgalan2018unsupervised}. They are also the basis for the Variational autoencoder, which will be discussed in depth in the next chapter.
 
-\begin{equation}
-\mathcal{L}_{r}(x,\phi,\theta)=||x-d_{\theta}(e_{\phi}(x))||_{2}^{2}.\label{eq:ae_loss}
-\end{equation}
-The process of training and autoencoder is describe in Alg. \ref{alg:ae_train}.
-Any standard optimization procedure based on gradient descent can
-be used for updating in the step 6, such as the Nesterov optimizer\,\cite{nesterov1983method},
-ADAM\,\cite{kingma2014adam} or AMSGrad\,\cite{reddi2019convergence}.
 \begin{algorithm}
-
-\include{algs/ae_train_alg}\caption{Autoencoder training procedure}
+\include{algs/ae_train_alg}\caption{Autoencoder training procedure.}
 \label{alg:ae_train}
-
 \end{algorithm}
 
 \begin{figure}
 \begin{centering}
-\includegraphics[scale=0.85]{data/chapter_intro/ae_reconstruction}\caption{The figure demonstrates the ability of an autoencoder to reconstruct
-data. The dimensionality of the latent space $\mathcal{Z}$ is on
-the x--axis, while the average reconstruction error over the whole
-dataset is on the y--axis. Note that although the artificial dataset
-is 16--dimensional, it only contains 8 non--correlated dimensions
-while the remaining are a linear combination of them. This results
-in the error dropping to zero for $\text{dim}(\mathcal{Z})>=8$ where
-the model is able to disentangle the correlations and learn the identity
-function.}
+\includegraphics[scale=0.85]{data/chapter_intro/ae_reconstruction}\caption{The figure demonstrates the ability of an autoencoder to reconstruct data. The dimension $h$ of the latent space $\mathcal{Z}$ is on the x--axis, while the average reconstruction error over the whole dataset is on the y--axis. Note that although the artificial dataset is 16--dimensional, it only contains 8 non--correlated dimensions while the remaining are a linear combination of them, which makes the data lie on an 8-dimensional manifold. This results in the error dropping to zero for $h>=8$ where the model is able to disentangle the correlations and learn the identity function.}
 \label{fig:ae_reconstruction}
 \par\end{centering}
 \end{figure}
-
-Suppose that $p(x)$ is the distribution of the normal data in $\mathcal{X}$
-space. After training with enough examples sampled from $p(x)$, an
-autoencoder should be able to reconstruct any sample from $p(x)$
-almost exactly with the average error given by the constraints of
-the hidden layers, as demonstrated in \ref{fig:ae_reconstruction}.
-In other words, the autoencoder has learnt the shape of the distribution.
-When presented with a novel sample, the ability of the autoencoder
-to reconstruct it might be used to decide whether the sample comes
-from $p(x)$ or not. Indeed, the most naive way of using autoencoders
-for anomaly detection is assuming that $p(x)$ is the distribution
-of normal data and training them using normal samples. Then, for a
-novel sample $x$ the reconstruction error of the trained network
-($\bar{\phi}$ and $\bar{\theta}$ are the learnt parameters of the
-autoencoder)
-
-\begin{equation}
-f_{AE}(x)=\mathcal{L}_{r}(x,\bar{\phi},\bar{\theta})\label{eq:ae_score}
-\end{equation}
-can be used as a an anomaly score function with the assumption that
-an anomaly is going to produce a larger reconstruction error due to
-not coming from $p(x)$.
-
-
-\subsection{Ensemble-based}
-
-MOGAAL - put it into the GAN section
-
-\subsection{Hybrid - two-stage models}
-
-
-\section{Anomaly detection datasets}

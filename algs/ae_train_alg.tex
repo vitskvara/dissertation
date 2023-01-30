@@ -1,12 +1,13 @@
 \begin{algorithmic}[1]
-\Require{A training set $X=\lbrace x_j \rbrace \in \mathbb{R}^d$, maximum number of iterations $I\in\mathbb{N}$, batchsize $L \in \mathbb{N}$}
+\Require{Autoencoder $(g_{\theta}, e_{\phi})$, a training set $X=\lbrace x_1, x_2, \ldots, x_n \rbrace \in \mathbb{R}^d$, maximum number of iterations $I\in\mathbb{N}$, batchsize $L \in \mathbb{N}$, latent space dimension $h$, objective function $\mathcal{L}_{r}(x,\phi,\theta) = \vert \vert x - g_{\theta}(e_{\phi}(x)) \vert \vert_2^2.$}
 \State $\phi,\theta \gets $ Initialize parameters
 \State{$i \gets $ Iteration counter}
 \While{$i<I$ or $\phi,\theta$ are not converged}
 	\State{$X_L \gets$ A random batch of $L$ samples from $X$}
 	\State$l \gets \frac{1}{L}\sum_{j=1}^L \mathcal{L}_{r}(x_j,\phi,\theta), x_j \in X_L$
-	\State$\phi,\theta \gets $ Update parameters with gradients $\nabla_{\theta,\phi} l$ to minimize $l$
+	\State$\phi \stackrel{+}\gets - \nabla_{\phi}l $ update of encoder parameters
+	\State$\theta \stackrel{+}\gets - \nabla_{\theta}l $ update of decoder parameters
 	\State{$i \gets i+1$}
 \EndWhile
-\State{\textbf{return} encoder $e_{\phi}(x)$, decoder $d_{\theta}(z)$}
+\State{\textbf{return} encoder $e_{\phi}(x)$, decoder $g_{\theta}(z)$}
 \end{algorithmic}
