@@ -1,5 +1,5 @@
 \begin{tikzpicture}
-  \node[const]                               (x) {$x$};
+  \node[const]                               (x) {$\vc{x}$};
   \node[const, right = 0.5cm of x]           (xin) {};
   % encoder in
   \node[latent, right = 0.6cm of x, yshift = 0.825cm] (E11) {};
@@ -14,9 +14,9 @@
   \node[latent, right = 3cm of x, yshift = 0.275cm] (E31) {};
   \node[latent, right = 3cm of x, yshift = -0.275cm] (E32) {};
   % encoder tag
-  \node[const, right = 2.8cm of x, yshift = 0.825cm] (E) {$e_{\phi}(x)$};
+  \node[const, right = 2.8cm of x, yshift = 0.825cm] (E) {$e_{\vc{\phi}}(\vc{x})$};
   % code
-  \node[const, right = 4.3cm of x]           (z) {$z$};
+  \node[const, right = 4.3cm of x]           (z) {$\vc{z}$};
   \node[const, right = -0.8cm of z]           (zout) {};       
   \node[const, right = 0.5cm of z]           (zin) {};
   % decoder in
@@ -32,10 +32,10 @@
   \node[latent, right = 3cm of z, yshift = -0.275cm] (D33) {};
   \node[latent, right = 3cm of z, yshift = -0.825cm] (D34) {};
   % xhat
-  \node[const, right = 4.3cm of z]           (xhat) {$x'$};
+  \node[const, right = 4.3cm of z]           (xhat) {$\vc{x}'$};
   \node[const, right = -0.8cm of xhat]       (xhatout) {};       
   % decoder tag
-  \node[const, right = 0.6cm of z, yshift = 0.825cm] (D) {$g_{\theta}(z)$};
+  \node[const, right = 0.6cm of z, yshift = 0.825cm] (D) {$g_{\vc{\theta}}(\vc{z})$};
   
 
   % edges

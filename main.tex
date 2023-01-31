@@ -33,54 +33,6 @@
 
 \maketitle
 
-
-\begin{itemize}
-	\item Chapter I: 
-		\begin{itemize}
-			\item Introduction to anomaly detection - what it is, throw around some references to surveys, where it is used.
-			\item Ideally define some core concepts that will be used later.
-			\item Evaluation of AD: just some core concepts, AUC, prec@ etc., maybe show some experiments with the volume of enclosed space, that was kind of nice. Should we put the never published paper on arxiv so that we can cite it here?
-			\item Introducing some classical methods split based on their methodology -- distance-based, parametric, nonparametric.
-			\item Introduce normal AE for anomaly detection, so that we have some notation already for the next text.
-			\item Also talk about some datasets that we use or that are often used for AD research.
-		\end{itemize}
-	\item Chapter II:
-	\begin{itemize}
-			\item There used to be the metric evaluation stuff. I would probably take very small parts of it and put it in the first chapter, probably just the definitions of some metrics that we will actually use, but otherwise this work is mainly unrelated to what we are doing later.
-			\item This chapter will be an overview of generative models for AD.
-			\item Main sections: VAEs/GANs/Wasserstein AEs. I think this makes sense and we already have alot of text written for this.
-			\item Maybe add a section on flow models? Because we use them later in the large comparison part. Write it a bit more in detail thatn what is in the context paper.
-			\item Each section will have intro to main concepts, how the model is trained, where it was used, and then the modifications -- basically go through the papers and describe what each method is doing.
-		\end{itemize}
-	\item Chapter III: 
-		\begin{itemize}
-			\item This will contain the stuff from the anomaly context paper.
-			\item Again, we mainly want to prepare the ground for the SGVAEGAN stuff, so we have to focus on the semantic anomalies stuff.
-			\item Otherwise, a lot of the paper will be just the description of datasets and experiments, as all the theory should be already in Chapters I and II.
-			\item Maybe it would make sense to split it into 2 parts - first tabular data, second image data, since the conclusions are very different there.
-		\end{itemize}
-	\item Chapter IV: 
-		\begin{itemize}
-			\item This will contain the stuff from the plasma (Alfvén) paper.
-			\item There we compare the one-class stuff with two-stage stuff. Basically we can use this to say that the two-stage stuff performs better, and use this later as an argument to why we think using the latent information makes sense in SGVAEGAN.
-			\item Intro to problem - what data we have - what problems we face - why we do oneclass/two stage approach - their comparison.
-		\end{itemize}
-	\item Chapter V: 
-		\begin{itemize}
-			\item SGVAEGAN - this we can probably rewrite almost verbatim, as there is a lot of new stuff here that is nowhere else in the paper. We can probably only skip through dataset and baseline methods.
-		\end{itemize}
-
-\end{itemize}
-
-\begin{theorem}[Theorem name]
-    \lipsum[5]
-\end{theorem}
-
-\begin{example}[Example name]
-    \lipsum[5]
-\end{example}
-
-
 \input{chapters/chapter_intro.tex}
 
 \input{chapters/chapter_survey.tex}
@@ -99,6 +51,8 @@
 \part*{Apendices}
 
 % what is in the appendices will be decided later
+\input{chapters/etc.tex}
+
 \input{chapters/appendix_datasets.tex}
 
 % ------------------------------------------------------------------------------
