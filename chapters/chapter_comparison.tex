@@ -161,33 +161,6 @@ The self-adversarial Variational Autoencoder (adVAE)~\cite{wang2020advae} was in
 
 Despite its name, GANomaly~\cite{akcay2018ganomaly, ahnDeepGenerativeModelsBased2020} is more related to adversarial autoencoders than to GANs. It consists of encoder-decoder-encoder architecture with a discriminator, similar to an AAE. The anomaly score is the difference between latent representations of a sample after the first and second encoding. An upgrade to this model, skip-GANomaly~\cite{akcay2019skip}, uses skip connections in a U-Net type architecture. Here, the anomaly score is a combination of reconstruction error and feature-matching loss (see the next section on fmGAN). Although originally proposed only for use in images, we have implemented a variant for tabular data as well.  
 
-\subsection{Generative adversarial networks} \label{sec:gan}
-Generative adversarial networks~\cite{goodfellow2014generative} construct and train two networks: a generator $g_{\vec{\phi}}(\vec{z}):\mathcal{Z} \rightarrow \mathcal{X}$ and a discriminator $d_{\vec{\psi}}(\vec{x}) :\mathcal{X} \rightarrow \left[ 0,1 \right]$ approximating the probability
-of $\vec{x}$ being a sample from the data distribution rather than the generator. The generator aims to transforms samples from $p(\vec{z}) = \mathcal{N}(\vec{0}, \vec{I})$ to $\mathcal{X}$ such that they are indistinguishable from the real data. Formally, the  optimization objectives are
-\begin{align}
-\mathcal{L}_{\text{d}}(\vec{\psi}) = & \log d_{\vec{\psi}}(\vec{x}) + \log \left( 1 - d_{\vec{\psi}}(g_{\vec{\phi}}(\vec{z})) \right) , \\
-    \mathcal{L}_{\text{g}}(\vec{\phi}) = &- \log d_{\vec{\psi}}(g_{\vec{\phi}}(\vec{z})),\label{eq:gan-Lg}
-\end{align}
-where $\mathcal{L}_d$ is maximized while $\mathcal{L}_g$  is minimized, $\vec{z}$ is sampled from the prior and $\vec{x}$ from the training set. The optimization searches the saddle point of the two losses, which is difficult and notoriously unstable. Therefore a long series of work, e.g.~\cite{hong2019generative}, proposes improvements over the basic approach~\cite{goodfellow2014generative}. One of the approaches is based on the introduction of  feature-matching loss~\cite{salimans2016improved}. We will denote the model trained with this loss as feature-matching GAN  (fmGAN). In fmGAN training, the cost function of the generator~\ref{eq:gan-Lg} is augmented with output of some intermediate layer of the discriminator. Specifically, the generator is optimized as 
-\begin{equation}
-    \mathcal{L}_{\text{fm}}(\vec{\phi}) = \alpha \mathcal{L}_{\text{g}}(\vec{\phi}) + || h_{\vec{\psi}}(\vec{x}) - h_{\vec{\psi}}(g_{\vec{\phi}}(\vec{z})) ||^2,
-    \label{eq:fmloss}
-\end{equation}
-where $h_{\vec{\psi}}$ is the output of the intermediate layer of the discriminator and $\vec{z}$ is a sample from $p(\vec{z})$. This feature-matching loss is used in AnoGAN~\cite{schlegl2017unsupervised} for detection of anomalous objects in images, with hyperparameter $\alpha$, which was zero in the original publication \cite{salimans2016improved}. 
-
-GANs are frequently augmented with a third model $q(z|x)$~\cite{donahue2016adversarial} which makes the distinction between GANs and VAEs blurred, as demonstrated by using min-max (GAN-like) approximation of Wasserstein divergence in Wasserstein autoencoders, Sec.~\ref{sec:ae_theory}.  This makes it sometimes hard to assign a model to some class (for example, GANomaly belongs to probabilistic autoencoders in our opinion).
-
-Recall the role of the discriminator is to discriminate \textit{generated} samples from \textit{real} ones. Since the generator is trained to generate samples with a high discriminator score, it seems logical to use the discriminator to score anomalies
-\begin{equation}
-     s_{\text{GAN}}(\vec{x}) = 1 - d_{\vec{\psi}}(\vec{x}),
-     \label{eq:disc_score}
-\end{equation}
-which is used e.g., in~\cite{liu2019generative}. The common critique is that the discriminator was not trained to recognize an arbitrary distribution of the anomalies but only that of the latent transformed by the generator. Thus it may fail to recognize anomalous samples of interest. 
-
-AnoGAN recognizes this flaw and proposes to augment the discriminator loss~\eqref{eq:fmloss} for training and an iterative procedure that searches for the latent code $z$ most likely to generate the tested sample to identify anomalous images. However, this procedure is computationally expensive. Its sequel, f(ast)AnoGAN~\cite{schleglFAnoGANFastUnsupervised2019}, uses Wasserstein GAN with gradient penalization~\cite{gulrajani2017improved} to improve stability and adds $q(z|x)$ to find $z$ closest to given $x$ in $q(x|z)$ faster. The anomaly score of fAnoGAN is a combination of discriminator score and feature-matching loss.
-
-Multiple-Objective Generative Adversarial Active Learning (MOGAAL)~\cite{liu2019generative}, train $k$ generators against a single discriminator on input data divided into $k$ subsets. The usual discriminator score in Eq.~\eqref{eq:disc_score} is used to test new samples.
-Other anomaly detection models derived from GAN include~\cite{zenatiEfficientGANBasedAnomaly2018, kliger2018novelty, perera2019ocgan}, however, it seems that autoencoder-based models are more popular for anomaly detection, and our selected candidates are representative.
 
 \subsection{Two-stage models}
 A recurring idea~\cite{ergen2017unsupervised, yaoUnsupervisedAnomalyDetection2019, ruff2018deep, vskvara2020detection} is to combine autoencoders with a secondary model acting on the latent space defined by the encoder. The motivation behind it is that the encoder should preserve the semantic information of the sample and remove noise (e.g. background in images). Additionally, reducing the size mitigates the curse of dimensionality, as high dimensions can be problematic for some models.

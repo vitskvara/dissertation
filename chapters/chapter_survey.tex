@@ -1,9 +1,68 @@
 \chapter{Overview of generative models in anomaly detection} \label{sec:chapter_survey}
-Suppose that a given problem (e.g. classification) is requires us to model some directly observable data, denoted by $\vc{x}$, which is somehow connected with a second variable $\vc{z}$, which might not be directly observable, or we only have a finite set of observed pairs $(\vc{x},\vc{x})$. When $\vc{z}$ is discrete, it has the interpretation of a \textit{label} which denotes an affiliation with one of a finite number of classes (in that case, it is often denoted by $\vc{y}$ instead). When it is continuous, we use the term \textit{hidden} or \textit{latent} variable, see Sec.~\ref{sec:probabilistic_models}, where it was already discussed. We assume that there is some mechanism that connects $\vec{x}$ and $\vec{z}$, that we model e.g. by a decoder $g_{\vc{\theta}}(z)$ from Sec.~\ref{sec:reconstruction_models}. The term \textbf{generative model} denotes an approach when the joint probability distribution of $p(\vc{x},\vc{z})$ is modeled, as opposed to a \textbf{discriminative model}, which tries to estimate $p(\vc{z} \vert \vc{x})$. An example of a discriminative model is a logistic classifier, which in fact estimates $p(\vc{z} \vert \vc{x})$ as a function $f:\mathcal{X} \rightarrow \mathcal{Z}$ where $\mathcal{Z} = [0,1]$, i.e. it produces a guess for binary label based on input data. While it seems that a generative model is more flexible, as it can provide  $p(\vc{z} \vert \vc{x}) = p(\vc{x},\vc{z})/p(\vc{x})$, it is usually subpar in classification tasks due to the difference between the model and the true distribution of the data $p(\vc{x})$~\cite{ng2001discriminative,bishop2007generative}. The advantage of using a generative model is that it can be trained in an unsupervised manner (without observed labels/latent variables) and, most importantly, it can generate artificial samples $\vec{x}$.
+Suppose that a given problem (e.g. classification) is requires us to model some directly observable data, denoted by $\vc{x}$, which is somehow connected with a second variable $\vc{z}$, which might not be directly observable, or we only have a finite set of observed pairs $(\vc{x},\vc{z})$. When $\vc{z}$ is discrete, it has the interpretation of a \textit{label} which denotes an affiliation with one of a finite number of classes (in that case, it is often denoted by $\vc{y}$ instead). When it is continuous, we use the term \textit{hidden} or \textit{latent} variable, see Sec.~\ref{sec:probabilistic_models}, where it was already discussed. In that case, we assume that there is some mechanism that connects $\vc{x}$ and $\vc{z}$ that can be modeled e.g. by a decoder $g_{\vc{\theta}}(z)$ from Sec.~\ref{sec:reconstruction_models}. The term \textbf{generative model} denotes an approach when the joint probability distribution of $p(\vc{x},\vc{z})$ is modeled, as opposed to a \textbf{discriminative model}, which tries to estimate $p(\vc{z} \vert \vc{x})$. An example of a discriminative model is a logistic classifier, which in fact estimates $p(\vc{z} \vert \vc{x})$ as a function $f:\mathcal{X} \rightarrow \mathcal{Z}$ where $\mathcal{Z} = [0,1]$, i.e. it produces a guess for binary label based on input data. While it seems that a generative model is more flexible, as it can provide  $p(\vc{z} \vert \vc{x}) = p(\vc{x},\vc{z})/p(\vc{x})$, it is usually subpar in classification tasks~\cite{ng2001discriminative,bishop2007generative}. The advantage of using a generative model is that it can generate artificial samples $\vc{x}$, and most importantly, it can be trained in an unsupervised manner (without observed labels/latent variables) and provide an estimate of the data distribution $p(x)$. This is the reason generative models are interesting for anomaly detection, together with the advent of deep generative models that can model large quantities of high-dimensional data.
 
-Some generative models were actually already introduced in the previous chapter in Sec.~\ref{sec:probabilistic_models}. From the simplest generative models, such as the naive Bayes classifier~\cite{domingos1997optimality} or Gaussian Mixture Models already mentioned in , through Boltzmann machines
-\cite{goodfellow2014gan,kingma2013vae,dinh2014nice}
+Some generative models were actually already introduced in the previous chapter in Sec.~\ref{sec:probabilistic_models}, such as the Gaussian Mixture Model, autoregressive models or various energy based models. Recently, very large deep generative models with billions of parameters were introduced. They are pushing the boundaries in many domains and produce human-like outputs, such as the BigGAN~\cite{brock2018large} for images, GPT-3~\cite{brown2020language} for text, the Jukebox model~\cite{dhariwal2020jukebox} for music generation, or diffusion models~\cite{sohl2015deep} for text-to-image translation~\cite{saharia2022photorealistic}. In the previous chapter, we have already mentioned the three main types of deep generative models that will be discussed in greater depth in this chapter -- the \textbf{Generative Adversarial Network} (GAN)~\cite{goodfellow2014gan}, the \textbf{Variational Autoencoder} (VAE)~\cite{kingma2013vae} and various \textbf{flow models}~\cite{dinh2014nice}. They present the basic paradigms on which most of novel anomaly detectors are built~\cite{an2015variational,xu2018unsupervised,wang2018generative,perera2019ocgan,yamaguchi2019adaflow,schmidtNormalizingFlowsNovelty2019}. 
 
+\section{GAN--based models}
+The \textbf{Generative Adversarial Network} (GAN) was introduced in~\cite{goodfellow2014gan} where it was successfully used to generate MNIST digits, faces and CIFAR-10 images. Since then, GAN-based models were used in a multitude of different areas, such as next frame prediction in videos~\cite{lotter2015unsupervised}, semi--supervised learning~\cite{salimans2016fmgan}, image--to--image translation~\cite{zhu2016generative}, semantic manipulation of high resolution images~\cite{wang2018high} or for generating realistic artificial image~\cite{karras2019style} and audio data~\cite{lee2022bigvgan}. In comparison with VAE-based generative models, it is believed that GAN-based models produce pictures that are more realistic (less blurry), at the cost of difficult and highly unstable training~\cite{salimans2016fmgan}. In the following text, the basics of GANs will be introduced together with their applications to anomaly detection. 
+
+\subsection{Basic GAN model}
+\begin{figure}
+\centering{}\include{data/chapter_survey/gan}\caption{A schematic of a GAN consisting of fully connected layers. A latent
+noise sample $\vc{z}\sim p(\vc{z})$ is fed to the generator $g_{\vc{\theta}}(\vc{z})$
+which then produces an artificial sample $\tilde{\vc{x}}$. Alternatively,
+a sample $\vc{x}$ is sampled from the data distribution $p(\vc{x})$. Both
+are passed to the discriminator $d_{\vc{\varphi}}(\vc{x})$ that produces a score
+$s_d$ -- the probability that $\tilde{\vc{x}}$ or $\vc{x}$ come from the
+true data distribution.}
+\label{fig:gan}
+\end{figure}
+
+Suppose that we have samples from the true data distribution $p(\vc{x}),\vc{x}\in\mathcal{X}$, which we are trying to imitate. We don't know the true form of $p(\vc{x})$, since it is usually high-dimensional and not representable directly by a function, but instead it is available to us through a finite set of samples that comprise the training dataset $X$. The goal is to build a proxy for $p(\vc{x})$ so that we can draw new, yet unseen samples from it. The GAN tackles this problem by a model with two principal parts. First is the \textbf{generator}, which is a neural network that represents a mapping $g_{\vc{\theta}}(\vc{z}):\mathcal{Z}\rightarrow\mathcal{X}$, where $\vc{\theta}$ are its weights, and $\mathcal{Z}$ is the latent space. We will denote a generated sample by $\tilde{\vc{x}} = g_{\vc{\theta}}(\vc{z})$. Since the generator as we have defined it so far is deterministic and we need to cover a random distribution, the inputs to the generator come from a \textbf{prior} noise distribution $p(\vc{z})$. The prior is usually chosen such that it it easy to generate samples from it, e.g. $p(\vc{z}) = \mathcal{N}(0,\vc{I})$, in which case $\mathcal{Z} = \mathbb{R}^h$ with $h$ being the dimension of the latent space. Then, the task is to train the generator in such a fashion that it learns the potentially highly non--linear mapping from $p(\vc{z})$ to $p(\vc{x})$. This is stimulated by the adversary of the generator -- the \textbf{discriminator}. We define it as a neural network with weights $\vc{\theta}$, i.e. a mapping $d_{\vc{\varphi}}(\vc{x}):\mathcal{X}\rightarrow\left[0,1\right]$. The output of the discriminator has the interpretation of the probability that its input comes from $p(\vc{x})$ rather than being generated by the generator, in other words, true samples $\vc{x}$ should be given higher value than the generated samples $\tilde{\vc{x}}$.
+
+Both parts of a GAN are trained (their weights are updated) in tandem, so each of them iteratively improves in its task. The discriminator is trained both with true and generated samples to maximize the probability of assigning a correct label to them, while the generator is minimizing the probability of the discriminator
+recognizing the generated sample. This can be written down as a two player minimax~\cite{maschler2020game} game 
+\begin{equation} \label{eq:gan_obj}
+\min_{\vc{\theta}}\max_{\vc{\varphi}}\mathbb{E}_{ \vc{x} \sim p(\vc{x})}\left[\ln d_{\vc{\varphi}}(\vc{x})\right]+\mathbb{E}_{\vc{z}\sim p(\vc{z})}\left[\ln\left(1-d_{\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))\right)\right].
+\end{equation}
+It can be shown~\cite{goodfellow2014gan} that this objective has a saddle point at at $-\ln4$. In practice, \eqref{eq:gan_obj} is not used directly. That is because the term $\ln\left(1-d_{\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))\right)$ suffers from vanishing gradients -- when the generated samples do not resemble the real data in the beginning of the training, than this terms is almost zero and the generator is not trained. Therefore, instead of minimizing this, we can maximize $\ln d_{\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))$ to train the generator, which has much stronger gradients~\cite{goodfellow2014gan}. During training, we sample $\vc{x}$ from the training dataset and $\vc{z}$ from the prior distribution and update the generator and discriminator weights by minimizing
+\begin{equation}\label{eq:gen_loss}
+\mathcal{L}_{g}(\vc{z},\vc{\theta})= - \ln d_{\vc{\varphi}}(g_{\vc{\theta}}(\vc{z})),
+\end{equation}
+\begin{equation}\label{eq:disc_loss}
+\mathcal{L}_{d}(\vc{x},\vc{z},\vc{\varphi})= - \ln d_{\vc{\varphi}}(\vc{x}) - \ln\left(1-d_{\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))\right).
+\end{equation}
+Note that we explicitly remove the dependency of the loss functions on the weights that are not being optimized through them. A detailed training procedure of a GAN is described in Alg.~\ref{alg:gan_train}. Interestingly, during training, the generator never encounters any sample coming from $p(x)$ but is still able to eventually learn the shape of $p(\vc{x})$. The choice of $p(\vc{z})$ can be rather arbitrary as far as sampling from it is possible and the generator and discriminator have sufficient capacity to process it. In practice, uniform or normal distribution is usually used, as already mentioned. 
+
+\begin{algorithm}
+\include{algs/gan_train_alg}
+\caption{GAN training procedure.}
+\label{alg:gan_train}
+\end{algorithm}
+
+Achieving convergence such that the generated samples $\tilde{\vc{x}}$ resemble the training data might be difficult and require multiple random initializations of the model weights. Details on stable training of GANs can be found e.g. in~\cite{gui2021review}. A phenomenon called \textit{mode collapse} has been described~\cite{goodfellow2016nips}, which happens when $p(\vc{x})$ is multimodal, but the generator distribution collapses to a single mode. A generator that has collapsed to a single mode of a MNIST dataset will produce only a single digit, e.g. "1", no matter where the code is sampled from. To mitigate this issue, several practices have been proposed~\cite{salimans2016fmgan,hong2019generative}. One of them is the use of an enhanced generator loss
+\begin{equation} \label{eq:fmgan}
+\mathcal{L}_{\text{gfm}}(\vc{z},\vc{x},\vc{\theta})=\alpha\mathcal{L}_{g}(\vc{z},\vc{\theta})+\mathcal{L}_{h}(\vc{z},\vc{x},\vc{\theta}),
+\end{equation}
+where the second term is the so-called \textit{feature-matching} loss
+\begin{equation} \label{eq:fm_loss}
+\mathcal{L}_{fm}(\vc{z},\vc{x},\vc{\theta}) = ||d_{l,\vc{\varphi}}(\vc{x})-d_{l,\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))||_{2}^{2}
+\end{equation}
+where $\alpha > 0$ is a tunable weight and $d_{l,\vc{\varphi}}(\vc{x})$ is the intermediate representation of $\vc{x}$ after propagation through $l \in \mathbb{N}$ layers of the discriminator. This loss is supposed to provide improved gradients for the generator to stabilize the training. In the following text, a GAN model with the loss~(\ref{eq:fmgan}) will be referred to as the \textbf{feature-matching GAN} (fmGAN).
+
+\subsection{GANs in anomaly detection}
+The idea of using a GAN for anomaly detection comes from the the ability of the generator to learn the true data distribution $p(\vc{x})$ and especially the ability of the discriminator to recognize samples coming from $p(\vc{x})$. When the training dataset consists of normal samples, the discriminator output can be converted into an anomaly score
+\begin{equation} \label{eq:disc_score}
+     s_{\text{GAN}}(\vc{x}) = 1 - d_{\vc{\varphi}}(\vc{x}),
+\end{equation}
+which is higher for suspected anomalies and lower for normal data. The common critique is that the discriminator was not trained to recognize an arbitrary distribution of the anomalies but only that of the latent transformed by the generator. Thus it may fail to recognize anomalous samples of interest. 
+
+The authors of the \textbf{AnoGAN} model~\cite{schlegl2017unsupervised} recognize this flaw. Their convolutional GAN model is trained with the feature-matching loss~\eqref{eq:fmgan}. For identification of anomalies in medical images, instead of using~\eqref{eq:disc_score}, they propose an iterative procedure that searches for the latent code $\vc{z}$ most likely to generate the tested sample to identify anomalous images. However, this procedure is computationally expensive. Therefore, an update to this model was published, the \textbf{f(ast)AnoGAN}~\cite{schleglFAnoGANFastUnsupervised2019}. It uses a Wasserstein GAN~\cite{gulrajani2017improved,haloui2018anomaly} (more on Wasserstein optimization objective in the next section) with gradient penalization~\cite{gulrajani2017improved} to improve training stability and adds an encoder distribution $q_{\phi}(\vc{z}|\vc{x})$ to find $\vc{z}$ closest to given $\vc{x}$ faster. The anomaly score of fAnoGAN is a combination of the discriminator score~\eqref{eq:disc_score} and the feature-matching loss~\eqref{eq:fm_loss}. 
+
+The fmGAN model is used the publication~\cite{kliger2018novelty}, where it is tested on benchmark datasets such as MNIST and CIFAR-10. In~\cite{wang2018generative}, a GAN model was used to detect anomalies in time series data coming from industrial processes, whereas in~\cite{zenatiEfficientGANBasedAnomaly2018}, network intrusions were detected. In the \textbf{Multiple-Objective Generative Adversarial Active Learning} (MOGAAL)~\cite{liu2019generative}, $k \in \mathbb{N}$ generators are trained against a single discriminator on input data divided into $k$ subsets. The discriminator score Eq.~\eqref{eq:disc_score} is used to test new samples. The authors of~\cite{perera2019ocgan} claim to have achieved state-of-the-art results in one-class classification through severely restricting the latent space of the
+GAN combined with an autoencoder and employing an adversarial data augmentation strategy. 
+
+The use of GAN with an encoder~\cite{donahue2016adversarial} or an autoencoder with a discriminator~\cite{leveau2017adversarial} for anomaly detection is often and somehow blurs the line between GAN and VAE-based models, but we believe that presenting both concepts separately is useful. True GAN-like models for anomaly detection are however far less prevalent than models that use some autoencoding structure, which will be the focus of the next section. Experimental comparison of both approaches is presented in Chapter~\ref{sec:chapter_comparison}.
 
 \section{The Variational Autoencoder}
 
@@ -406,171 +465,6 @@ the authors share some interesting insights, e.g. that the VAE is
 able to capture the temporal structure in the data, they do not offer
 a thorough comparison with other methods.
 
-\section{GAN--based models}
-
-A different sort of generative deep model has been successful recently
--- the Generative Adversarial Network (GAN)\,\cite{goodfellow2014gan}.
-It is based on a different perspective than the VAE model. Generally,
-it is believed that the GAN model produces pictures that are more
-realistic (less blurry) than that produced by VAE, at the cost of
-difficult and highly unstable training\,\cite{salimans2016fmgan}
--- usually many models need to be trained in order to find a good
-one. 
-
-In a GAN, there are again two parts of the model. Instead of an encoder
-and a decoder, there is a generator and a discriminator. The generator
-is trying to produce samples that look like they come from the true
-data distribution $p(x)$, while the discriminator is trying to recognize
-true samples from the samples produced by the generator. They are
-trained in tandem, so each of them iteratively improves in its task.
-
-When introduced, GAN was successfully used to generate MNIST digits,
-faces and CIFAR-10 images\,\cite{goodfellow2014gan}. Then they were
-used in a multitude of different areas, such as next frame prediction
-in videos\,\cite{lotter2015unsupervised}, semi--supervised learning\,\cite{salimans2016fmgan},
-image--to--image translation\,\cite{zhu2016generative} or semantic
-manipulation of high resolution images\,\cite{wang2018high}.
-
-\subsection{GAN theory}
-
-\begin{figure}
-\centering{}\include{data/chapter_survey/gan}\caption{A schematic of a GAN consisting of fully connected layers. A latent
-noise sample $z\sim p(z)$ is fed to the generator $g_{\phi}(z)$
-which then produces an artificial sample $\tilde{x}$. Alternatively,
-a sample $x$ is sampled from the data distribution $p(x)$. Both
-are passed to the discriminator $d_{\theta}(x)$ that produces a score
-$s$ -- the probability that $\tilde{x}$ or $x$ comes from the
-true data distribution.}
-\label{fig:gan}
-\end{figure}
- 
-
-The basis on which the GAN works is relatively simple. Suppose that
-we have samples coming from the true data distribution $p(x),x\in\mathcal{X}$,
-which we are trying to imitate. To this end we design a generator,
-which is a neural network with parameters $\phi$ and which represents
-a mapping $g_{\phi}(z):\mathcal{Z}\rightarrow\mathcal{X}$. Since
-the generator is deterministic and we need to cover a whole distribution,
-the inputs to the generator come from a prior noise distribution $p(z),z\in\mathcal{Z}$.
-Then, the task is to train the generator in such a fashion that it
-learns the potentially highly non--linear mapping from $p(z)$ to
-$p(x)$. This is stimulated by the adversary of the generator --
-the discriminator. It can be a neural network with parameters $\theta$
-which represents a mapping $d_{\theta}(x):\mathcal{X}\rightarrow\left[0,1\right]$,
-i.e. the probability that a sample $x$ comes from $p(x)$ rather
-than from the generator.
-
-The discriminator is trained both with true and generated samples
-to maximize the probability of assigning a correct label to them,
-while the generator is minimizing the probability of the discriminator
-recognizing the generated sample. This can be written down as a two
-player minimax game 
-\begin{equation}
-\min_{\phi}\max_{\theta}\mathbb{E}_{x\sim p(x)}\left[\ln d_{\theta}(x)\right]+\mathbb{E}_{z\sim p(z)}\left[\ln\left(1-d_{\theta}(g_{\phi}(z))\right)\right].\label{eq:gan_obj}
-\end{equation}
-It was proven that this objective has an optimum at $-\ln4$. In practice,
-(\ref{eq:gan_obj}) is not used directly. That is because the term
-$\ln\left(1-d_{\theta}(g_{\phi}(z))\right)$ suffers from vanishing
-gradients -- when the samples from the generator are too poor in
-the beginning of the training, than this terms is almost zero and
-the generator is not trained. Therefore, instead of minimizing this,
-we can maximize $\ln d_{\theta}(g_{\phi}(z))$ to train the generator,
-which has much stronger gradients\,\cite{goodfellow2014gan}. During
-training, we sample $x$ from the data and $z$ from the noise distribution
-and update the generator and discriminator parameters using loss functions
-\begin{equation}
-\mathcal{L}_{g}(z,\phi)=\ln d_{\theta}(g_{\phi}(z)),\label{eq:gen_loss}
-\end{equation}
-
-\begin{equation}
-\mathcal{L}_{d}(x,z,\theta)=\ln d_{\theta}(x)+\ln\left(1-d_{\theta}(g_{\phi}(z))\right).\label{eq:disc_loss}
-\end{equation}
-The training procedure of a GAN is described in Alg.\,\ref{alg:gan_train}.
-Note that during training, the generator never encounters any sample
-coming from $p(x)$, as clearly visible in\,(\ref{eq:gen_loss}),
-but is still able to eventually learn the shape of $p(x)$. The choice
-of $p(z)$ can be rather arbitrary as far as sampling from it is possible
-and the generator and discriminator have sufficient capacity. This
-is unlike in VAE, where standard distribution is used due to its favourable
-analytical properties. In practice however, uniform or normal distribution
-is usually used.
-
-\begin{algorithm}
-\include{algs/gan_train_alg}
-
-\caption{GAN training procedure.}
-\label{alg:gan_train}
-
-\end{algorithm}
-
-After a GAN is successfully trained, one can use it to generate samples
-that look like they come from $p(x)$ by simply passing $z\sim p(z)$
-through the generator. 
-
-\subsection{Feature matching GAN}
-
-GAN model is famous for the instability of its training. A phenomenon
-called mode collapse has been described\,\cite{goodfellow2016nips},
-which happens when $p(x)$ is multimodal, but the generator distribution
-collapses to a single mode. A generator that has collapsed to a single
-mode of a MNIST dataset will produce only a single digit, e.g. 1,
-no matter where the code is sampled from. To mitigate this issue,
-several practices have been proposed\,\cite{salimans2016fmgan}.
-One of them is the use of an enhanced generator cost function
-\begin{equation}
-\mathcal{L}_{f}(z,x,\phi)=\alpha\mathcal{L}_{g}(z,\phi)+||h_{\theta}(x)-h_{\theta}(g_{\phi}(z))||_{2}^{2},\label{eq:fmgan}
-\end{equation}
-where $h_{\theta}(x)$ is the output of some intermediate (e.g. the
-penultimate) layer of the discriminator and $\alpha\in\mathbb{R}$
-is a scaling parameter. This loss is supposed to provide improved
-gradients for the generator to stabilize the training. In the following
-text, a GAN model with the loss\,(\ref{eq:fmgan}) will be referred
-to as feature--matching GAN (fmGAN).
-
-\subsection{GAN in anomaly detection}
-
-The idea of using a GAN for anomaly detection comes from the fact
-that was described in the previous text, and that is the ability of
-the generator to learn the true data distribution $p(x)$ and especially
-the ability of the discriminator to recognize samples coming from
-$p(x)$. Naturally, if trained properly, the discriminator can be
-used to test whether a new sample $x$ is from the training data distribution
-which is exactly the scenario in semi-- and unsupervised anomaly
-detection. However using only the discriminator score might not always
-be optimal, as there might be artificial modes in the $\mathcal{X}$
-space to which the discriminator assigns a high score despite there
-not being any training data. Therefore, a sample produced by the generator
-is compared with $x$ as well.
-
-Using a trained generator $g_{\phi}(z)$ and discriminator $d_{\theta}(x)$,
-we can define the GAN anomaly score function as a weighted average
-between the discriminator score and the distance between the tested
-sample and a generated sample
-\begin{equation}
-f_{\text{GAN}}(x)=-(1-\lambda)\ln(d_{\theta}(x))+\lambda||x-g_{\phi}(z)||_{2}^{2},\label{eq:gan_score}
-\end{equation}
-where $\lambda\in\left[0,1\right]$ is a scaling parameter and $z\sim p(z)$
-is a sample from the prior.
-
-The paper\,\cite{schlegl2017unsupervised} introduced the use of
-convolutional fmGAN model for anomaly detection in medical images.
-The model is trained on healthy patients' data and then successfully
-used to identify anomalies in retinal scans. The fmGAN model was also
-used in\,\cite{kliger2018novelty}, where the authors test the framework
-on benchmark datasets such as MNIST and CIFAR-10. GAN was also used
-in\,\cite{wang2018generative} to detect anomalies in time series
-data coming from industrial processes. The authors of\,\cite{perera2019ocgan}
-claim to have achieved state--of--the--art results in one-class
-classification through severely restricting the latent space of the
-GAN combined with an autoencoder and employing an adversarial data
-augmentation strategy.
-
-As was presented, there exists some research on GANs in anomaly detection,
-however it is much sparser compared to the number of papers that use
-some modification of VAE. This is probably due to the poor stability
-of their training. As will be shown in chapter\,\ref{chap:kdd18},
-we have observed inferiority of GANs to VAE in our experiments, although
-we have not tested and compared all available methods.
 
 \section{Wasserstein Autoencoders}
 
