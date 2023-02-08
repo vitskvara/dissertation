@@ -84,75 +84,7 @@ This section briefly reviews deep generative models in the order of exactness of
 
 Before the description, we introduce a notation. Training samples, $\vec{x},$ are assumed to be i.i.d from the underlying probability distribution $p({\vec{x}})$ defined on the input space $\mathcal{X}$. Following the conventional definition of an anomaly~\cite{barnett1974outliers}, each anomaly detection method is expected to provide a quantity (called score and denoted $s(\vec{x}')$) related to the probability of a sample $\vec{x}'$ being generated from $p(\vec{x}).$ The score does not need to be a normalized distribution, as the threshold is typically determined as an empirical estimate of the quantile. Most functions in this section are assumed to have parameters optimized during training. 
 
-\subsection{Normalizing flows}
-The name normalizing flows refers to methods relying on the change of variables formula
-\begin{equation}
-    p\left(\vec{x}\right) = p\left(\vec{z}\right)\!\left\vert \text{det} J_f\!\left(\vec{z}\right) \right\vert^{-1}, \, \vec{z} = f^{-1}\!\left(\vec{x}\right),
-\label{eq:rv_transformation}
-\end{equation}
-where $J_f\!\left(\vec{z}\right)$ is Jacobi matrix of function $f$ evaluated at $\vec{z}$. $p(\vec{z})$ is a known distribution of the latent variable $\vec{z}$ from space $\mathcal{Z}$ of the same dimension as $\mathcal{X}$.
-
-Theoretical reviews~\cite{papamakariosNormalizingFlowsProbabilistic2019, kobyzevNormalizingFlowsIntroduction2020} require $f$ to be invertible and both $f$ and $f^{-1}$ to be differentiable. Therefore, flow models primarily differ in how they define the class of functions $f$, which ranges from simple affine transformations to solutions of ordinary differential equations. The expressive power comes from their composition, as is usual in neural networks. In the comparison, we consider flows on tabular data only, for which we have implemented the well-known RealNVP~\cite{dinh2016density} and MAF~\cite{papamakariosMaskedAutoregressiveFlow2018} flows alongside a promising class of Sum-Product-Transform networks --- SPTN~\cite{pevny2020sum} combining normalizing flows with a graphical model. The likelihood is used as a natural anomaly score.
-
-Flow models have not yet enjoyed much popularity in anomaly detection~\cite{yamaguchi2019adaflow, schmidtNormalizingFlowsNovelty2019, diasAnomalyDetectionTrajectory2020a, pevny2020sum} in comparison to the autoencoder-based models reviewed below. To us, this is surprising since these methods can exactly calculate likelihood functions, which under a good fit are the ideal anomaly score. Meanwhile, the focus of the surrounding community is on the topic of \textit{out of distribution detection} (OOD)\footnote{Out of distribution detection means identifying samples coming from a different dataset. For example, a model trained on MNIST / CIFAR10 should assign a low likelihood to samples from Fashion MNIST / SVHN respectively.}~\cite{nalisnickDeepGenerativeModels2019}, which is very related to anomaly detection if not being equal. Ref.~\cite{choiWAICWhyGenerative2019} suggests to use ensembles, while~\cite{renLikelihoodRatiosOutofDistribution2019} recommends to convert the single-class problem to classification problems in the spirit of \cite{steinwart2005a}. A deep investigation of OOD in~\cite{kirichenkoWhyNormalizingFlows2020} shows that with low-level features such as pixel intensities, flows tend to learn local models, i.e. according to taxonomy in~\cite{ruff2020unifying} they fail to detect semantic anomalies.
-
 \subsection{Autoencoder-based models}
-\label{sec:ae_theory}
-Autoencoder-based models differ from flows by relaxing the exact mapping between $\vec{x}=f(\vec{z})$ \eqref{eq:rv_transformation} into a probability distribution $p_{\vec{\theta}} (\vec{x}|\vec{z})=\mathcal{N}(\vec{\mu}_{\vec{\theta}}(\vec{z}), \mathrm{diag}(\vec{\sigma}_{\vec{\theta}}(\vec{z})))$,\footnote{Other forms of the distribution are possible, e.g. Bernoulli for scaled pixel intensities.} called \emph{decoder}. The symbol $\vec{\theta}$ denotes the trainable parameters of the decoder, e.g. weights of a neural network. The marginal likelihood is computed as
-\begin{equation}
-    p(\vec{x})=\int p_{\vec{\theta}}(\vec{x}|\vec{z})p(\vec{z}) d\vec{z},
-    \label{eq:vae-px}
-\end{equation}
-where $p(\vec{z})$  is a chosen prior probability distribution of the latent variable. This relaxation allows for more flexible models, e.g. using different dimension of $\vec{x}$ and $\vec{z}$. However, training and evaluation of the model is more demanding since the marginal likelihood \eqref{eq:vae-px} is not available in closed form. Therefore~\cite{kingma2013auto} introduces \emph{encoder} distribution $q_{\vec{\phi}}(\vec{z}|\vec{x})=\mathcal{N}(\vec{\mu}_{\vec{\phi}}(\vec{x}), \mathrm{diag}(\vec{\sigma}_{\vec{\phi}}(\vec{x})))$  with parameters $\vec{\phi}$ allowing approximation of Eq.~\eqref{eq:vae-px} as described below in Eq.~\ref{eq:vae_loss}.
-
-Various modifications of the original formulation have been proposed, giving rise to many specialized methods. Below we describe extensions in three blocks according to i) approximation of the likelihood \eqref{eq:vae-px} used for training, ii) prior model, iii) approximations used for evaluating the anomaly score, and iv) various modifications of the original concept.
-
-\paragraph{Training loss}
-The original Variational Autoencoder~\cite{kingma2013auto} (VAE) proposes to replace \eqref{eq:vae-px} by the evidence lower bound (ELBO)
-\begin{equation}
-    \mathcal{L}_{\text{VAE}} (\vec{\theta}, \vec{\phi}) = - \mathbb{E}_{q_{\vec{\phi}}(\vec{z}|\vec{x})} \left[ \log p_{\vec{\theta}}(\vec{x}|\vec{z}) \right] + D_{KL} \left( q_{\vec{\phi}}(\vec{z}|\vec{x}) || p(\vec{z}) \right),
-\label{eq:vae_loss}
-\end{equation}
-which combines reconstruction error with regularization term is form of the Kullback-Leibler divergence (KLD) between the encoder distribution and the prior. Models based on~\eqref{eq:vae_loss} will be referred to as the VAE family.
-
-Asymmetry of the KL divergence motivated search for a more accurate metric. Ref.~\cite{tolstikhin2017wasserstein} proposes to replace KL by a Wasserstein divergence, yielding training loss function in the form:
-\begin{equation}
-    \mathcal{L}_{\text{WAE}} (\vec{\theta}, \vec{\phi}) = - \mathbb{E}_{q_{\vec{\phi}}} \left[ \log p_{\vec{\theta}}(\vec{x}|\vec{z}) \right] + \lambda D \left( q_{\vec{\phi}}(\vec{z}|\vec{x}) || p(\vec{z}) \right),
-\label{eq:wae_loss}
-\end{equation}
-where $\lambda >0$  is a scalar hyperparameter, and $D$  is an arbitrary divergence. The most commonly used divergence is the kernelized maximum-mean-discrepancy (MMD) with kernel  $k$, which was reported to perform well in matching high dimensional distributions~\cite{zhao2017infovae}. Models based on~\eqref{eq:wae_loss} will be referred to as the WAE  family.
-
-An alternative choice of the divergence $D$ in~\eqref{eq:wae_loss} proposed in~\cite{tolstikhin2017wasserstein} is the adversarial loss, which in combination with the Gaussian decoder coincides with the adversarial autoencoder~\cite{makhzani2015adversarial}. This divergence introduces a third network $d_{\vec{\psi}}(\vec{z}):\mathcal{Z} \rightarrow \left[ 0,1 \right]$,  called discriminator, trained to distinguish between samples from the prior $p(\vec{z})$ and samples $x$ projected by the encoder $q(z|x)$. Every step of optimization separately updates the autoencoder and discriminator parts to minimize the loss functions
-\begin{align}
-\label{eq:aae_loss}
-\mathcal{L}_{\text{AE}}(\vec{\theta}, \vec{\phi}) & = - \mathbb{E}_{q_{\vec{\phi}}(\vec{z}|\vec{x})} \left[ \log p_{\vec{\theta}}(\vec{x}|\vec{z}) \right] - \lambda \log d_{\vec{\psi}}(\vec{z}^q), \\
-\mathcal{L}_{\text{D}}(\vec{\psi}) & = \log d_{\vec{\psi}}(\vec{z}^p) + \log \left(1-d_{\vec{\psi}}(\vec{z}^q)\right),
-\end{align}
-respectively, where $\vec{z}^p \sim p(\vec{z})$, $\vec{z}^q \sim q_{\vec{\phi}}(\vec{z}|\vec{x})$. Models trained with loss function~(\ref{eq:aae_loss}) will be denoted as AAE.
-
-\paragraph{Prior model}
-A common criticism of the VAE model is its use of the standard Gaussian prior $p(z),$ which stimulates the distribution $q(z|x)p(x)$ to have a single mode, and therefore it is hard to fit data with a multi-modal latent distribution. Ref.~\cite{tomczak2018vae} proposes a learnable multimodal \emph{Vamp} prior realized as a mixture of $K$ independent Gaussian components. Vamp prior is compatible with AAE and WAE models since it does not have an analytical expression of KLD in~\eqref{eq:vae_loss}. The mean values of components of the mixture are learned together with the parameters of the autoencoder. In the model selection below, the Vamp prior is considered as a binary hyperparameter with an additional parameter, $K,$ specifying the number of components.
-
-\paragraph{Anomaly Score}
-The likelihood function \eqref{eq:vae-px} also constitutes the ideal anomaly score. Some training losses such as ELBO \eqref{eq:vae_loss} were designed as approximations of the likelihood and can thus be used as anomaly scores. However, this interpretation is not so clear for other  training losses, i.e. \eqref{eq:wae_loss}, \eqref{eq:aae_loss}, hence their authors propose anomaly scores as part of the method. Nevertheless, many scores are interchangeable, giving rise to another degree of freedom (hyperparameter) for the use of autoencoders in anomaly detection. A common score is based on the first term in the loss i.e. a Monte Carlo estimate of the expectation of conditional log-likelihood over the encoder, yielding \begin{align}
-s_{\text{rs}}(\vec{x}) = & - \frac{1}{L}\sum_{l=1}^L \log p_{\vec{\theta}}(\vec{x}| \vec{z_l}),   \vec{z}_l \sim q_{\vec{\phi}}(\vec{z}|\vec{x}). \label{eq:score_sample}
-\end{align}
-This score, called sampled reconstruction error (abbreviated as rs), was shown in~\cite{xu2018unsupervised} to be more accurate than evaluating~\eqref{eq:vae-px} by sampling $z$ from the prior $p(\vec{z})$. Further simplification is based on replacing samples from the encoder  by its mean, yielding the common reconstruction error score (abbreviated as rm)
-\begin{align}
-s_{\text{rm}}(\vec{x}) = & - \log p_{\vec{\theta}}(\vec{x}| \vec{\mu}_{\vec{\phi}}(\vec{x})) \label{eq:score_mean}
-\end{align}
-The usage of~\eqref{eq:score_mean} is justified by the assumption that taking the mean at the encoder should approximate~\eqref{eq:score_sample} while having lower computational demands. For adversarial autoencoders, these simplifications can be combined with the discriminator score~\cite{schlegl2017unsupervised, zenatiEfficientGANBasedAnomaly2018},
-\begin{equation}
-    s_{\text{a}}(\vec{x}) = \alpha s_{\text{rm}}(\vec{x}) + (1-\alpha) d_{\vec{\psi}}(\vec{\mu}_{\vec{\phi}}(\vec{x})), \alpha \in \left[ 0, 1 \right].
-\label{eq:aae_score}
-\end{equation}
-
-The reconstruction error-based anomaly scores were criticized in~\cite{pidhorskyi2018generative}  for not capturing the true data density $p(\vec{x}).$ The proposed replacement is based on the orthogonal decomposition of the data into $x=x^\bot +x^{\parallel} $ where the $x^\parallel$  lies in the tangent space of to the manifold defined by the decoder. This allows to decompose the marginal likelihood into a product of two orthogonal parts
-\begin{equation}
-    p(\vec{x}) \approx p(\vec{x}^{||})p(\vec{x}^{\perp}),
-\label{eq:jacodeco}
-\end{equation}
-where $p(\vec{x}^\bot)$ is the reconstruction error, and $p(\vec{x}^\parallel)$ is obtained by transformation of variables~\eqref{eq:rv_transformation}. This score is abbreviated as \textit{jc} in the following text. The calculation of~\eqref{eq:jacodeco} is expensive, as it needs to compute the singular value decomposition of the Jacobian. For implementation details, see~\cite{pidhorskyi2018generative} or~\cite{vsmidl2019anomaly}.
 
 \paragraph{Other models and techniques}
  A plethora of models based on probabilistic autoencoders and specialized for anomaly detection was introduced in recent years, such as~\cite{zong2018deep, pereira2018unsupervised, xu2018unsupervised, principi2017acoustic, chen2018unsupervised, chalapathyGroupAnomalyDetection2018}. Below, we list models included in the comparison and not described above.
