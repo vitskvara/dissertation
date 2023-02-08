@@ -1,0 +1,58 @@
+\chapter{Mathematical formulations}
+
+\section{Multivariate normal distribution}
+
+A random vector $\vc{x} \in \mathbb{R}^d$ follows the multivariate normal (Gaussian) distribution with mean $\vc{\mu}\in\mathbb{R}^{d}$, symmetric and positive--definite covariance matrix $\Sigma\in\mathbb{R}^{d\times d}$, if its probability density is 
+\begin{equation}
+p(\vc{x}|\vc{\mu},\Sigma)=\mathcal{N}(\vc{x}|\vc{\mu},\Sigma)=(2\pi)^{-\frac{d}{2}}|\Sigma|^{-\frac{1}{2}}\exp\left(-\frac{1}{2}(\vc{x}-\vc{\mu})^{T}\Sigma^{-1}(\vc{x}-\vc{\mu})\right),\label{eq:gaussprob}
+\end{equation}
+where $|\Sigma|$ is the determinant of the covariance matrix. Sometimes, instead of covariance the precision matrix is used $\Lambda=\Sigma^{-1}$ which makes some manipulations easier. Some moments of interest are
+\begin{equation}
+\mathbb{E}\left[\vc{x}\right]=\vc{\mu},
+\end{equation}
+\begin{equation}
+\mathbb{E}\left[\vc{x}\vc{x}^{T}\right]=\Sigma+\vc{\mu}\vc{\mu}^{T},
+\end{equation}
+\begin{equation}
+\mathbb{E}\left[\vc{x}^{T}\vc{x}\right]=\vc{\mu}^{T}\vc{\mu}+\text{Tr}(\Sigma),
+\end{equation}
+where $\text{Tr}(.)$ is the trace operator.
+
+
+\section{The Kullback-Leibler divergence}
+
+The Kullback-Leibler (KL) divergence is a measure of distance of two probability distributions. For two continuous probability distributions with probability densities $p(\vc{x})$ and $q(\vc{x})$ defined on the same probability space we define it as
+\begin{equation}
+D_{\text{KL}}\left(p(\vc{x})||q(\vc{x})\right)=\int_{\mathcal{X}}p(\vc{x})\ln\frac{p(\vc{x})}{q(\vc{x})}d\vc{x}.\label{eq:kld}
+\end{equation}
+It is an asymmetric measure, therefore it is not a proper metric. These relations holds
+\begin{equation}
+p(\vc{x})=q(\vc{x})\text{ almost everywhere }\Longleftrightarrow D_{\text{KL}}\left(p(\vc{x})||q(\vc{x})\right)=0,
+\end{equation}
+\begin{equation}
+D_{\text{KL}}\left(p(\vc{x})||q(\vc{x})\right)\geq0,
+\end{equation}
+\begin{equation}
+\text{\text{generally} \ensuremath{D_{\text{KL}}\left(p(\vc{x})||q(\vc{x})\right)}\ensuremath{\ensuremath{\neq D_{\text{KL}}\left(q(\vc{x})||p(\vc{x})\right)}}.}
+\end{equation}
+
+
+\section{Kullback--Leibler divergence of two normal distributions}
+For the case of two multivariate normal distributions $p_{0}(\vc{x})=\mathcal{N}(\vc{x}|\vc{\mu}_{0},\Sigma_{0})$ and $p_{1}(\vc{x})=\mathcal{N}(\vc{x}|\vc{\mu}_{1},\Sigma_{1})$ where $\vc{x} \in \mathbb{R}^d$ the KL divergence is
+\begin{eqnarray}
+D_{\text{KL}}(p_{0}(\vc{x})||p_{1}(\vc{x})) & = & \mathbb{E}_{p_{0}}\left[\ln p_{0}(\vc{x})-\ln p_{1}(\vc{x})\right]\nonumber \\
+ & = & \frac{1}{2}\mathbb{E}_{p_{0}}\left[-\ln|\Sigma_{0}|-(\vc{x}-\vc{\mu}_{0})^{T}\Sigma_{0}^{-1}(\vc{x}-\vc{\mu}_{0})+\ln|\Sigma_{1}|\right]+\nonumber \\
+ & & \frac{1}{2}\mathbb{E}_{p_{0}}\left[ (\vc{x}-\vc{\mu}_{1})^{T}\Sigma_{1}^{-1}(\vc{x}-\vc{\mu}_{1}) \right] \nonumber\\
+ & = & \frac{1}{2}\ln\frac{|\Sigma_{1}|}{|\Sigma_{0}|}+\frac{1}{2}\mathbb{E}_{p_{0}}\left[-\text{Tr}\left(\Sigma_{0}^{-1}(\vc{x}-\vc{\mu}_{0})(\vc{x}-\vc{\mu_{0}})^{T}\right)\right]+\nonumber \\
+ &  & \frac{1}{2}\mathbb{E}_{p_{0}}\left[\text{Tr}\left(\Sigma_{1}^{-1}(\vc{x}-\vc{\mu}_{1})(\vc{x}-\vc{\mu}_{1})^{T}\right)\right]\nonumber \\
+ & = & \frac{1}{2}\ln\frac{|\Sigma_{1}|}{|\Sigma_{0}|}-\frac{1}{2}\text{Tr}\left(\Sigma_{0}^{-1}\mathbb{E}_{p_{0}}\left[(\vc{x}-\vc{\mu}_{0})(\vc{x}-\vc{\mu}_{0})^{T}\right]\right)+\nonumber \\
+ &  & \frac{1}{2}\text{Tr}\left(\mathbb{E}_{p_{0}}\left[\Sigma_{1}^{-1}(\vc{x}\vc{x}^{T}-2\vc{x}\vc{\mu}_{1}^{T}+\vc{\mu}_{1}\vc{\mu}_{1}^{T})\right]\right)\nonumber \\
+ & = & \frac{1}{2}\ln\frac{|\Sigma_{1}|}{|\Sigma_{0}|}-\frac{1}{2}\text{Tr}\left(\Sigma_{0}^{-1}\Sigma_{0}\right)+\frac{1}{2}\text{Tr}\left(\Sigma_{1}^{-1}(\Sigma_{0}+\vc{\mu}_{0}\vc{\mu}_{0}^{T}-2\vc{\mu}_{0}\vc{\mu}_{1}^{T}-\vc{\mu}_{1}\vc{\mu}_{1}^{T})\right)\nonumber \\
+ & = & \frac{1}{2}\ln\frac{|\Sigma_{1}|}{|\Sigma_{0}|}-\frac{1}{2}d+\frac{1}{2}\text{Tr}\left(\Sigma_{1}^{-1}\Sigma_{0}\right)+\frac{1}{2}\text{Tr}\left(\Sigma_{1}^{-1}(\vc{\mu}_{0}-\vc{\mu}_{1})^{T}(\vc{\mu}_{0}-\vc{\mu}_{1})\right)\nonumber \\
+ & = & \frac{1}{2}\left(\ln\frac{|\Sigma_{1}|}{|\Sigma_{0}|}-d+\text{Tr}\left(\Sigma_{1}^{-1}\Sigma_{0}\right)+(\vc{\mu}_{0}-\vc{\mu}_{1})^{T}\Sigma_{1}^{-1}(\vc{\mu}_{0}-\vc{\mu}_{1})\right).
+\end{eqnarray}
+where we have used the common trick using the trace of a scalar, the relation $\text{Tr}(ABC)=\text{Tr}(BCA)=\text{Tr}(CAB)$ and~the linearity of the trace operator. For us, a special case is of high interest -- one where we have a normal distribution with diagonal covariance and a standard normal distribution, that is $p_{0}(\vc{x})=\mathcal{N}(\vc{x}|\vc{\mu}),\text{diag}(\ensuremath{\vc{\sigma}}^{2}),\vc{\sigma}^{2}\in\mathbb{R}^{d}$
+and $p_{1}(\vc{x})=\mathcal{N}(\vc{x}|0,\vc{I})$. In that case
+\begin{equation}
+D_{\text{KL}}(p_{0}(\vc{x})||\mathcal{N}(\vc{x}|0,1))=\frac{1}{2}\left(\ln\frac{1}{\prod_{i=1}^{d}\vc{\sigma}_{i}^{2}}-d+\sum_{i=1}^{d}\vc{\sigma}_{i}^{2}+\vc{\mu}^{T}\vc{\mu})\right)=\frac{1}{2}\sum_{i=1}^{d}\vc{\sigma}_{i}^{2}-1-\ln\vc{\sigma}_{i}^{2}+\vc{\mu}_{i}^{2}.\label{eq:kl_standard}
+\end{equation}
