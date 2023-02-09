@@ -1,5 +1,5 @@
 \chapter{Generative models in anomaly detection} \label{sec:chapter_survey}
-Suppose that a given problem (e.g. classification) is requires us to model some directly observable data, denoted by $\vc{x}$, which is somehow connected with a second variable $\vc{z}$, which might not be directly observable, or we only have a finite set of observed pairs $(\vc{x},\vc{z})$. When $\vc{z}$ is discrete, it has the interpretation of a \textit{label} which denotes an affiliation with one of a finite number of classes (in that case, it is often denoted by $\vc{y}$ instead). When it is continuous, we use the term \textit{hidden} or \textit{latent} variable, see Sec.~\ref{sec:probabilistic_models}, where it was already discussed. In that case, we assume that there is some mechanism that connects $\vc{x}$ and $\vc{z}$ that can be modeled e.g. by a decoder $g_{\vc{\theta}}(z)$ from Sec.~\ref{sec:reconstruction_models}. The term \textbf{generative model} denotes an approach when the joint probability distribution of $p(\vc{x},\vc{z})$ is modeled, as opposed to a \textbf{discriminative model}, which tries to estimate $p(\vc{z} \vert \vc{x})$. An example of a discriminative model is a logistic classifier, which in fact estimates $p(\vc{z} \vert \vc{x})$ as a function $f:\mathcal{X} \rightarrow \mathcal{Z}$ where $\mathcal{Z} = [0,1]$, i.e. it produces a guess for binary label based on input data. While it seems that a generative model is more flexible, as it can provide  $p(\vc{z} \vert \vc{x}) = p(\vc{x},\vc{z})/p(\vc{x})$, it is usually subpar in classification tasks~\cite{ng2001discriminative,bishop2007generative}. The advantage of using a generative model is that it can generate artificial samples $\vc{x}$, and most importantly, it can be trained in an unsupervised manner (without observed labels/latent variables) and provide an estimate of the data distribution $p(x)$. This is the reason generative models are interesting for anomaly detection, together with the advent of deep generative models that can model large quantities of high-dimensional data.
+Suppose that a given problem (e.g. classification) is requires us to model some directly observable data, denoted by $\vc{x}$, which is somehow connected with a second variable $\vc{z}$, which might not be directly observable, or we only have a finite set of observed pairs $(\vc{x},\vc{z})$. When $\vc{z}$ is discrete, it has the interpretation of a \textbf{label} which denotes an affiliation with one of a finite number of classes (in that case, it is often denoted by $\vc{y}$ instead). When it is continuous, we use the term \textbf{hidden} or \textbf{latent} variable, see Sec.~\ref{sec:probabilistic_models}, where it was already discussed. In that case, we assume that there is some mechanism that connects $\vc{x}$ and $\vc{z}$ that can be modeled e.g. by a decoder $g_{\vc{\theta}}(z)$ from Sec.~\ref{sec:reconstruction_models}. The term \textbf{generative model} denotes an approach when the joint probability distribution of $p(\vc{x},\vc{z})$ is modeled, as opposed to a \textbf{discriminative model}, which tries to estimate $p(\vc{z} \vert \vc{x})$. An example of a discriminative model is a logistic classifier, which in fact estimates $p(\vc{z} \vert \vc{x})$ as a function $f:\mathcal{X} \rightarrow \mathcal{Z}$ where $\mathcal{Z} = [0,1]$, i.e. it produces a guess for binary label based on input data. While it seems that a generative model is more flexible, as it can provide  $p(\vc{z} \vert \vc{x}) = p(\vc{x},\vc{z})/p(\vc{x})$, it is usually subpar in classification tasks~\cite{ng2001discriminative,bishop2007generative}. The advantage of using a generative model is that it can generate artificial samples $\vc{x}$, and most importantly, it can be trained in an unsupervised manner (without observed labels/latent variables) and provide an estimate of the data distribution $p(x)$. This is the reason generative models are interesting for anomaly detection, together with the advent of deep generative models that can model large quantities of high-dimensional data.
 
 Some generative models were actually already introduced in the previous chapter in Sec.~\ref{sec:probabilistic_models}, such as the Gaussian Mixture Model, autoregressive models or various energy based models. Recently, very large deep generative models with billions of parameters were introduced. They are pushing the boundaries in many domains and produce human-like outputs, such as the BigGAN~\cite{brock2018large} for images, GPT-3~\cite{brown2020language} for text, the Jukebox model~\cite{dhariwal2020jukebox} for music generation, or diffusion models~\cite{sohl2015deep} for text-to-image translation~\cite{saharia2022photorealistic}. In the previous chapter, we have already mentioned the three main types of deep generative models that will be discussed in greater depth in this chapter -- the \textbf{Generative Adversarial Network} (GAN)~\cite{goodfellow2014gan}, the \textbf{Variational Autoencoder} (VAE)~\cite{kingma2013vae} and various \textbf{flow models}~\cite{dinh2014nice}. They present the basic paradigms on which most of novel anomaly detectors are built~\cite{an2015variational,xu2018unsupervised,wang2018generative,perera2019ocgan,yamaguchi2019adaflow,schmidtNormalizingFlowsNovelty2019}. 
 
@@ -20,8 +20,7 @@ true data distribution.}
 
 Suppose that we have samples from the true data distribution $p(\vc{x}),\vc{x}\in\mathcal{X}$, which we are trying to imitate. We don't know the true form of $p(\vc{x})$, since it is usually high-dimensional and not representable directly by a function, but instead it is available to us through a finite set of samples that comprise the training dataset $X = \lbrace \vc{x}_1, \vc{x}_2, \ldots, \vc{x}_n \rbrace \subset \mathcal{X}$. The goal is to build a proxy for $p(\vc{x})$ so that we can draw new, yet unseen samples from it. The GAN tackles this problem by a model with two principal parts. First is the \textbf{generator}, which is a neural network that represents a mapping $g_{\vc{\theta}}(\vc{z}):\mathcal{Z}\rightarrow\mathcal{X}$, where $\vc{\theta}$ are its weights, and $\mathcal{Z}$ is the latent space. Note that we use the same notation for the generator that was already used for a decoder in the AE model -- this is because they fulfill the same role in both models. We will denote a generated sample by $\tilde{\vc{x}} = g_{\vc{\theta}}(\vc{z})$. Since the generator as we have defined it so far is deterministic and we need to cover a random distribution, the inputs to the generator come from a \textbf{prior} noise distribution $p(\vc{z})$. The prior is usually chosen such that it it easy to generate samples from it, e.g. $p(\vc{z}) = \mathcal{N}(0,\vc{I})$, in which case $\mathcal{Z} = \mathbb{R}^h$ with $h$ being the dimension of the latent space. Then, the task is to train the generator in such a fashion that it learns the potentially highly non--linear mapping from $p(\vc{z})$ to $p(\vc{x})$. This is stimulated by the adversary of the generator -- the \textbf{discriminator}. We define it as a neural network with weights $\vc{\theta}$, i.e. a mapping $d_{\vc{\varphi}}(\vc{x}):\mathcal{X}\rightarrow\left[0,1\right]$. The output of the discriminator has the interpretation of the probability that its input comes from $p(\vc{x})$ rather than being generated by the generator, in other words, true samples $\vc{x}$ should be given higher value than the generated samples $\tilde{\vc{x}}$.
 
-Both parts of a GAN are trained (their weights are updated) in tandem, so each of them iteratively improves in its task. The discriminator is trained both with true and generated samples to maximize the probability of assigning a correct label to them, while the generator is minimizing the probability of the discriminator
-recognizing the generated sample. This can be written down as a two player minimax~\cite{maschler2020game} game 
+Both parts of a GAN are trained (their weights are updated) in tandem, so each of them iteratively improves in its task. The discriminator is trained both with true and generated samples to maximize the probability of assigning the correct label to them, while the generator is minimizing the probability of the discriminator recognizing the generated sample. This can be written down as a two player minimax~\cite{maschler2020game} game 
 \begin{equation} \label{eq:gan_obj}
 \min_{\vc{\theta}}\max_{\vc{\varphi}}\mathbb{E}_{ \vc{x} \sim p(\vc{x})}\left[\ln d_{\vc{\varphi}}(\vc{x})\right]+\mathbb{E}_{\vc{z}\sim p(\vc{z})}\left[\ln\left(1-d_{\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))\right)\right].
 \end{equation}
@@ -40,11 +39,11 @@ Note that we explicitly remove the dependency of the loss functions on the weigh
 \label{alg:gan_train}
 \end{algorithm}
 
-Achieving convergence such that the generated samples $\tilde{\vc{x}}$ resemble the training data might be difficult and require multiple random initializations of the model weights. Details on stable training of GANs can be found e.g. in~\cite{gui2021review}. A phenomenon called \textit{mode collapse} has been described~\cite{goodfellow2016nips}, which happens when $p(\vc{x})$ is multimodal, but the generator distribution collapses to a single mode. A generator that has collapsed to a single mode of a MNIST dataset will produce only a single digit, e.g. "1", no matter where the code is sampled from. To mitigate this issue, several practices have been proposed~\cite{salimans2016fmgan,hong2019generative}. One of them is the use of an enhanced generator loss
+Achieving convergence such that the generated samples $\tilde{\vc{x}}$ resemble the training data might be difficult and require multiple random initializations of the model weights. Details on stable training of GANs can be found e.g. in~\cite{gui2021review}. A phenomenon called \textbf{mode collapse} has been described~\cite{goodfellow2016nips}, which happens when $p(\vc{x})$ is multimodal, but the generator distribution collapses to a single mode. A generator that has collapsed to a single mode of a MNIST dataset will produce only a single digit, e.g. "1", no matter where the code is sampled from. To mitigate this issue, several practices have been proposed~\cite{salimans2016fmgan,hong2019generative}. One of them is the use of an enhanced generator loss
 \begin{equation} \label{eq:fmgan}
 \mathcal{L}_{\text{gfm}}(\vc{z},\vc{x},\vc{\theta})=\alpha\mathcal{L}_{g}(\vc{z},\vc{\theta})+\mathcal{L}_{h}(\vc{z},\vc{x},\vc{\theta}),
 \end{equation}
-where the second term is the so-called \textit{feature-matching} loss
+where the second term is the so-called \textbf{feature-matching} loss
 \begin{equation} \label{eq:fm_loss}
 \mathcal{L}_{fm}(\vc{z},\vc{x},\vc{\theta}) = ||d_{l,\vc{\varphi}}(\vc{x})-d_{l,\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))||_{2}^{2}
 \end{equation}
@@ -65,20 +64,20 @@ GAN combined with an autoencoder and employing an adversarial data augmentation 
 The use of GAN with an encoder~\cite{donahue2016adversarial} or an autoencoder with a discriminator~\cite{leveau2017adversarial} for anomaly detection is often and somehow blurs the line between GAN and VAE-based models, but we believe that presenting both concepts separately is useful. True GAN-like models for anomaly detection are however far less prevalent than models that use some autoencoding structure, which will be the focus of the next section. Experimental comparison of both approaches is presented in Chapter~\ref{sec:chapter_comparison}.
 
 \section{VAE-based models} \label{sec:vae_models}
-The Variational Autoencoder (VAE) is a generative model that has enjoyed a great success in a number of fields since its introduction in~\cite{kingma2013vae}. Its basic architecture~\cite{kingma2019introduction} is very similar to that of an AE model described in Sec.~\ref{sec:reconstruction_models}, but that is where the similarities end, as VAE is more of a probabilistic anomaly detector, since it models the probability distribution of the normal data. Unlike in AE, where the encoding to latent space $\mathcal{Z}$ is not constrained from taking any shape or form as far as the learning objective is minimized, in VAE a desired distribution of the encodings is explicitly prescribed in the form of a prior distribution $p(\vc{z})$. If the network is trained properly and the encodings follow the prior, we can feed samples from $p(\vc{z})$ to the decoder and expect to obtain random samples in the $\mathcal{X}$ space that will resemble those from the training dataset. This is the simple principle of how VAE works --- more details will be given in the following text.
+The \textbf{Variational Autoencoder} (VAE) is a generative model that has enjoyed a great success in a number of fields since its introduction in~\cite{kingma2013vae}. Its basic architecture~\cite{kingma2019introduction} is very similar to that of an AE model described in Sec.~\ref{sec:reconstruction_models}, but that is where the similarities end, as VAE is more of a probabilistic anomaly detector, since it models the probability distribution of the normal data. Unlike in AE, where the encoding to latent space $\mathcal{Z}$ is not constrained from taking any shape or form as far as the learning objective is minimized, in VAE a desired distribution of the encodings is explicitly prescribed in the form of a prior distribution $p(\vc{z})$. If the network is trained properly and the encodings follow the prior, we can feed samples from $p(\vc{z})$ to the decoder and expect to obtain random samples in the $\mathcal{X}$ space that will resemble those from the training dataset. This is the simple principle of how VAE works --- more details will be given in the following text.
 
 The VAE has been mainly used for generation of artificial images such as faces~\cite{rezende2014stochastic} or sentences~\cite{bowman2015generating}, but also for other tasks such as semi--supervised learning~\cite{kingma2014semi}, segmentation~\cite{sohn2015learning}, static image forecasting~\cite{walker2016uncertain} and of course for anomaly detection~\cite{an2015variational,xu2018unsupervised,solch2016variational}. Since its popularity, a multitude of approaches enhancing the original VAE has been published, approaching the paradigm from different angles, with some of the more prominent examples published in~\cite{higgins2017beta,zhao2017infovae,tolstikhin2017wasserstein,makhzani2015adversarial,pu2017adversarial}. In the following text, we will go through the basic theory, its implications for the basic VAE, and through some of the extensions. 
 
 \subsection{Basic VAE} \label{sec:vanilla_vae}
-We will begin by defining the VAE from a probabilistic perspective. In fact, the connection with autoencoders will become apparent only after all the derivations have been carried out. Let us assume that there is a dataset $X$ consisting of i.i.d samples. We want to obtain a tractable estimate of the true data distribution $p(\vc{x})$ in order to be able to sample from it. For that purpose, suppose that there is a hidden random process that generates the data and which involves a latent variable $\vc{z}$. Then, like in the case of the GAN model, we can redirect the sampling from the data space $\mathcal{X}$ to the latent space
-$\mathcal{Z}$, in which it might be easier. Specifically, we want to sample from the latent distribution specified by a density $p(\vc{z})$, then pass this sample to the decoder $g_{\vc{\theta}}(\vc{z})$ which is used to model the parameters of the generative distribution $p_{\theta}(\vc{x}|\vc{z})$ and obtain a sample $\vc{x}$ that will be very similar to the samples coming from the true data distribution $p(\vc{x})$. In other words, we want to maximize the probability of each sample obtained through the generative process
+We will begin by defining the VAE from a probabilistic perspective. Let us assume that there is a dataset $X$ consisting of i.i.d samples. We want to obtain a tractable estimate of the true data distribution $p(\vc{x})$ in order to be able to sample from it. For that purpose, suppose that there is a hidden random process that generates the data and which involves a latent variable $\vc{z}$. Then, like in the case of the GAN model, we can redirect the sampling from the data space $\mathcal{X}$ to the latent space
+$\mathcal{Z}$, in which it might be easier. Specifically, we want to sample from the latent prior distribution specified by a density $p(\vc{z})$, then pass this sample to the generative distribution with density $p_{\vc{\theta}}(\vc{x}|\vc{z})$, where $\vc{\theta}$ are its parameters, and obtain a sample $\vc{x}$ that will be very similar to the samples coming from the true data distribution $p(\vc{x})$. In other words, we want to maximize the probability of each sample obtained through the generative process
 \begin{equation}
 p_{\vc{\theta}}(\vc{x})=\int_{\mathcal{Z}}p_{\vc{\theta}}(\vc{x}|\vc{z})p(\vc{z})d\vc{z}.\label{eq:x_likelihood}
 \end{equation}
-Unfortunately, there are several issues with this. Firstly, we do not know the optimal value of parameters $\vc{\theta}$. Secondly, the integral~(\ref{eq:x_likelihood}) is usually intractable, e.g. in the case where $p_{\vc{\theta}}(\vc{x}|\vc{z})$ is represented by a neural network. Finally, we want to avoid expensive sampling methods such as Monte Carlo Expectation Maximization. A sampling procedure will be used in the end, but we only want to pass such samples $\vc{z}$ to the generative model that will already be very likely under $p_{\vc{\theta}}(\vc{x}|\vc{z})$. To this end, we introduce an encoder distribution $q_{\vc{\phi}}(\vc{z}|\vc{x})$ which is an approximation of the true intractable posterior $p(\vc{z}|\vc{x})$ represented and parametrized by an encoder $e_{\vc{\phi}}(\vc{x})$.
+Unfortunately, there are several issues with this. Firstly, we do not know the optimal value of parameters $\vc{\theta}$. Secondly, the integral~(\ref{eq:x_likelihood}) is usually intractable, e.g. in the case where $p_{\vc{\theta}}(\vc{x}|\vc{z})$ is represented by a neural network. Finally, we want to avoid expensive sampling methods such as Monte Carlo Expectation Maximization~\cite{levine2001implementations}. A sampling procedure is eventually used, but we only want to pass such samples $\vc{z}$ to the generative model that will already be very likely under $p_{\vc{\theta}}(\vc{x}|\vc{z})$. To this end, we introduce a discriminative distribution $q_{\vc{\phi}}(\vc{z}|\vc{x})$ which is an approximation of the true intractable posterior $p(\vc{z}|\vc{x})$, with parameters $\vc{\phi}$.
 
 \subsubsection{The ELBO objective}
-Now, we would like to relate the encoder and decoder distributions together in way that would enable us to optimize the model with respect to $\vc{\phi},\vc{\theta}$. Continuing from~(\ref{eq:x_likelihood}),
+Now, we would like to relate the generative and discriminative distributions together in way that would enable us to optimize the model with respect to $\vc{\phi},\vc{\theta}$. Continuing from~(\ref{eq:x_likelihood}),
 \begin{equation}
 \ln p_{\vc{\theta}}(\vc{x})=\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x})\right]=\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})+\ln p(\vc{z})-\ln p(\vc{z}|\vc{x})\right],
 \end{equation}
@@ -86,221 +85,107 @@ where we have used the Bayes' rule and the fact that $p_{\vc{\theta}}(\vc{x})$ d
 \begin{eqnarray}
 \ln p_{\vc{\vc{\theta}}}(\vc{x})-D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z}|\vc{x})\right) & = & \mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})+\ln p(\vc{z})-\ln q_{\vc{\phi}}(\vc{z}|\vc{x})\right]\label{eq:elbo1}\\
  & = & \mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})\right]-D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z})\right)\label{eq:elbo2}\\
- & = & \mathcal{L}_{\text{VAE}}(\vc{x},\vc{\phi},\vc{\theta})\label{eq:elbo3}
+ & = & - \mathcal{L}_{\text{VAE}}(\vc{x},\vc{\phi},\vc{\theta})\label{eq:elbo3}
 \end{eqnarray}
-This is a variational lower bound $\mathcal{L}_{\text{VAE}}(\vc{x},\vc{\phi},\vc{\theta})$ (sometimes called ELBO -- evidence lower boundary) through which we can optimize the marginal likelihood $p_{\vc{\theta}}(\vc{x})$. This is due to the fact that the analytically unsolvable term $D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z}|x)\right)$ is always nonnegative, thus by maximization of $\mathcal{L}_{\text{VAE}}(\vc{x},\vc{\phi},\vc{\theta})$ we also maximize $p_{\vc{\theta}}(\vc{x})$.
+This is the variational lower bound of the VAE model, sometimes called \textbf{ELBO} (evidence lower boundary) through which we can optimize the marginal likelihood $p_{\vc{\theta}}(\vc{x})$. This is due to the fact that the analytically unsolvable term $D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z}|x)\right)$ is always nonnegative, thus by maximization of ELBO (minimization of $\mathcal{L}_{\text{VAE}}(\vc{x},\vc{\phi},\vc{\theta})$) we also maximize $p_{\vc{\theta}}(\vc{x})$.
 
-By looking at the individual parts of Eq.~(\ref{eq:elbo2}), we can see that by maximizing the ELBO, we simultaneously maximize the likelihood $p_{\vc{\theta}}(\vc{x}|\vc{z})$ and minimize the distance between $q_{\vc{\phi}}(\vc{z}|\vc{x})$ and $p(\vc{z})$. While looking at the left--hand side of \eqref{eq:elbo1} we can see that at the same time, the marginal likelihood $p_{\vc{\theta}}(\vc{x})$ is maximized and the error term $D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z}|\vc{x})\right)$ is minimized, forcing the shape of $q_{\vc{\phi}}(\vc{z}|\vc{x})$ to the true posterior. Also, \eqref{eq:elbo2} captures the autoencoding nature of the VAE model. We pass $\vc{x}$ to the encoder, sample latent encoding $\vc{z} \sim q_{\vc{\phi}}(\vc{z}|\vc{x})$ and pass this back to decoder to obtain a reconstructed sample $\vc{x}' \sim p_{\vc{\theta}}(\vc{x}|\vc{z})$.
+By looking at the individual parts of Eq.~(\ref{eq:elbo2}), we can see that by maximizing the ELBO, we simultaneously maximize the likelihood $p_{\vc{\theta}}(\vc{x}|\vc{z})$ and minimize the distance between $q_{\vc{\phi}}(\vc{z}|\vc{x})$ and $p(\vc{z})$. While looking at the left--hand side of \eqref{eq:elbo1} we can see that at the same time, the marginal likelihood $p_{\vc{\theta}}(\vc{x})$ is maximized and the error term $D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z}|\vc{x})\right)$ is minimized, forcing the shape of $q_{\vc{\phi}}(\vc{z}|\vc{x})$ to the true posterior. Also, \eqref{eq:elbo2} captures the autoencoding nature of the VAE model. We pass $\vc{x}$ to the discriminative distribution, which acts as an encoder, sample latent encoding $\vc{z} \sim q_{\vc{\phi}}(\vc{z}|\vc{x})$ and pass this back to generative distribution, which acts as a decoder, to obtain a reconstructed sample $\vc{x}' \sim p_{\vc{\theta}}(\vc{x}|\vc{z})$. From this point on, we will use the term encoder and decoder to describe the discriminative and generative distributions.
 
 \begin{figure}
 \centering{}\include{data/chapter_survey/vae}
-\caption{A schematic of a Variational Autoencoder consisting of fully connected layers with a Gaussian encoder distribution $q_{\vc{\phi}}(\vc{z}|\vc{x})$ with mean $\vc{\mu}_{\vc{\phi}}$ and variance $\vc{\sigma}^2_{\vc{\phi}}$, which are extracted from the last layer of the encoder. They are used to sample an encoding $\vc{z}$ which is then passed to the decoder, where the reconstruction $\vc{x}'$ is sampled from the decoder distribution $p_{\vc{\theta}}(\vc{x}|\vc{z})$.}
+\caption{A schematic of a Variational Autoencoder consisting of fully connected layers with a Gaussian encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$ with mean $\vc{\mu}_{\vc{\phi}}$ and variance $\vc{\sigma}^2_{\vc{\phi}}$, which are extracted from the last layer of the encoder. They are used to sample an encoding $\vc{z}$ through the reparametrization trick with a noise variable $\varepsilon$. The encoding is then passed forward and the reconstruction $\vc{x}'$ is sampled from the decoder $p_{\vc{\theta}}(\vc{x}|\vc{z})$.}
 \label{fig:vae}
 \end{figure}
 
-\subsubsection{The reparametrization trick}
-To be able to optimize~\eqref{eq:elbo3}, we must make some additional assumptions. First, a choice of the prior $p(\vc{z})$ must be made. Any continuous distribution is theoretically viable, but the usual choice of the prior is the $h$-dimensional unit normal distribution $p(\vc{z})=\mathcal{N}(\vc{z}|0,\textbf{I})$. In tandem with this, the encoder distribution should come from the same family, i.e. it is usually assumed to be a Gaussian with diagonal covariance matrix $q_{\vc{\phi}}(\vc{z}|x)=\mathcal{N}\left(\vc{z}|\mu_{\vc{\phi}}(x), \text{diag}(\sigma^2_{\vc{\phi}}(x))\right), \mu_{\vc{\phi}}, \sigma^2_{\vc{\phi}}:\mathbb{R}^d \rightarrow \mathbb{R}^h$, where the mean and variance estimates are computed by neural networks. These choices lead to analytically solvable expression for the KL divergence in~\eqref{eq:elbo2}, see~\eqref{eq:kl_standard} in the Appendix
-\begin{equation}
+\subsubsection{Vanilla VAE}
+To be able to optimize~\eqref{eq:elbo3}, we must make some additional assumptions about the model. Here, we will describe those that were made by the authors of the original "vanilla" VAE model, but note that different choices are also possible. First, the \textbf{prior} $p(\vc{z})$ is chosen to be an $h$-dimensional unit normal distribution $p(\vc{z})=\mathcal{N}(\vc{z}|0,\textbf{I})$. The encoded training data are expected to follow this distribution after optimization and it is used for generation of new samples. In tandem with this, the encoder is assumed to model a normal distribution with diagonal covariance matrix $q_{\vc{\phi}}(\vc{z}|\vc{x})=\mathcal{N}\left(\vc{z}|\mu_{\vc{\phi}}(x), \text{diag}(\vc{\sigma}^2_{\vc{\phi}}(x))\right), \vc{\mu}_{\vc{\phi}}, \vc{\sigma}^2_{\vc{\phi}}:\mathbb{R}^d \rightarrow \mathbb{R}^h$, where the mean and variance estimates are computed by neural networks with shared weights $\vc{\phi}$. These choices lead to an analytically solvable expression for the KL divergence in~\eqref{eq:elbo2}, see~\eqref{eq:kl_standard} in the Appendix
+\begin{equation} \label{eq:vae_kld}
 D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z}) \right) = \frac{1}{2}\sum_{i=1}^{d} 1-\sigma_{\vc{\phi},i}^{2}(\vc{x})+\ln \sigma_{\vc{\phi},i}^{2}(\vc{x}) -\mu_{\vc{\phi},i}^{2}(\vc{x}).
 \end{equation}
 
-
-Second, the optimization of the ELBO~\eqref{eq:elbo3} requires sampling from $q_{\vc{\phi}}(\vc{z}|\vc{x})$. This is however problematic for optimization of the VAE weights by backpropagation, because sampling is not a differentiable operation. Therefore, a reparametrization trick was introduced in~\cite{kingma2013vae}. Instead of directly drawing samples $z\sim\mathcal{N}\left(\vc{z}|\mu_{\vc{\phi}}(\vc{x}),\text{diag}(\sigma^2_{\vc{\phi}}(\vc{x}))\right)$, we first take a sample from a noise distribution $\varepsilon\sim p(\varepsilon)=\mathcal{N}(0,\mathbf{I})$ and then compute the encoding as $\vc{z}=\mu_{\vc{\phi}}(\vc{x})+\sigma^2_{\vc{\phi}}(\vc{x}) \odot \varepsilon$, where $\odot$ denotes element-wise multiplication. This changes the ELBO to
-\begin{equation}
-\mathcal{L}_{\text{VAE}}(\vc{x},\vc{\phi},\vc{\theta})=\mathbb{E}_{\varepsilon\sim\mathcal{N}(0,\textbf{I})}\left[\ln p_{\vc{\theta}}(\vc{x}| \vc{z} )\right]-D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z})\right).\label{eq:vae_loss}
+Second, the optimization of the ELBO~\eqref{eq:elbo3} requires sampling from the encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$. This is however problematic for optimization by backpropagation, because sampling is not a differentiable operation. Therefore, a \textbf{reparametrization trick} was introduced in~\cite{kingma2013vae}. Instead of directly drawing samples $z \sim q_{\vc{\phi}}(\vc{z}|\vc{x})$, we first take a sample from an $h$-dimensional noise distribution $\varepsilon\sim p(\varepsilon)=\mathcal{N}(0,\mathbf{I})$ and then compute the encoding as $\vc{z}=\vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}^2_{\vc{\phi}}(\vc{x}) \odot \varepsilon$, where $\odot$ denotes element-wise multiplication. This changes the first term of the ELBO, which is called the \textbf{log-likelihood} to
+\begin{equation} \label{eq:vae_reparam}
+\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})\right] = \mathbb{E}_{\varepsilon\sim\mathcal{N}(0,\textbf{I})}\left[\ln p_{\vc{\theta}}(\vc{x}| \vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}^2_{\vc{\phi}}(\vc{x}) \odot \varepsilon )\right].
 \end{equation}
 
-Finally, the decoder distribution is also normal 
- The ELBO for a single datapoint then takes the form
-\begin{eqnarray*}
-\mathcal{L}(x,\vc{\phi},\vc{\theta};\varepsilon) & = & \frac{1}{M}\sum_{m=1}^{M}\ln p_{\vc{\theta}}(x|z^{m}(\varepsilon))+\frac{1}{2}\sum_{i=1}^{d}\left(1-\left(\sigma_{\vc{\phi}}^{2}(x)\right)_{i}+\ln\left(\sigma_{\vc{\phi}}^{2}(x)\right)_{i}-\left(\mu_{\vc{\phi}}^{2}(x)\right)_{i}\right)
-\end{eqnarray*}
-\begin{equation}
-\text{where }z^{m}(\epsilon)=\mu_{\vc{\phi}}(x)+\sigma_{\vc{\phi}}(x)\odot\varepsilon,\varepsilon\sim\mathcal{N}(0,I).\label{eq:vae_elbo1}
+Finally, the decoder $p_{\vc{\theta}}(\vc{x}|\vc{z})$ is also assumed to model a normal distribution\\ $\mathcal{N}(\vc{x}|\vc{\mu}_{\vc{\theta}}(\vc{z}),\sigma I), \vc{\mu}_{\vc{\theta}} :\mathbb{R}^h \rightarrow \mathbb{R}^d, \sigma\in\mathbb{R}$, although a Bernoulli distribution is sometimes used for data scaled to the interval [0,1]. The mean of the decoder distribution is again represented by a neural network with weights $\vc{\theta}$. The scalar parameter $\sigma$ is either fixed, or it can be estimated from data during training. Therefore, the log-likelihood takes on the form 
+\begin{equation} \label{eq:vae_logpx}
+\ln p_{\vc{\theta}}(\vc{x}|\vc{z}) = - \frac{\sigma}{2} \vert \vert \vc{x} - \vc{\mu}_{\vc{\theta}}(\vc{z}) \vert \vert_2^2 - \frac{d}{2} \ln 2\pi - \frac{d}{2} \ln \sigma. 
 \end{equation}
-The expectation for the marginal likelihood is replaced with a mean
-over $M$ samples of $\varepsilon\sim p(\varepsilon)$ and $\odot$
-denotes an element--wise product. Note that $M=1$ is usually sufficient
-given that the model is trained with high enough batchsize. Now, $p_{\vc{\theta}}(x|z)$
-can take the form of any suitable distribution (e.g. normal or Bernoulli).
-The most common choice is the case of a normal isotropic generative
-model, that is $p_{\vc{\theta}}(x|z)=\mathcal{N}(x|\mu_{\vc{\theta}}(\vc{z}),\Sigma_{\vc{\theta}}(\vc{z}))=\mathcal{N}(x|\mu_{\vc{\theta}}(\vc{z}),\sigma I),\sigma\in\mathbb{R}$.
-Then, the optimization objective becomes
-\begin{equation}
-\mathcal{L_{\text{VAE}}}(x,\vc{\phi},\vc{\theta};\varepsilon)=-\frac{1}{\sigma M}\sum_{m=1}^{M}||x-\mu_{\vc{\theta}}(\vc{z}^{m}(\varepsilon))||_{2}^{2}+\frac{1}{2}\sum_{i=1}^{d}\left(1-\left(\sigma_{\vc{\phi}}^{2}(x)\right)_{i}+\ln\left(\sigma_{\vc{\phi}}^{2}(x)\right)_{i}-\left(\mu_{\vc{\phi}}^{2}(x)\right)_{i}\right)\label{eq:vae_elbo2}
-\end{equation}
-with $z^{m}(\varepsilon)$ sampled in the same way as in~(\ref{eq:vae_elbo1}).
-Finally, this objective can be optimized via stochastic gradient descent~\cite{bottou2010large}.
+Note that the last two terms can be left out of the optimization, since they are not dependent on any inputs or weights. Again, we see the connection with an autoencoding model, where the log-likelihood~\eqref{eq:vae_logpx} has very similar form to the objective~\eqref{eq:ae_objective}. Here, the reconstruction takes the form of $\vc{x}' = \vc{\mu}_{\vc{\theta}}(\vc{z})$. A notable property of the VAE model is that the reconstruction is stochastic, which is due to the sampling used in the reparametrization trick~\eqref{eq:vae_reparam}. 
 
-See Fig.~\ref{fig:vae} for a schematic example of a VAE architecture
-that uses the loss function~(\ref{eq:vae_elbo2}). The training
-procedure of a VAE is described in Alg.~\ref{alg:vae_train}. Note
-that instead of setting a fixed variance parameter $\sigma$ in the
-decoder, one can optimize and extract it instead from the last layer
-of the decoder, either as a scalar $\Sigma_{\vc{\theta}}(\vc{z})=\sigma_{\vc{\theta}}(\vc{z})I,\sigma(\vc{z})\in\mathbb{R}$
-or even full diagonal of the covariance $\Sigma_{\vc{\theta}}(\vc{z})=\text{diag}\left(\sigma_{\vc{\theta}}(\vc{z})\right)I,\sigma(\vc{z})\in\mathbb{R}^{n}$
-where $n$ is the dimensionality of input space $\mathcal{X}$. See
-the discussion in Fig.~\ref{fig:betavae} for details.
+Now, we combine the assumptions and equations~\eqref{eq:vae_kld}--\eqref{eq:vae_logpx} to derive the final analytic form of the ELBO objective. The expectation in~\eqref{eq:vae_reparam} is replaced by a mean of $L$ sample of $z$ through the reparametrization trick. The VAE loss function, that is minimized with respect to $\vc{\phi}, \vc{\theta}$, and which is in fact equal to negative ELBO~\eqref{eq:elbo3}, has the form
+\begin{equation} \label{eq:vae_loss}
+\mathcal{L_{\text{VAE}}}(\vc{x},\vc{\phi},\vc{\theta})=\frac{1}{\sigma L}\sum_{l=1}^{L}||\vc{x}-\vc{\mu}_{\vc{\theta}}(\vc{z}^{l})||_{2}^{2} - \frac{1}{2}\sum_{i=1}^{d} 1-\sigma_{\vc{\phi},i}^{2}(x)+\ln\sigma_{\vc{\phi},i}^{2}(x)-\mu_{\vc{\phi},i}^{2}(x),
+\end{equation}
+\begin{equation} 
+\vc{z}^l=\vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}^2_{\vc{\phi}}(\vc{x}) \odot \varepsilon^l, \varepsilon^l \sim  \mathcal{N}(0,\mathbf{I}). \nonumber
+\end{equation}
+This can be directly optimized via gradient descent techniques. We set $L=1$ in accordance with~\cite{kingma2013vae}. See Fig.~\ref{fig:vae} for a schematic example of a VAE model. The training procedure of a VAE is described in Alg.~\ref{alg:vae_train}. An example of the outputs of a VAE model trained on the MNIST hand--written digits dataset~\cite{lecun-mnisthandwrittendigit-2010} is in Fig.~\ref{fig:mnist_reconstruction}.
 
 \begin{algorithm}
 \include{algs/vae_train_alg}\caption{Variational Autoencoder training procedure.}
 \label{alg:vae_train}
 \end{algorithm}
 
-Now that a VAE model is trained, we can finally use it to generate
-realistic samples. Because we have pushed the encoding distribution
-to be close to the prior while maximizing the marginal probability
-of the encoding to produce a reasonable reconstruction through the
-decoder, we can expect the converged decoder to be able to transform
-samples $z\sim\mathcal{N}(0,1)$ to the $\mathcal{X}$ space in such
-a manner that they will be very close to the samples from the training
-dataset. This is also a place to note why we are using neural network
-representation of $q_{\vc{\phi}}(\vc{z}|x)$ and $p_{\vc{\theta}}(x|z)$. Since NNs
-have be proven to be universal function approximators, we know that
-given enough capacity, data and training time, the decoder can learn
-a mapping from $\mathcal{N}(0,1)$ to arbitrary function.
+\begin{figure}
+\centering{}\includegraphics[scale=0.8]{data/chapter_survey/mnist_reconstruction_generation}\caption{Example of a simple VAE trained on the MNIST dataset. Here, the neural networks modelling the encoder and decoder parameters contained two levels of convolutional blocks. Ground truth examples are in the top row, reconstructed samples are in the middle row, artificially generated digits are in the bottom row. The reconstructions are blurry, which is a typical VAE behaviour. Also, the reconstruction is imperfect for digits which resemble each other, such as "9", "4" and "7", or "3" and "8". The artificial digits were created by linearly interpolating between two coordinates in the latent space and using this as an input to the decoder. The VAE then produces a smooth interpolation between digits "1" and "8" that contains the related digits "2" and "3".}
+\label{fig:mnist_reconstruction}
+\end{figure}
+ 
+\subsubsection{Some VAE properties}
+\begin{figure}
+\begin{centering}
+\includegraphics[scale=0.8]{data/chapter_survey/mnist_latent}
+\par\end{centering}
+\caption{The latent space of the MNIST dataset produced by a VAE with a two-dimensional latent space. Note the overlapping of some digit encodings, e.g. "7" and "9".}
+\label{fig:mnist_latent}
+\end{figure}
 
-What is of a greater interest to us from the anomaly detection perspective
-is reconstructing a sample using the trained VAE. This is done through
-the same process the VAE is trained, thus by reconstruction of $x$
-we understand $\hat{x}$ such that
-\begin{equation}
-\hat{x}\sim\mathcal{N}(x|\mu_{\vc{\theta}}(\vc{z}),\Sigma_{\vc{\theta}}(\vc{z})),z\sim q_{\vc{\phi}}(\vc{z}|x).
+If a VAE model is correctly trained, we can assume that the encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$ and prior $p(\vc{z})=\mathcal{N}(\vc{z}|0,\textbf{I})$ are close to each other. Then, samples from the prior can be fed to the decoder and one can expect artificial samples that resemble the training data. A \textbf{generated sample} can therefore be described as
+\begin{equation} \label{eq:generated_sample}
+    \tilde{\vc{x}} = \vc{\mu}_{\vc{\theta}}(\vc{z}), \vc{z} \sim p(\vc{z}).
 \end{equation}
-We simply pass $x$ to the encoder $q_{\vc{\phi}}(\vc{z}|x)$, obtain the parameters,
-sample from the noise distribution and pass the resulting $z$ to
-the decoder $p_{\vc{\theta}}(x|z)$ to obtain the generative distribution
-from which we can readily sample.
-
-Looking at the objective~(\ref{eq:vae_elbo2}) we can see the connection
-with an ordinary autoencoder. The objective can be decomposed into
-a reconstruction term and a regularization term on the latent space.
-The one advantage of a VAE over AE is that provides a distribution
-both in the latent and sample space that can be readily sampled from,
-while the autoencoder is completely deterministic. This, coupled with
-the regularization term, enables the VAE to generalize better.
-
-It has been shown in~\cite{doersch2016tutorial} that scaling of
-the VAE loss~(\ref{eq:vae_elbo2}) with respect to the variance
-estimated by the encoder does not make much sense. It is however possible
-to scale the contribution of the two losses to the total loss, as
-was done in~\cite{higgins2017beta}, such that
-\begin{equation}
-\mathcal{L}(x,\vc{\phi},\vc{\theta},\beta)=\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|x)}\left[\ln p_{\vc{\theta}}(x|z)\right]-\beta D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|x)||p(\vc{z})\right),\beta>0.\label{eq:betavae}
-\end{equation}
-Varying the value of $\beta$ puts a different emphasis on how much
-should the latent space be regularized. Higher values of $\beta$
-supposedly lead to better representation power, however in some of
-our experiments we have used $\beta<1$ in order to pronounce the
-importance of the reconstruction error. Again, the discussion under
-Fig.~\ref{fig:betavae} contains some details on this.
+Note that a \textbf{reconstructed sample} is instead obtained by sampling the encoding $\vc{z}$ from the encoder through the reparametrization trick~\eqref{eq:vae_reparam}. This is also a place to note why we are using neural network representation of the encoder and decoder. Since neural networks have be proven to be universal function approximators, we know that given enough capacity, data and training time, the decoder can learn a mapping from the prior to an arbitrary function.
 
 \begin{figure}
 \centering
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
         \includegraphics[scale=0.9]{data/chapter_survey/vae_two_moons_z1_colored}
-        \caption{$\text{dim}(\mathcal{Z})=1$}
+        \caption{$h=1$}
     \end{subfigure}
     \begin{subfigure}[b]{0.45\textwidth}
         \centering
         \includegraphics[scale=0.9]{data/chapter_survey/vae_two_moons_z2_colored}
-        \caption{$\text{dim}(\mathcal{Z})=2$}
+        \caption{$h=2$}
     \end{subfigure}
-\caption{An overview of VAE behaviour with respect to the scaling parameter
-$\beta$ of the objective~(\ref{eq:betavae}) and to the way the
-covariance of the generative model $p_{\vc{\theta}}(x|z)=\mathcal{N}(x|\mu_{\vc{\theta}}(\vc{z}),\Sigma_{\vc{\theta}}(\vc{z}))$
-is estimated. The VAE model was trained on the two--moons data, plotted
-in the plots at the very top. Variants with 1D (a) and 2D (b) latent
-spaces are compared, means of the generative model $\mu_{\vc{\theta}}(\vc{z})$
-are plotted on the left and the latent representations on the right.
-Clearly, smaller values of $\beta$ lead to better sample reconstruction.
-Also, lower preference of the KL divergence objective seems to lead
-to better separation in the latent space. This is understandable,
-since the prior $p(\vc{z})=\mathcal{N}(0,1)$ is unimodal. The covariance
-is given by a fixed scalar ($\Sigma=\sigma I,\sigma=1$), by a scalar
-estimated from the data ($\Sigma=\sigma(\vc{z})I$), or the full diagonal
-of the covariance matrix is estimated ($\Sigma=\text{diag}(\sigma(\vc{z}))$).
-The magnitude of the estimated variance in the two latter cases is
-denoted by color, where brighter color corresponds to a higher value.
-It is interesting that the second case ($\Sigma=\sigma(\vc{z})I$) seems
-to alleviate the reconstruction difficulties with higher $\beta$,
-while the estimation of the full covariance diagonal does not exhibit
-such property. Also, the third case seems to ``exploit'' the estimation
-of variance -- instead of pushing and optimizing the mean, it can
-instead simply put higher variance in the direction in which the reconstruction
-is worse and still incur only a small loss. Due to this behaviour,
-the second case seems to be the most robust and stable way of estimation
-of the reconstruction variance. Not surprisingly, the 2D case provides
-better reconstructions since it was provided with one more dimension
-to encode data to.}
+\caption{An overview of VAE behaviour with respect to the scaling parameter $\beta$ of the objective~\eqref{eq:betavae} and to the way the covariance of the decoder $p_{\vc{\theta}}(\vc{x}|\vc{z})$ is estimated. The VAE model was trained on the two--moons data, plotted in the plots at the very top. Variants with 1D (a) and 2D (b) latent spaces are compared, means of the decoder $\vc{\mu}_{\vc{\theta}}(\vc{z})$ are plotted on the left and the latent representations on the right. Clearly, smaller values of $\beta$ lead to better sample reconstruction, especially in the case of a two-dimensional latent space, as well as leading to a better separation of the encodings. This is understandable, since the prior $p(\vc{z})=\mathcal{N}(0,\textbf{I})$ is unimodal. From the top: the covariance of the decoder is given either by a fixed scalar ($\sigma I,\sigma=1$), by a scalar estimated from the data ($\sigma(\vc{z})I$), or by an estimate of its diagonal terms ($\text{diag}(\sigma(\vc{z}))$). The magnitude of the estimated variance in the two latter cases is denoted by color, where a brighter color corresponds to a higher value of variance. It is interesting that the second case ($\sigma(\vc{z})I$) seems to alleviate the reconstruction difficulties with higher $\beta$, while the estimation of the full covariance diagonal does not exhibit such property. Also, the third case seems to "exploit" the estimation of variance. Instead of pushing and optimizing the mean, it can instead simply put higher variance in the direction in which the reconstruction is worse and still incur only a small loss. Due to this behaviour, the second case seems to be the most robust and stable way of estimation of the reconstruction variance. Not surprisingly, the 2D case provides better reconstructions since it was provided with one more dimension to encode data to.}
 \label{fig:betavae}
 \end{figure}
 
-\begin{figure}
-\centering{}\includegraphics[scale=0.8]{data/chapter_survey/mnist_reconstruction_generation}\caption{Example of a VAE trained on the MNIST dataset -- ground truth examples
-are in the top row, reconstructed samples (means of $p_{\vc{\theta}}(x|z)$)
-are in the middle row, artificially generated digits are in the bottom
-row. The reconstructions are blurry, which is a typical VAE behaviour.
-Also, the reconstruction is imperfect for digits which are resemble
-each other, such as 9, 4 and 7 or 3 and 8. The artificial digits were
-created by linearly interpolating between two coordinates in the latent
-space and using this as an input to the decoder. The VAE then presents
-a smooth interpolation between digits 1 and 8.}
-\label{fig:mnist_reconstruction}
-\end{figure}
- 
-\begin{figure}
-\begin{centering}
-\includegraphics[scale=0.8]{data/chapter_survey/mnist_latent}
-\par\end{centering}
-\caption{The latent space of the MNIST dataset produced by a VAE. Note the
-overlapping of some digit encodings, e.g. 7 and 9.}
-\label{fig:mnist_latent}
-\end{figure}
+Fig.~\ref{fig:mnist_latent} shows the latent space of an example VAE model. Note that although the overall distribution of the encodings resembles the normal prior, in order to be able to reconstruct the samples from the encodings, the model has to learn to encode the samples from different digit classes to different parts of the latent space. It was shown~\cite{higgins2017beta} that the reconstruction and regularization parts of the VAE loss~\eqref{eq:elbo3} actually work against each other. A model with encoder perfectly copying the randomness of the prior would not be able to reconstruct the inputs. On the other hand, a model without the latent regularization would not be able to generate new samples, as it would be practically identical with an AE model from Sec.~\ref{sec:reconstruction_models}, which is free to encode the different classes to arbitrary parts of the latent space. The basic loss~\eqref{eq:vae_loss} leads to a model that is usually in an equilibrium between both of these states. It is however possible to push the model in one of these directions by using a scaling parameter
+\begin{equation} \label{eq:betavae}
+\mathcal{L}_{\beta\text{VAE}}(\vc{x},\vc{\phi},\vc{\theta},\beta)= - \mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})\right] + \beta D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z})\right),\beta>0.
+\end{equation}
+A VAE model trained with this loss is known as \textbf{BetaVAE}~\cite{higgins2017beta} and is one of the first VAE-based models that attempt some sort of \textbf{unsupervised disentanglement}. A disentangled model captures the possible factors of variation of a dataset in orthogonal dimensions of the latent space. Imagine a colored MNIST dataset, on which a disentangled model with a two dimensional latent space is trained. If properly disentangled, one latent dimension would capture the identity of the digit, while the other one would capture its color. This concept will be again revisited in Chapter~\ref{sec:chapter_sgvaegan}. The influence of the $\beta$ parameter is discussed in Fig.~\ref{fig:betavae}.
 
-We include some experiments with the MNIST hand--written digits dataset,
-which can be found in almost every VAE publication, see Fig.~\ref{fig:mnist_reconstruction}
-and \ref{fig:mnist_latent}, that demonstrate the way a VAE encodes,
-reconstructs and generates new samples.
-
-
-
-\subsection{Probabilistic foundations}
-
-
-\subsection{Vanilla VAE\label{sec:vae_vanilla}}
-
+Instead of setting a fixed variance parameter $\sigma$ in the decoder, one can optimize and extract it instead from the last layer of the decoder, either as a scalar $\sigma_{\vc{\theta}}(\vc{z}) \in \mathbb{R}$
+or even a full diagonal of the covariance $\text{diag}\left(\vc{\sigma}_{\vc{\theta}}(\vc{z})\right),\vc{\sigma}(\vc{z})\in\mathbb{R}^{d}$. From the experiment in Fig.~\ref{fig:betavae}, it seems (at least for tabular data) that the best results were surprisingly obtained not by the most complex variant, but the one with a scalar value $\sigma_{\vc{\theta}}$ optimized during training.
 
 \subsection{VAE in anomaly detection}
-
-An easy way to assess the probability of a sample coming from the
-data distribution would be computing 
+From the anomaly detection perspective, the basic criterion that test whether an input $\vc{x}$ is from the training (normal) data distribution is based on an estimate of the log-likelihood $- \ln p_{\vc{\theta}}(\vc{x}|\vc{z})$ is computed. However, using only the generating model with a prior
 \begin{equation}
-p_{\vc{\theta}}(x)=\mathbb{E}_{p(\vc{z})}\left[\ln p_{\vc{\theta}}(x|z)\right]
+- \mathbb{E}_{p(\vc{z})}\left[\ln p_{\vc{\theta}}(x|z)\right]
 \end{equation}
-by sampling directly from the prior. Although theoretically well--justified,
-it has been shown that this does not work well enough in practice~\cite{xu2018unsupervised}.
-Instead, the reconstruction probability can be used as an anomaly
-score function
+is theoretically well--justified, but it has been shown that this does not work well enough in practice~\cite{xu2018unsupervised}. Instead, the generative and discriminative distributions are used together to compute an estiamte of the \textbf{sampled reconstruction probability}
+\begin{equation} \label{eq:rec_prob}
+s_{\text{VAE}}(\vc{x})=-\frac{1}{L}\sum_{l=1}^{L}\ln p_{\vc{\theta}}(\vc{x}|\vc{z}^{l}) \approx-\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})\right].
+\end{equation}
 \begin{equation}
-f_{\text{VAE}}(x)=-\frac{1}{M}\sum_{m=1}^{M}\ln p_{\vc{\theta}}(x|z^{m}(\varepsilon))\approx-\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|x)}\left[\ln p_{\vc{\theta}}(x|z)\right].\label{eq:vae_score}
+\vc{z}^l \sim q_{\vc{\phi}}(\vc{z}|\vc{x}) \nonumber 
 \end{equation}
-which was done in one of the first application of VAE in anomaly detection
-in~\cite{an2015variational}. The negative sign is used because
-of the convention of higher score belonging to an anomaly. Note that
-for a Gaussian decoder, equation~(\ref{eq:vae_score}) is very similar
-to the reconstruction error of a standard autoencoder with the difference
-that the reconstruction probability is computed from several samples
-of the noise distribution. Because there is sampling in the latent
-space, this anomaly score can process the variability of the input
-space in an improved way. We suppose that an anomalous sample that
-the VAE has not been trained with will have a lower probability of
-being correctly reconstructed, thus producing a higher anomaly score.
-The authors of~\cite{an2015variational} successfully compare VAE
-with AE and PCA on several anomaly datasets while claiming that the
-generative property of VAE can be used for causal analysis on the
-detected anomalies.
+which was done in one of the first application of VAE in anomaly detection in~\cite{an2015variational}, where the authors successfully compare the VAE with AE and PCA on several anomaly datasets while claiming that the generative property of VAE can be used for causal analysis on the detected anomalies. Note that for a normal decoder, equation~(\ref{eq:vae_score}) is very similar to the reconstruction error of an  AE model~\eqref{eq:ae_objective}, with the difference that the reconstruction probability is computed from several samples of the encoder.
 
 The reason for using the reconstruction probability of a VAE instead
 of a reconstruction error of AE is the improved generalization that

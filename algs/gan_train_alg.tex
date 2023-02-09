@@ -1,11 +1,11 @@
 \begin{algorithmic}[1]
-\Require{Generator $g_{\vc{\theta}}$, discriminator $e_{\vc{\phi}}$, a training set $X=\lbrace \vc{x}_1, \vc{x}_2, \ldots, \vc{x}_n \rbrace \subset \mathcal{X}$, maximum number of iterations $I\in\mathbb{N}$, batchsize $L \in \mathbb{N}$.}
+\Require{Generator $g_{\vc{\theta}}$, discriminator $e_{\vc{\phi}}$, a training set $X=\lbrace \vc{x}_1, \vc{x}_2, \ldots, \vc{x}_n \rbrace \subset \mathcal{X}$, maximum number of iterations $I\in\mathbb{N}$, batchsize $B \in \mathbb{N}$.}
 \State $\vc{\theta}, \vc{\varphi} \gets $ Initialize weights
 \State{$i \gets $ Iteration counter}
 \While{$i<I$ or $\vc{\theta}, \vc{\varphi}$ are not converged}
-	\State{$X_L \gets$ A random batch of $L$ samples from $X$}
-	\State{$Z_L \gets$ A random batch of $L$ samples from $p(\vc{z})$}
-	\State$l_d \gets \frac{1}{L}\sum_{j=1}^L \mathcal{L}_d(\vc{x}_j,\vc{z}_j,\vc{\varphi}), \vc{x}_j \in X_L, \vc{z}_j \in Z_L$
+	\State{$X_B \gets$ A random batch of $B$ samples from $X$}
+	\State{$Z_B \gets$ A random batch of $B$ samples from $p(\vc{z})$}
+	\State$l_d \gets \frac{1}{B}\sum_{j=1}^N \mathcal{L}_d(\vc{x}_j,\vc{z}_j,\vc{\varphi}), \vc{x}_j \in X_B, \vc{z}_j \in Z_B$
 	\State$\vc{\varphi} \stackrel{+}\gets - \nabla_{\vc{\varphi}} l_d$ update of discriminator weights 
 	\State$l_g \gets \frac{1}{L}\sum_{j=1}^L \mathcal{L}_g (\vc{z}_j,\vc{\theta}), \vc{z}_j \in Z_L$
 	\State$\vc{\theta} \stackrel{+}\gets - \nabla_{\vc{\theta}} l_g$ update of generator weights

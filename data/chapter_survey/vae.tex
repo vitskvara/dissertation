@@ -16,8 +16,7 @@
   \node[latent, right = 2.8cm of x, yshift = -0.35cm] (E33) {};
   \node[latent, right = 2.8cm of x, yshift = -0.9cm] (E34) {};
   % encoder tag
-  \node[const, right = 1.4cm of x, yshift = 1.5cm] (E) {$e_{\vc{\phi}}(\vc{x})$};
-  \node[const, right = 3.4cm of x, yshift = 1.5cm] (ED) {$q_{\vc{\phi}}(\vc{z}|\vc{x})$};
+  \node[const, right = 1.6cm of x, yshift = 1.4cm] (ED) {$q_{\vc{\phi}}(\vc{z}|\vc{x})$};
   % code
   \node[const, right = 3.8cm of x, yshift = 0.575cm]           (mu) {$\vc{\mu}_{\vc{\phi}}$};
   \node[const, right = 3.8cm of x, yshift = -0.575cm]           (sigma) {$\vc{\sigma}^2_{\vc{\phi}}$};
@@ -44,10 +43,8 @@
   \node[const, right = 4cm of z]           (xhat) {$\vc{x}'$};
   \node[const, right = -0.8cm of xhat]       (xhatout) {};    
   % decoder tag
-  \node[const, right = 1.6cm of z, yshift = 1.5cm] (D) {$g_{\vc{\theta}}(\vc{z})$};   
-  \node[const, right = 3.5cm of z, yshift = 1.5cm] (DD) {$p_{\vc{\theta}}(\vc{x}|\vc{z})$};   
+  \node[const, right = 1.6cm of z, yshift = 1.4cm] (DD) {$p_{\vc{\theta}}(\vc{x}|\vc{z})$};   
   
-
   % edges
   \nedge {x} {xin}
   % encoder 
