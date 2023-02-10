@@ -71,13 +71,13 @@ The VAE has been mainly used for generation of artificial images such as faces~\
 \subsection{Basic VAE} \label{sec:vanilla_vae}
 We will begin by defining the VAE from a probabilistic perspective. Let us assume that there is a dataset $X$ consisting of i.i.d samples. We want to obtain a tractable estimate of the true data distribution $p(\vc{x})$ in order to be able to sample from it. For that purpose, suppose that there is a hidden random process that generates the data and which involves a latent variable $\vc{z}$. Then, like in the case of the GAN model, we can redirect the sampling from the data space $\mathcal{X}$ to the latent space
 $\mathcal{Z}$, in which it might be easier. Specifically, we want to sample from the latent prior distribution specified by a density $p(\vc{z})$, then pass this sample to the generative distribution with density $p_{\vc{\theta}}(\vc{x}|\vc{z})$, where $\vc{\theta}$ are its parameters, and obtain a sample $\vc{x}$ that will be very similar to the samples coming from the true data distribution $p(\vc{x})$. In other words, we want to maximize the probability of each sample obtained through the generative process
-\begin{equation}
-p_{\vc{\theta}}(\vc{x})=\int_{\mathcal{Z}}p_{\vc{\theta}}(\vc{x}|\vc{z})p(\vc{z})d\vc{z}.\label{eq:x_likelihood}
+\begin{equation} \label{eq:vae-px}
+p_{\vc{\theta}}(\vc{x})=\int_{\mathcal{Z}}p_{\vc{\theta}}(\vc{x}|\vc{z})p(\vc{z})d\vc{z}.
 \end{equation}
-Unfortunately, there are several issues with this. Firstly, we do not know the optimal value of parameters $\vc{\theta}$. Secondly, the integral~(\ref{eq:x_likelihood}) is usually intractable, e.g. in the case where $p_{\vc{\theta}}(\vc{x}|\vc{z})$ is represented by a neural network. Finally, we want to avoid expensive sampling methods such as Monte Carlo Expectation Maximization~\cite{levine2001implementations}. A sampling procedure is eventually used, but we only want to pass such samples $\vc{z}$ to the generative model that will already be very likely under $p_{\vc{\theta}}(\vc{x}|\vc{z})$. To this end, we introduce a discriminative distribution $q_{\vc{\phi}}(\vc{z}|\vc{x})$ which is an approximation of the true intractable posterior $p(\vc{z}|\vc{x})$, with parameters $\vc{\phi}$.
+Unfortunately, there are several issues with this. Firstly, we do not know the optimal value of parameters $\vc{\theta}$. Secondly, the integral~(\ref{eq:vae-px}) is usually intractable, e.g. in the case where $p_{\vc{\theta}}(\vc{x}|\vc{z})$ is represented by a neural network. Finally, we want to avoid expensive sampling methods such as Monte Carlo Expectation Maximization~\cite{levine2001implementations}. A sampling procedure is eventually used, but we only want to pass such samples $\vc{z}$ to the generative model that will already be very likely under $p_{\vc{\theta}}(\vc{x}|\vc{z})$. To this end, we introduce a discriminative distribution $q_{\vc{\phi}}(\vc{z}|\vc{x})$ which is an approximation of the true intractable posterior $p(\vc{z}|\vc{x})$, with parameters $\vc{\phi}$.
 
 \subsubsection{The ELBO objective}
-Now, we would like to relate the generative and discriminative distributions together in way that would enable us to optimize the model with respect to $\vc{\phi},\vc{\theta}$. Continuing from~(\ref{eq:x_likelihood}),
+Now, we would like to relate the generative and discriminative distributions together in way that would enable us to optimize the model with respect to $\vc{\phi},\vc{\theta}$. Continuing from~(\ref{eq:vae-px}),
 \begin{equation}
 \ln p_{\vc{\theta}}(\vc{x})=\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x})\right]=\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})+\ln p(\vc{z})-\ln p(\vc{z}|\vc{x})\right],
 \end{equation}
@@ -103,10 +103,11 @@ To be able to optimize~\eqref{eq:elbo3}, we must make some additional assumption
 D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z}) \right) = \frac{1}{2}\sum_{i=1}^{d} 1-\sigma_{\vc{\phi},i}^{2}(\vc{x})+\ln \sigma_{\vc{\phi},i}^{2}(\vc{x}) -\mu_{\vc{\phi},i}^{2}(\vc{x}).
 \end{equation}
 
-Second, the optimization of the ELBO~\eqref{eq:elbo3} requires sampling from the encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$. This is however problematic for optimization by backpropagation, because sampling is not a differentiable operation. Therefore, a \textbf{reparametrization trick} was introduced in~\cite{kingma2013vae}. Instead of directly drawing samples $z \sim q_{\vc{\phi}}(\vc{z}|\vc{x})$, we first take a sample from an $h$-dimensional noise distribution $\varepsilon\sim p(\varepsilon)=\mathcal{N}(0,\mathbf{I})$ and then compute the encoding as $\vc{z}=\vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}^2_{\vc{\phi}}(\vc{x}) \odot \varepsilon$, where $\odot$ denotes element-wise multiplication. This changes the first term of the ELBO, which is called the \textbf{log-likelihood} to
+Second, the optimization of the ELBO~\eqref{eq:elbo3} requires sampling from the encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$. This is however problematic for optimization by backpropagation, because sampling is not a differentiable operation. Therefore, a \textbf{reparametrization trick} was introduced in~\cite{kingma2013vae}. Instead of directly drawing samples from $q_{\vc{\phi}}(\vc{z}|\vc{x})$, we first take a sample from an $h$-dimensional noise distribution $\varepsilon\sim p(\varepsilon)=\mathcal{N}(0,\mathbf{I})$ and then compute the encoding as $\vc{z}=\vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}^2_{\vc{\phi}}(\vc{x}) \odot \varepsilon$, where $\odot$ denotes element-wise multiplication. This changes the first term of the ELBO, which is called the \textbf{log-likelihood} to
 \begin{equation} \label{eq:vae_reparam}
 \mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})\right] = \mathbb{E}_{\varepsilon\sim\mathcal{N}(0,\textbf{I})}\left[\ln p_{\vc{\theta}}(\vc{x}| \vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}^2_{\vc{\phi}}(\vc{x}) \odot \varepsilon )\right].
 \end{equation}
+In the following text, whenever it can apply, we use the notation $\vc{z} \sim q_{\vc{\phi}}(\vc{z}|\vc{x})$ as a shorthand for the reparametrization trick.
 
 Finally, the decoder $p_{\vc{\theta}}(\vc{x}|\vc{z})$ is also assumed to model a normal distribution\\ $\mathcal{N}(\vc{x}|\vc{\mu}_{\vc{\theta}}(\vc{z}),\sigma I), \vc{\mu}_{\vc{\theta}} :\mathbb{R}^h \rightarrow \mathbb{R}^d, \sigma\in\mathbb{R}$, although a Bernoulli distribution is sometimes used for data scaled to the interval [0,1]. The mean of the decoder distribution is again represented by a neural network with weights $\vc{\theta}$. The scalar parameter $\sigma$ is either fixed, or it can be estimated from data during training. Therefore, the log-likelihood takes on the form 
 \begin{equation} \label{eq:vae_logpx}
@@ -176,236 +177,80 @@ or even a full diagonal of the covariance $\text{diag}\left(\vc{\sigma}_{\vc{\th
 \subsection{Wasserstein and adversarial autoencoders}
 The asymmetry of the KL divergence motivated search for a more accurate metric measuring the distance between the prior and the encoder. An alternative approach to VAE has been published in~\cite{mescheder2017adversarial} and improved in~\cite{tolstikhin2017wasserstein}, which proposes a general form of a generative autoencoder that uses a Wasserstein metric~\cite{givens1984class}. Unlike the KL divergence term in the VAE loss, which forces all the input data samples to zero (the mean of the standard prior), in \textbf{Wasserstein autoencoders} (WAE) the encoding is loosened, which reportedly leads to improved reconstruction~\cite{tolstikhin2017wasserstein}. A general form of the loss function of a WAE model is
 \begin{equation} \label{eq:general_wae_loss}
-    \mathcal{L}_{\text{WAE}} (\vc{x}, \vc{\theta}, \vc{\phi}) = - \mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})} \left[ \log p_{\vc{\theta}}(\vc{x}|\vc{z}) \right] + \lambda D_{\text{W}} \left( q_{\vc{\phi}}(\vc{z}|\vc{x}) || p(\vc{z}) \right),
+    \mathcal{L}_{\text{DW}} (\vc{x}, \vc{\theta}, \vc{\phi}) = - \mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})} \left[ \ln p_{\vc{\theta}}(\vc{x}|\vc{z}) \right] + \lambda D_{\text{W}} \left( q_{\vc{\phi}}(\vc{z}|\vc{x}) || p(\vc{z}) \right),
 \end{equation}
-where $\lambda >0$  is a scalar hyperparameter, and $D_{\text{W}}$ is a Wasserstein metric. The most commonly used form of the Wasserstein metric is the kernelized \textbf{maximum-mean-discrepancy} (MMD) with a kernel function $k_f:\mathbb{R}^d \times \mathbb{R}^d \rightarrow \mathbb{R}$, which was reported to perform well in matching high dimensional distributions~\cite{zhao2017infovae}. From the theoretical point of view, KLD only matches the first and the second moment of the two distributions, while MMD can potentially match an infinite amount of moments with the right kernel. Some authors~\cite{tolstikhin2017wasserstein} argue that by minimizing KLD, the latent representation might become uninformative for the decoder to reconstruct the code. On the other hand, MMD maximizes the mutual information between $\vc{x}$  and $\vc{z}$~\cite{zhao2017infovae}.
-
-Under some mild assumptions about the kernel function $k_f$ (see details in~\cite{tolstikhin2017wasserstein}) the MMD can be expressed in such a way that enables optimization of the model by backpropagation. Then, the MMD of the prior and the encoder can be approximated solely by comparing sets of samples from these  distributions $Z_q=\{\vc{z}_{q,1}, \vc{z}_{q,2}, \ldots, \vc{z}_{q,n}\}, Z_p=\{\vc{z}_{p,1}, \vc{y}_{p,2}, \ldots, \vc{y}_{p,n}\},\vc{z}_{q,i}\sim q_{\vc{\phi}}(\vc{z}|\vc{x}),\vc{z}_{p,i} \sim p(\vc{z}),\forall i \in \hat{n}$ in a closed expression
-\begin{equation} \label{eq:mmd}
-\text{MMD}_{k}(Z_p,Z_q)=\frac{1}{n(n-1)}\sum_{i\neq j}k_f(\vc{z}_{q,i},\vc{z}_{q,j})+\frac{1}{n(n-1)}\sum_{i\neq j}k_f(\vc{z}_{p,i},\vc{z}_{p,j})-\frac{2}{n^{2}}\sum_{i,j}k_f(\vc{z}_{q,i}, \vc{z}_{p,j}).
-\end{equation}
-The most notable characteristic of the MMD is that in practice, it only require samples from the distributions in question, and it is therefore less restricting than the KLD, which required normal prior and encoder in order to obtain the analytic expression~\eqref{eq:vae_kld}. This offers the potential for the use of a variety of prior and encoder distributions. The two most common choices of $k_f$ are the RBF $k_f(x,y) = \exp(- \gamma \vert \vert x - y \vert \vert_2^2), \gamma > 0$ and inverse multiquadratics (IMQ) $k_f(x,y) = (c^2 +  \vert \vert x - y \vert \vert_2^2)^\beta, c>0, \beta < 0$ kernels. The training algorithm for a Wasserstein autoencoder with the MMD loss is in Alg.~\ref{alg:infovae}. Note that although the parameters $\vc{\phi}$ do not appear directly in the loss on line 7 of the algorithm, they are present through the samples $\tilde{Z_{L}}$. 
+where $\lambda >0$  is a scalar hyperparameter, and $D_{\text{W}}$ is a Wasserstein metric. The most commonly used form of the Wasserstein metric is the kernelized \textbf{maximum-mean-discrepancy} (MMD) with a kernel function $k_f:\mathbb{R}^h \times \mathbb{R}^h \rightarrow \mathbb{R}$, which was reported to perform well in matching high dimensional distributions~\cite{zhao2017infovae}. From the theoretical point of view, KLD only matches the first and the second moment of the two distributions, while MMD can potentially match an infinite amount of moments with the right kernel. Some authors~\cite{tolstikhin2017wasserstein} argue that by minimizing KLD, the latent representation might become uninformative for the decoder to reconstruct the code. On the other hand, MMD maximizes the mutual information between $\vc{x}$  and $\vc{z}$~\cite{zhao2017infovae}.
 
 \begin{algorithm}
 \include{algs/infovae_train_alg}
-
-\caption{InfoVAE training procedure.}
+\caption{Wasserstein autoencoder training procedure.}
 \label{alg:infovae}
 \end{algorithm}
 
+Under some mild assumptions about the kernel function $k_f$, which needs to be characteristic and positive-definite (see details in~\cite{tolstikhin2017wasserstein}), the MMD can be expressed in such a way that enables optimization of the model by backpropagation. Then, the MMD of the prior and the encoder can be approximated solely by comparing sets of samples from these distributions $Z=\{\vc{z}_{1}, \vc{z}_{2}, \ldots, \vc{z}_{n}\}, \tilde{Z}=\{\tilde{\vc{z}}_{1}, \tilde{\vc{z}}_{2}, \ldots, \tilde{\vc{z}}_{n}\},\vc{z}_{i}\sim q_{\vc{\phi}}(\vc{z}|\vc{x}),\tilde{\vc{z}}_{i} \sim p(\vc{z}),\forall i \in \hat{n}$ in a closed expression
+\begin{equation} \label{eq:mmd}
+\text{MMD}_{k}(Z,\tilde{Z})=\frac{1}{n(n-1)}\sum_{i\neq j}k_f(\vc{z}_{i},\vc{z}_{j})+\frac{1}{n(n-1)}\sum_{i\neq j}k_f(\tilde{\vc{z}}_{i},\tilde{\vc{z}}_{j})-\frac{2}{n^{2}}\sum_{i,j}k_f(\vc{z}_{i}, \tilde{\vc{z}}_{j}).
+\end{equation}
+The most notable characteristic of the MMD is that in practice, it only requires samples from the distributions in question, and it is therefore less restricting than the KLD, which required normal prior and encoder in order to obtain the analytic expression~\eqref{eq:vae_kld}. This offers the potential for the use of a variety of prior and encoder distributions, however, the reparametrization trick~\eqref{eq:vae_reparam} or a similar technique must be used in order to keep the sampling from $q_{\vc{\phi}}(\vc{z}|\vc{x})$ a differentiable operation. The two most common choices of $k_f$ are the RBF $k_f(\vc{z},\tilde{\vc{z}}) = \exp(- \gamma \vert \vert \vc{z} - \tilde{\vc{z}} \vert \vert_2^2), \gamma > 0$ and inverse multiquadratics (IMQ) $k_f(\vc{z},\tilde{\vc{z}}) = (c^2 +  \vert \vert \vc{z} - \tilde{\vc{z}} \vert \vert_2^2)^\beta, c>0, \beta < 0$ kernels. The training algorithm for a WAE with the MMD is in Alg.~\ref{alg:infovae}. Note that although the parameters $\vc{\phi}$ do not appear  explicitly in the overall loss function, they are present through the samples in $Z$. 
 
-
-\subsection{Adversarial Autoencoder}
-
-A different architecture arises when the Jensen--Shannon divergence
-$D_{\text{JS}}$ is used in place of $D_{Z}$. The JS divergence is
-a symmetrical (unlike KL divergence) measure of distance between two
-probability distributions. The use of $D_{\text{JS}}$ leads to a
-model that is called adversarial autoencoder (AAE) and was originally
-proposed in~\cite{makhzani2015adversarial}. It was shown in~\cite{tolstikhin2017wasserstein}
-how the use of $D_{\text{JS}}$ leads to the use of GAN loss that
-was described in the previous part. To regularize the encoder, we
-add a discriminator $d_{\eta}(\vc{z}):\mathcal{Z}\rightarrow\left[0,1\right]$
-represented by a neural network with parameters $\eta$. The discriminator
-has the same function as the one in the GAN model -- it tries to
-recognize latent space samples produced by the encoder and those sampled
-from the prior $p(\vc{z})$. The difference is that the discriminator now
-operates on the latent space $\mathcal{Z}$ instead of the data space
-$\mathcal{X}$. 
+A different architecture arises when the \textbf{Jensen--Shannon divergence} $D_{\text{JS}}$~\cite{barranco1994texture} is used in place of $D_{\text{W}}$. The JSD is a symmetrical (unlike KL divergence) measure of distance between two probability distributions. The use of JSD leads to a model that is called  the \textbf{adversarial autoencoder} (AAE) and was originally proposed in~\cite{makhzani2015adversarial}. The connection between an AAE model and the general formulation~\eqref{eq:general_wae_loss} was shown in~\cite{tolstikhin2017wasserstein}. To regularize the encoder, we add a discriminator $d_{\vc{\eta}}(\vc{z}):\mathcal{Z}\rightarrow\left[0,1\right]$ represented by a neural network with parameters $\vc{\eta}$. The discriminator has a similar function to the one in the GAN model from Sec.~\ref{sec:gan_models}. It tries to recognize latent space samples produced by the encoder and those sampled from the prior $p(\vc{z})$. The difference is that here, the discriminator operates on the latent space $\mathcal{Z}$ instead of the data space $\mathcal{X}$. 
 
 \begin{figure}
-\centering{}\include{data/chapter_survey/aae}\caption{A schematic of a AAE model consisting of fully connected layers. A
-data sample $x$ is mapped to latent space representation $\tilde{z}$
-via the encoder $q_{\vc{\phi}}(\vc{z}|x)$. Also, a sample $z$ is sampled from
-the latent prior $p(\vc{z})$. Both $z$ and $\tilde{z}$ are passed to
-the discriminator $d_{\eta}(\vc{z})$ that produces a score $s$ -- the
-probability that the input sample comes from the latent prior. At
-the same time, the latent representation is passed to the decoder
-$p_{\vc{\theta}}(x|z)$ which maps it to a reconstruction $\tilde{x}$.}
+\centering{}\include{data/chapter_survey/aae}\caption{A schematic of a AAE model consisting of fully connected layers. A data sample $x$ is mapped to latent space representation $\tilde{z}$ via the encoder $q_{\vc{\phi}}(\vc{z}|x)$. Also, a sample $z$ is sampled from the latent prior $p(\vc{z})$. Both $z$ and $\tilde{z}$ are passed to the discriminator $d_{\eta}(\vc{z})$ that produces a score $s$ -- the probability that the input sample comes from the prior. At the same time, the latent representation is passed to the decoder $p_{\vc{\theta}}(x|z)$ which maps it to a reconstruction $\tilde{x}$.}
 \label{fig:aae}
 \end{figure}
 
-The GAN loss function~(\ref{eq:disc_loss}) is used to train the
-discriminator, while the loss function~(\ref{eq:gen_loss}) is added
-to the reconstruction term for training of the encoder and decoder.
-The AAE training losses to be maximized are then
-\begin{equation}
-\mathcal{L}_{d}(\vc{z},\tilde{z},\eta)=\ln d_{\eta}(\vc{z})+\ln(1-d_{\eta}(\tilde{z})),\label{eq:aae_loss_disc}
-\end{equation}
-\begin{equation}
-\mathcal{L}_{ae}(x,\tilde{x},\tilde{z},\vc{\theta},\vc{\phi})=c(x,\tilde{x})-\lambda\ln d_{\eta}(\tilde{z}),\label{eq:aae_loss_autoencoder}
-\end{equation}
-where $\lambda>0$, $z\sim p(\vc{z})$, $x\sim p(x)$, $\tilde{z}\sim q_{\vc{\phi}}(\vc{z}|x)$
-and $\tilde{x}\sim p_{\vc{\theta}}(x|\tilde{z})$.
-
 \begin{algorithm}
 \include{algs/aae_train_alg}
-
 \caption{AAE training procedure.}
 \label{alg:aae}
 \end{algorithm}
 
-The AAE training procedure is described in Alg.~\ref{alg:aae}.
-Again, any prior $p(\vc{z})$ that we can sample from is suitable for the
-regularization of AAE, even a multimodal one. A schematic of the AAE
-model is in Fig.~\ref{fig:aae}. In practice, an AAE model compared
-to InfoVAE behaves similarly as GAN compared to VAE. The adversarial
-loss leads to less blurry reconstructions and generated samples at
-the cost of higher training instability~\cite{tolstikhin2017wasserstein}.
-One way to gain advantages of both is to use an AAE model as depicted
-in Fig.~\ref{fig:aae} and add the MMD regularization term~(\ref{eq:mmd})
-to the loss~(\ref{eq:aae_loss_autoencoder}).
+A modified loss~\eqref{eq:disc_loss} is used to train the discriminator, while the loss function~\eqref{eq:gen_loss} is used in place of the general Wasserstein distance in~\eqref{eq:general_wae_loss} for training of the encoder and decoder. Explicitly,
+\begin{equation} \label{eq:aae_loss_disc}
+\mathcal{L}_{\text{AAE}_d}(\vc{z},\tilde{\vc{z}}, \vc{\eta})= - \ln d_{\eta}(\vc{z}) - \ln(1-d_{\vc{\eta}}(\tilde{\vc{z}})),
+\end{equation}
+\begin{equation} \label{eq:aae_loss_autoencoder}
+\mathcal{L}_{\text{AAE}}(\vc{x},\vc{z},\tilde{\vc{z}}, \vc{\theta}, \vc{\phi}) = \frac{1}{\sigma}||\vc{x}-\vc{\mu}_{\vc{\theta}}(\vc{z})||_{2}^{2} -\lambda\ln d_{\vc{\eta}}(\tilde{\vc{z}}),
+\end{equation}
+where $\lambda>0$, $\vc{z} \sim q_{\vc{\phi}}(\vc{z}|\vc{x})$, $\tilde{\vc{z}} \sim p(\vc{z})$. Not that the loss~\eqref{eq:aae_loss_autoencoder} has implicit functional dependence on $\vc{\phi}$ through the samples $\vc{z}$.  A schematic of the AAE model is in Fig.~\ref{fig:aae} and the AAE training procedure is described in Alg.~\ref{alg:aae}. Again, any prior $p(\vc{z})$ that we can sample from is suitable for the regularization of AAE, even a multimodal one. In practice, an AAE model compared to a WAE behaves similarly as GAN compared to VAE. The adversarial loss leads to less blurry reconstructions and generated samples at the cost of higher training instability~\cite{tolstikhin2017wasserstein}. One way to gain advantages of both is to use an AAE architecture as depicted in Fig.~\ref{fig:aae} and add the MMD regularization term~\eqref{eq:mmd} to the loss~\eqref{eq:aae_loss_autoencoder}.
 
+The single-mode prior $p(\vc{z})$ of the VAE model stimulates the distribution $q_{\vc{\phi}}(\vc{z}|\vc{x})$ to have a single mode as well, and therefore it is hard to fit data with a multi-modal latent distribution. The publication~\cite{tomczak2018vae} proposes a learnable multimodal \textbf{Vamp} prior realized as a mixture of $K \in \mathbb{N}$ independent Gaussian components. However, the Vamp prior is not compatible with the basic VAE model since its use does not lead to an analytical expression of the KLD~\eqref{eq:vae_kld}. Fortunately, we have just described two alternatives that only require samples from the prior and which are viable with Vamp. The parameters of the components of the mixture can be then learned together with the parameters of the model. We will present some experiments with this prior in Chapter~\ref{sec:chapter_comparison}.
 
+\subsection{Generative autoencoders in anomaly detection}
+\subsubsection{Anomaly scores}
+The likelihood function~\eqref{eq:vae-px} constitutes the ideal anomaly score. Some training losses such as ELBO~\eqref{eq:elbo3} were designed as approximations of the likelihood and can thus be used as anomaly scores. However, this interpretation is not so clear for other training losses, i.e.~\eqref{eq:general_wae_loss} or \eqref{eq:aae_loss_autoencoder}, hence these models were proposed for anomaly detection with separately defined anomaly scores. Nevertheless, many scores are interchangeable, giving rise to another degree of freedom (hyperparameter) for the use of autoencoders in anomaly detection. A common score is based on the first term in the loss i.e. a Monte Carlo estimate of the expectation of conditional log-likelihood over the encoder $- \mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})} \left[ \ln p_{\vc{\theta}}(\vc{x}| \vc{z}) \right]$, which is in the case of a isotropic Gaussian decoder equal to
+\begin{align} \label{eq:score_sample}
+s_{\text{rs}}(\vc{x}) = & \frac{1}{\sigma L} \sum_{l=1}^L \vert \vert x - \vc{\mu}_{\vc{\theta}} (\vc{z} ^l) \vert \vert_2^2.
+\end{align}
+This score, called the \textbf{sampled reconstruction error}, was shown in~\cite{xu2018unsupervised} to be more accurate than evaluating~\eqref{eq:vae-px} by sampling $\vc{z}$ from the prior $p(\vc{z})$, which is equal to computing $- \mathbb{E}_{p(\vc{z})} \left[ \ln p_{\vc{\theta}}(\vc{x}| \vc{z}) \right]$. Further simplification is based on replacing samples from the encoder by its mean $- \ln p_{\vc{\theta}}(\vc{x}| \vc{\mu}_{\vc{\phi}}(\vc{x}))$ and therefore avoiding sampling, yielding the common \textbf{reconstruction error} score
+\begin{align} \label{eq:score_mean}
+s_{\text{rm}}(\vc{x}) = & \vert \vert x - \vc{\mu}_{\vc{\theta}} ( \vc{\mu}_{\vc{\phi}}(\vc{x}) )  \vert \vert_2^2.
+\end{align}
+The usage of~\eqref{eq:score_mean} is justified by the assumption that taking the mean at the encoder should approximate~\eqref{eq:score_sample} while having lower computational demands. However, as we show in some of the experiments in Chapter~\ref{sec:chapter_comparison}, the score~\eqref{eq:score_sample} performs generally better.
 
-
-
-
-
-
-
-
-
-
-
-As was already demonstrated, a common criticism of the VAE model is its use of the unit normal prior $p(\vc{z})$ which stimulates the distribution $q_{\vc{\phi}}(\vc{z}|\vc{x})$ to have a single mode, and therefore it is hard to fit data with a multi-modal latent distribution. The publication~\cite{tomczak2018vae} proposes a learnable multimodal \textbf{Vamp} prior realized as a mixture of $K \in \mathbb{N}$ independent Gaussian components. However, the Vamp prior is not compatible with the basic VAE model since its use does not lead to an analytical expression of KLD~\eqref{eq:vae_kld}. In the following text, we will describe alternatives to KLD regularization that are viable with this kind of prior. Then, the parameters of the components of the mixture are learned together with the parameters of the model.
-
-\subsection{VAE in anomaly detection}
-From the anomaly detection perspective, the basic criterion that test whether an input $\vc{x}$ is from the training (normal) data distribution is based on an estimate of the log-likelihood $- \ln p_{\vc{\theta}}(\vc{x}|\vc{z})$ is computed. However, using only the generating model with a prior
+For adversarial autoencoders, these simplifications can be combined with the discriminator score~\cite{schlegl2017unsupervised, zenatiEfficientGANBasedAnomaly2018},
 \begin{equation}
-- \mathbb{E}_{p(\vc{z})}\left[\ln p_{\vc{\theta}}(x|z)\right]
+    s_{\text{ad}}(\vc{x}) = \alpha s_{\text{rm}}(\vc{x}) + (1-\alpha) d_{\vc{\eta}}(\vc{\mu}_{\vc{\phi}}(\vc{x})), \alpha \in \left[ 0, 1 \right].
+\label{eq:aae_score}
 \end{equation}
-is theoretically well--justified, but it has been shown that this does not work well enough in practice~\cite{xu2018unsupervised}. Instead, the generative and discriminative distributions are used together to compute an estiamte of the \textbf{sampled reconstruction probability}
-\begin{equation} \label{eq:rec_prob}
-s_{\text{VAE}}(\vc{x})=-\frac{1}{L}\sum_{l=1}^{L}\ln p_{\vc{\theta}}(\vc{x}|\vc{z}^{l}) \approx-\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})\right].
+
+The reconstruction error-based anomaly scores were criticized in~\cite{pidhorskyi2018generative} for not capturing the true data density $p(\vc{x}).$ The proposed replacement is based on the orthogonal decomposition of the data into $\vc{x}=\vc{x}^\bot + \vc{x}^{\parallel} $ where the $\vc{x}^\parallel$  lies in the tangent space of to the manifold defined by the decoder. This allows to decompose the marginal likelihood into a product of two orthogonal parts
+\begin{equation} \label{eq:jacodeco_basic}
+    p(\vc{x}) \approx p(\vc{x}^{||})p(\vc{x}^{\perp}),
 \end{equation}
-\begin{equation}
-\vc{z}^l \sim q_{\vc{\phi}}(\vc{z}|\vc{x}) \nonumber 
-\end{equation}
-which was done in one of the first application of VAE in anomaly detection in~\cite{an2015variational}, where the authors successfully compare the VAE with AE and PCA on several anomaly datasets while claiming that the generative property of VAE can be used for causal analysis on the detected anomalies. Note that for a normal decoder, equation~(\ref{eq:vae_score}) is very similar to the reconstruction error of an  AE model~\eqref{eq:ae_objective}, with the difference that the reconstruction probability is computed from several samples of the encoder.
+where $p(\vc{x}^\bot)$ is the reconstruction error term, e.g.~\eqref{eq:score_sample}, and $p(\vc{x}^\parallel)$ is obtained by transformation of variables~\eqref{eq:rv_transformation}. The calculation of~\eqref{eq:jacodeco_basic} is expensive, as it needs to compute the singular value decomposition of a Jacobian. For more details, see~\cite{pidhorskyi2018generative} or~\cite{vsmidl2019anomaly} and Sec.~\ref{sec:anomaly_detection}.
 
-The reason for using the reconstruction probability of a VAE instead
-of a reconstruction error of AE is the improved generalization that
-was described in the previous section. It is discussed in~\cite{dai2017hidden}
-that a VAE model is equivalent to a non--linear robust PCA model
-and is proficient at dismissing sparse outliers. The authors also
-make note of the fact that VAE is very efficient in pruning of unnecessary
-latent dimensions in case when the real latent structure has lower
-dimension than the chosen VAE latent space. However, sometimes~\cite{pereira2018unsupervised}
-the reconstruction error of the VAE is used, which is defined as
-\begin{equation}
-f_{\text{VAEr}}(x)=-\frac{1}{M}\sum_{m=1}^{M}||x-\mathbb{E}\left[p_{\vc{\theta}}(x|z^{m}(\varepsilon)\right]||_{2}^{2},
-\end{equation}
-where only the mean of the generative distribution is compared to
-the original sample $x$.
+\subsubsection{Practical examples}
+The reason for using the VAE model instead of a reconstruction error of AE is the improved generalization that was described in the previous section. It is discussed in~\cite{dai2017hidden} that a VAE model is equivalent to a non--linear robust PCA model and is proficient at dismissing sparse outliers. The authors also make note of the fact that VAE is very efficient in pruning of unnecessary latent dimensions in case when the real latent structure has lower dimension than the chosen VAE latent space.
 
-Another way of using VAE and other autoencoding models for anomaly
-detection is to employ their ability to produce a low--dimensional
-representation of high--dimensional data that preserves the important
-relations between individual datapoints. Then, an anomaly detection
-model (be it a generative or a classical one) can be trained on the
-data encoded in the latent space. This two stage approach is especially
-useful when the problem is in the image domain and some kind of vectorization
-has to be used anyway. Also it enables the combination of countless
-different approaches. Usage of this technique will be demonstrated
-in one of the next chapters. It is also used in~\cite{dai2019diagnosing},
-where both stages are a VAE and the second stage has the same input
-and latent space dimensionality (therefore it does not compress data
-at all). Although this paper does not present an application in anomaly
-detection, it shows an improvement in learning of the latent space
-prior. 
+In~\cite{xu2018unsupervised} the authors present a so-called \textbf{DonutVAE} model with an enhanced loss function to detect anomalies in times series data. The architecture is similar to that of a vanilla VAE, but the training loss~\eqref{eq:vae_loss} is modified to consider the nature of the time series data. The authors then show that usage of this loss function improves overall results. This however has a caveat -- known anomalous samples must be available, otherwise the proposed loss is the same as~\eqref{eq:vae_loss}. Furthermore, the authors claim that using reconstruction probability~\eqref{eq:score_sample} can be seen as
+a weighted kernel density estimate. A smilar problem is solved in~\cite{pereira2018unsupervised}, where a VAE model coupled with an LSTM recurrent neural network with attention mechanism is used for detecting anomalies in time series. Again, the model operates in the semisupervised setting, and it is able to capture the temporal structure in the data.
 
-In~\cite{xu2018unsupervised} the authors present a so-called DonutVAE
-with an enhanced loss function to detect anomalies in times series
-data. The architecture is similar to that of a vanilla VAE, but the
-loss becomes
-\begin{equation}
-\mathcal{L}_{\text{DVAE}}(x,\vc{\phi},\vc{\theta})=\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|x)}\left[\beta\ln p(\vc{z})-\ln q_{\vc{\phi}}(\vc{z}|x)+\sum_{t=i}^{T}\alpha_{t}\ln p_{\vc{\theta}}(x|z)\right],\label{eq:donutvae}
-\end{equation}
-where $x=\{x_{t}\}_{t=1}^{T}$ is a sliding window of the last $T$
-observations. Also, $\alpha_{t}=0$ if $x_{t}$ is anomalous or missing
-and $\alpha_{t}=1$ otherwise and $\beta=\sum_{t=1}^{T}\alpha_{t}/T$.
-The authors then show that usage of this loss function improves overall
-results. This however has a caveat -- known anomalous samples must
-be available, otherwise the loss~(\ref{eq:donutvae}) is the same
-as~(\ref{eq:elbo2}). Furthermore, the authors claim that using
-reconstruction probability~(\ref{eq:vae_score}) can be seen as
-a weighted kernel density estimate.
+A variant of AAE is used in~\cite{leveau2017adversarial} where it is benchmarked on the MNIST problem. Standard normal distribution prior is compared to a Gaussian mixture model (GMM) latent prior and a special rejection component is introduced for representation of anomalies. In~\cite{chen2018unsupervised} the AAE model is compared to VAE on the task of detection of brain abnormalities in MRI images. The loss function of the autoencoding part is enhanced by a term $\gamma||\vc{z}-\vc{z}'||, \gamma > 0$, where $\vc{z}$ is a latent representation of a sample $\vc{x}$ and $\vc{z}'$ is the latent representation of the reconstructed sample $\vc{x}'$, which is supposed to improve consistency of the representation. The thesis~\cite{dimokranitou2017adversarial} also uses AAEs for detection of abnormalities in videos. The model presented in~\cite{pidhorskyi2018generative} uses an additional discriminator on top of the decoder in AAE to improve reconstruction and generative property. The model is then tested for anomaly detection on standard benchmark datasets.
 
-The authors of~\cite{zong2018deep} couple an ordinary autoencoder
-with a Gaussian mixture model (GMM) represented by a neural network.
-The AE reduces the problem dimension to help overcome the curse of
-dimensionality, while the GMM model serves as a density estimate in
-the latent space. The novelty of the method is in two facts. Firstly,
-instead of training parameters of both models separately, they are
-learnt jointly which improves the performance of the model. Secondly,
-the input of the GMM model is not only the latent representation,
-but also the reconstruction error of the sample. The loss is 
-\begin{eqnarray}
-\mathcal{L}_{\text{DAGMM}}(x,\vc{\phi},\vc{\theta},\omega) & = & ||x-d_{\vc{\theta}}(e_{\vc{\phi}}(x))||_{2}^{2}+\lambda_{1}E_{\omega}(\vc{z})+\lambda_{2}P(\hat{\Sigma)}\\
-z & = & \left[e_{\vc{\phi}}(x),||x-d_{\vc{\theta}}(\vc{z})||_{2}^{2}\right]^{T}\\
-E_{\omega}(\vc{z}) & = & -\ln\left(\sum_{i=1}^{d}\pi_{\omega,i}\frac{\exp\left(-\frac{1}{2}(\vc{z}-\mu_{\omega,i})^{T}\Sigma_{i}^{-1}(\vc{z}-\mu_{\omega,i})\right)}{\sqrt{|2\pi\Sigma_{\omega,i}|}}\right)
-\end{eqnarray}
-where we recognize the reconstruction error of the AE, the energy
-term $E_{\omega}(\vc{z})$ of the GMM model and a penalization $P(\Sigma)$
-that prevents the covariance matrices in the GMM model to become singular,
-$\lambda_{1},\lambda_{2}>0$ are scaling parameters. Parameters $\left\{ \pi_{\omega,i},\mu_{\omega,i},\Sigma_{\omega,i}\right\} _{i=1}^{d}$
-are the parameters of the GMM model estimated by a neural network
-with weights $\omega$. The sample energy is used as anomaly score.
-Although this model is not based on VAE, we can view the energy term
-as being similar to the KL divergence term in the VAE loss as it also
-imposes some kind of structure in the latent space.
-
-A VAE model couple with an LSTM recurrent neural network with attention
-mechanism is used in~\cite{pereira2018unsupervised} for detecting
-anomalies in time series. They operate in the semisupervised setting,
-where only labeled normal samples are used for training. Although
-the authors share some interesting insights, e.g. that the VAE is
-able to capture the temporal structure in the data, they do not offer
-a thorough comparison with other methods.
-
-
-
-
-\subsection{Wasserstein autoencoders in anomaly detection}
-
-For InfoVAE, the anomaly score can be either the reconstruction error~(\ref{eq:ae_score})
-or the reconstruction probability~(\ref{eq:vae_score}) depending
-on whether a deterministic or a stochastic decoder is used. In the
-AAE model, we can use the loss of a trained model which combines the
-reconstruction error term with the discriminator score 
-\begin{equation}
-f_{\text{AAE}}(x)=\mathcal{L}_{ae}(x,\tilde{x},\tilde{z},\bar{\vc{\theta}},\bar{\vc{\phi}}),\tilde{z}\sim q_{\bar{\vc{\phi}}}(\vc{z}|x),\tilde{x}\sim p_{\bar{\vc{\theta}}}(x|\tilde{z}),\label{eq:aae_score}
-\end{equation}
-where $\bar{\vc{\theta}},\bar{\vc{\phi}}$ are fixed parameters of the trained
-neural network. This anomaly score has one tuning hyperparameter $\lambda$
-which governs how much the information from the discriminator weighs
-in to the decision. As said before, the reconstruction term $c(x,\tilde{x})$
-is either a reconstruction error or probability based on the type
-of decoder.
-
-The AAE model is used in~\cite{leveau2017adversarial} where it
-is benchmarked on the MNIST problem. Standard distribution is compared
-to a Gaussian mixture model (GMM) when used as priors $p(\vc{z})$ and
-a special rejection component is introduced for representation of
-anomalies. 
-
-In~\cite{chen2018unsupervised} an AAE model is compared to the
-VAE model on the task of detection of brain abnormalities in MRI images.
-The loss function of the autoencoding part is enhanced by a term $\alpha||z-z^{\prime}||$,
-where $z$ is a the latent representation of a sample $x$ and $z'$
-is the latent representation of the reconstructed sample $\tilde{x}$.
-This is supposed to improve consistency of the representation. The
-thesis~\cite{dimokranitou2017adversarial} also uses AAEs for detection
-of abnormalities in videos. The model presented in~\cite{pidhorskyi2018generative}
-uses an additional discriminator on top of the decoder in AAE to improve
-reconstruction and generative property. The model is then tested for
-anomaly detection on standard benchmark datasets.
-
-Clearly, some work has already been done in the area of AAE and anomaly
-detection, but not a lot of authors use the InfoVAE model for this
-specific task.
-
+Another way of using generative autoencoders for anomaly detection is to employ their ability to produce a low--dimensional representation of high--dimensional data that preserves the important relations between individual datapoints. Then, an anomaly detection model (be it a generative or a classical one) can be trained on the data encoded in the latent space. This two stage approach is especially useful when the target domain is image data and some kind of vectorization has to be used anyway. Usage of this technique will be demonstrated an experiment in this chapters. It is also used in~\cite{dai2019diagnosing}, where both stages are a VAE and the second stage has the same input and latent space dimensionality (therefore it does not compress data at all). Although this paper does not present an application in anomaly detection, it shows an improvement in learning of the latent space prior. The authors of~\cite{zong2018deep} couple an ordinary autoencoder with a Gaussian mixture model represented by a neural network. The AE reduces the problem dimension to help overcome the curse of dimensionality, while the GMM model serves as a density estimate in the latent space. Both the autoencoder and the GMM model are learnt jointly which improves the performance of the model. Secondly, the input of the GMM model is not only the latent representation,
+but also the reconstruction error of the sample. Although this model is not based on VAE, the proposed loss function can be viewed as being similar to the general form~\eqref{eq:general_wae_loss}, as it imposes some kind of structure on the distribution of encodings.
 
 \subsection{Normalizing flows}
 The name normalizing flows refers to methods relying on the change of variables formula

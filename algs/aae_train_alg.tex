@@ -1,17 +1,18 @@
 \begin{algorithmic}[1]
-\Require{A training set $X=\lbrace x_j \rbrace \in \mathbb{R}^d$, maximum number of iterations $I\in\mathbb{N}$, batchsize $L \in \mathbb{N}$, the number of decoder samples $M$, regularization coefficient $\lambda \in \mathbb{R}$.}
-\State $\phi,\theta, \eta \gets $ Initialize parameters
+\Require{An AAE model with encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$, decoder $p_{\vc{\theta}}(\vc{x}|\vc{z})$,  a prior $p(\vc{z})$ and a discriminator $d_{\vc{\eta}}(\vc{z})$, training set $X=\lbrace \vc{x}_1, \vc{x}_2, \ldots, \vc{x}_n \rbrace \subset \mathcal{X}$, maximum number of iterations $I\in\mathbb{N}$, batchsize $B \in \mathbb{N}$, regularization coefficient $\lambda > 0$, standard deviation parameter $\sigma$ > 0.}
+\State $\vc{\phi},\vc{\theta}, \vc{\eta} \gets $ Initialize parameters
 \State{$i \gets $ Iteration counter}
-\While{$i<I$ or $\phi,\theta,\eta$ are not converged}
-	\State{$X_L \gets$ A random batch of $L$ samples from $X$}
-	\State{$Z_L \gets$ A random batch of $L$ samples from $p(z)$}
-	\State{$\tilde{Z}_L \gets \lbrace\tilde{z}_j \sim q_{\phi}(z|x_j), x_j \in X_L \rbrace$ samples from $q_{\phi}(z|x)$}
-	\State{$\tilde{X}_L \gets \lbrace\tilde{x}_j \sim p_{\theta}(x|\tilde{z}_j), \tilde{z}_j \in \tilde{Z}_L \rbrace$ samples from $p_{\theta}(x|z)$}
-	\State{$l_d \gets \frac{1}{L}\sum_{j=1}^L \mathcal{L}_d(z_j,\tilde{z}_j,\eta), z_j \in Z_L, \tilde{z}_j \in \tilde{Z}_L$}
-	\State$\eta \gets $ Update parameters with gradients $\nabla_{\eta} l_d$ to maximize $l_d$
-	\State$l_{ae} \gets \frac{1}{L}\sum_{j=1}^L \mathcal{L}_{ae}(x_j,\tilde{x}_j,\tilde{z}_j,\theta,\phi), x_j \in X_L, \tilde{x}_j \in \tilde{X}_L, \tilde{z}_j \in \tilde{Z}_L$
-	\State{$\phi,\theta \gets $ Update parameters with gradients $\nabla_{\theta,\phi} l_{ae}$ to minimize $l_{ae}$}
+\While{$i<I$ or $\vc{\phi},\vc{\theta},\vc{\eta}$ are not converged}
+	\State{$X_B \gets$ A random batch of $B$ samples from $X$}
+	\State{$Z \gets \lbrace \vc{z}_j \sim q_{\vc{\phi}}(\vc{z}|\vc{x}_j), \vc{x}_j \in X_B \rbrace$ samples from the encoder}
+	\State{$\tilde{Z} \gets$ A random batch of $B$ samples from prior $p(\vc{z})$}
+	\State{$\tilde{X} \gets \lbrace\tilde{\vc{x}}_j \sim p_{\vc{\theta}}(\vc{x}|\tilde{\vc{z}}_j), \tilde{\vc{z}}_j \in \tilde{Z}_B \rbrace$ generated samples}
+	\State$l_{ae} \gets \frac{1}{B}\sum_{j=1}^B \mathcal{L}_{\text{AAE}}( \vc{x}_j,\vc{z}_j,\tilde{\vc{z}}_j, , \vc{\theta}, \vc{\phi} ) , x_j \in X_B, \vc{z}_j \in Z, \tilde{\vc{z}}_j \in \tilde{Z}$
+	\State{$l_d \gets \frac{1}{B}\sum_{j=1}^B \mathcal{L}_{\text{AAE}_d}(\vc{z}_j,\tilde{\vc{z}}_j, \vc{\eta}), \vc{z}_j \in Z, \tilde{\vc{z}}_j \in \tilde{Z}$}
+	\State$\vc{\phi} \stackrel{+}\gets - \nabla_{\vc{\phi}}l_{ae} $ update of encoder weights
+	\State$\vc{\theta} \stackrel{+}\gets - \nabla_{\vc{\theta}}l_{ae} $ update of decoder weights
+	\State$\vc{\eta} \stackrel{+}\gets - \nabla_{\vc{\eta}}l_{d} $ update of discriminator weights
 	\State{$i \gets i+1$}
 \EndWhile
-\State{\textbf{return} encoder $q_{\phi}(z|x)$, decoder $p_{\theta}(x|z)$, discriminator $d_\eta(z)$}
+\State{\textbf{return} encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$, decoder $p_{\vc{\theta}}(\vc{x}|\vc{z})$, discriminator $d_{\vc{\eta}}(\vc{z})$}
 \end{algorithmic}
