@@ -1,0 +1,59 @@
+\begin{tikzpicture}
+  % code
+  \node[const]           (z) {$\vc{z} \sim p(\vc{z})$};
+  \node[const, right = 0.3cm of z]           (zin) {};
+  % decoder in
+  \node[latent, right = 0.4cm of z, yshift = 0.275cm] (G11) {};
+  \node[latent, right = 0.4cm of z, yshift = -0.275cm] (G12) {};
+  % decoder hidden
+  \node[latent, right = 1.6cm of z, yshift = 0.55cm] (G21) {};
+  \node[latent, right = 1.6cm of z, yshift = 0cm] (G22) {};
+  \node[latent, right = 1.6cm of z, yshift = -0.55cm] (G23) {};
+  % decoder out
+  \node[latent, right = 2.8cm of z, yshift = 0.825cm] (G31) {};
+  \node[latent, right = 2.8cm of z, yshift = 0.275cm] (G32) {};
+  \node[latent, right = 2.8cm of z, yshift = -0.275cm] (G33) {};
+  \node[latent, right = 2.8cm of z, yshift = -0.825cm] (G34) {};
+  % generator tag
+  \node[const, right = 1.6cm of z, yshift = 1.1cm] (G) {$g_{\vc{\theta}}(\vc{z})$};
+  % x
+  \node[const, right = 4.0cm of z]           (xg) {$\tilde{\vc{x}}$};
+  \node[const, right = -0.8cm of xg]          (xout) {};
+  \node[const, right = 0.5cm of xg]           (xin) {};
+  \node[const, right = -0.7cm of xg, yshift=1.3cm]      (x) {$\vc{x} \sim p(\vc{x})$};
+  \node[const, right = -0.05cm of xg, yshift=1.1cm]      (xpout) {};
+  \node[const, right = 0.5cm of xg, yshift=0.1cm]      (xpin) {};
+  % encoder in
+  \node[latent, right = 0.7cm of xg, yshift = 0.825cm] (D11) {};
+  \node[latent, right = 0.7cm of xg, yshift = 0.275cm] (D12) {};
+  \node[latent, right = 0.7cm of xg, yshift = -0.275cm] (D13) {};
+  \node[latent, right = 0.7cm of xg, yshift = -0.825cm] (D14) {};
+  % encoder hidden
+  \node[latent, right = 1.9cm of xg, yshift = 0.55cm] (D21) {};
+  \node[latent, right = 1.9cm of xg, yshift = 0cm] (D22) {};
+  \node[latent, right = 1.9cm of xg, yshift = -0.55cm] (D23) {};
+  % encoder out
+  \node[latent, right = 3.1cm of xg, yshift = 0cm] (D31) {};
+  % xhat
+  \node[const, right = 4.1cm of xg]           (dx) {$s_d \in [0,1]$};
+  \node[const, right = -1.9cm of dx]       (dxout) {};       
+  % discriminator tag
+  \node[const, right = 1.9cm of xg, yshift = 1.1cm] (D) {$d_{\vc{\varphi}}(\vc{x})$};
+  
+  % edges
+  % latent
+  \nedge {z} {zin}
+  % generator
+  \nedge {G11, G12} {G21, G22, G23}
+  \nedge {G21, G22, G23} {G31, G32, G33, G34} 
+  
+  % x 
+  \nedge {xout} {xg}
+  \nedge {xg} {xin}
+  \nedge {xpout} {xpin}
+  % discriminator
+  \nedge {D11, D12, D13, D14} {D21, D22, D23}
+  \nedge {D21, D22, D23} {D31}
+  %xhat
+  \nedge {dxout} {dx}
+\end{tikzpicture}
