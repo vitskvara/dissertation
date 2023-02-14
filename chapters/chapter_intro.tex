@@ -143,7 +143,7 @@ where $\mathcal{X}$ is the input space, $s(\vc{x})$ is an anomaly score, and $\a
 Computing the empirical $\text{VOL}(\alpha)$ in data space $\mathcal{X}$ requires first finding the threshold $\tau$ corresponding to the chosen FPR $\alpha$ and then integrating the volume which corresponds to the space enclosed by the isosurface where the anomaly score is equal to $\tau$. It is numerically estimated by Monte Carlo sampling~\cite{robert1999monte}. This comes with its downsides. Mainly, the number of samples required to cover $d$--dimensional sample space grows exponentially with $d$. This issue has been addressed in \cite{goix2016evaluate}, where the volume is computed multiple times for different subsampling of input features, however this does not seem to be optimal as it requires training a new model for each subset of features.
 
 
-\section{Anomaly detectors taxonomy}
+\section{Anomaly detectors taxonomy} \label{sec:taxonomy}
 Anomaly detection methods are based on a wide range of paradigms. In this section we will follow the taxonomy outlined in publications~\cite{pimentel2014review, ruff2020unifying}, which divide shallow (not based on neural networks) and deep (based on neural networks) detectors into groups based on their common traits. Examples of methods will be given since their knowledge will be useful in the later chapters of this text, but the list is far from complete. For a complete overview of the landscape of anomaly detection methods, see the surveys~\cite{pimentel2014review, campos2016evaluation, goldstein2016comparative, moustafa2019holistic, kwon2019survey, fernandes2019comprehensive, wang2019progress, chalapathy2019deep,ruff2020unifying}.
 
 \subsection{Probabilistic  methods} \label{sec:probabilistic_models}

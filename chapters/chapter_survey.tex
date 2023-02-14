@@ -31,7 +31,7 @@ It can be shown~\cite{goodfellow2014gan} that this objective has a saddle point 
 \begin{equation}\label{eq:disc_loss}
 \mathcal{L}_{d}(\vc{x},\vc{z},\vc{\varphi})= - \ln d_{\vc{\varphi}}(\vc{x}) - \ln\left(1-d_{\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))\right).
 \end{equation}
-Note that we explicitly remove the dependency of the loss functions on the weights that are not being optimized through them. A detailed training procedure of a GAN is described in Alg.~\ref{alg:gan_train}. Interestingly, during training, the generator never encounters any sample coming from $p(x)$ but is still able to eventually learn the shape of $p(\vc{x})$. The choice of $p(\vc{z})$ can be rather arbitrary as far as sampling from it is possible and the generator and discriminator have sufficient capacity to process it. In practice, uniform or normal distribution is usually used, as already mentioned. 
+Note that we explicitly remove the dependency of the loss functions on the weights that are not being optimized through them. A detailed training procedure of a GAN is described in Alg.~\ref{alg:gan_train}. Interestingly, during training, the generator never encounters any sample coming from $p(\vc{x})$ but is still able to eventually learn the shape of $p(\vc{x})$. The choice of $p(\vc{z})$ can be rather arbitrary as far as sampling from it is possible and the generator and discriminator have sufficient capacity to process it. In practice, uniform or normal distribution is usually used, as already mentioned. 
 
 \begin{algorithm}
 \include{algs/gan_train_alg}
@@ -69,7 +69,7 @@ The \textbf{Variational Autoencoder} (VAE) is a generative model that has enjoye
 The VAE has been mainly used for generation of artificial images such as faces~\cite{rezende2014stochastic} or sentences~\cite{bowman2015generating}, but also for other tasks such as semi--supervised learning~\cite{kingma2014semi}, segmentation~\cite{sohn2015learning}, static image forecasting~\cite{walker2016uncertain} and of course for anomaly detection~\cite{an2015variational,xu2018unsupervised,solch2016variational}. Since its popularity, a multitude of approaches enhancing the original VAE has been published, approaching the paradigm from different angles, with some of the more prominent examples published in~\cite{higgins2017beta,zhao2017infovae,tolstikhin2017wasserstein,makhzani2015adversarial,pu2017adversarial}. In the following text, we will go through the basic theory, its implications for the basic VAE, and through some of the extensions. 
 
 \subsection{Basic VAE} \label{sec:vanilla_vae}
-We will begin by defining the VAE from a probabilistic perspective. Let us assume that there is a dataset $X$ consisting of i.i.d samples. We want to obtain a tractable estimate of the true data distribution $p(\vc{x})$ in order to be able to sample from it. For that purpose, suppose that there is a hidden random process that generates the data and which involves a latent variable $\vc{z}$. Then, like in the case of the GAN model, we can redirect the sampling from the data space $\mathcal{X}$ to the latent space
+Let's begin by defining the VAE from a probabilistic perspective. Assume that there is a dataset $X$ consisting of i.i.d samples. We want to obtain a tractable estimate of the true data distribution $p(\vc{x})$ in order to be able to sample from it. For that purpose, suppose that there is a hidden random process that generates the data and which involves a latent variable $\vc{z}$. Then, like in the case of the GAN model, we can redirect the sampling from the data space $\mathcal{X}$ to the latent space
 $\mathcal{Z}$, in which it might be easier. Specifically, we want to sample from the latent prior distribution specified by a density $p(\vc{z})$, then pass this sample to the generative distribution with density $p_{\vc{\theta}}(\vc{x}|\vc{z})$, where $\vc{\theta}$ are its parameters, and obtain a sample $\vc{x}$ that will be very similar to the samples coming from the true data distribution $p(\vc{x})$. In other words, we want to maximize the probability of each sample obtained through the generative process
 \begin{equation} \label{eq:vae-px}
 p_{\vc{\theta}}(\vc{x})=\int_{\mathcal{Z}}p_{\vc{\theta}}(\vc{x}|\vc{z})p(\vc{z})d\vc{z}.
@@ -252,22 +252,57 @@ A variant of AAE is used in~\cite{leveau2017adversarial} where it is benchmarked
 Another way of using generative autoencoders for anomaly detection is to employ their ability to produce a low--dimensional representation of high--dimensional data that preserves the important relations between individual datapoints. Then, an anomaly detection model (be it a generative or a classical one) can be trained on the data encoded in the latent space. This two stage approach is especially useful when the target domain is image data and some kind of vectorization has to be used anyway. Usage of this technique will be demonstrated an experiment in this chapters. It is also used in~\cite{dai2019diagnosing}, where both stages are a VAE and the second stage has the same input and latent space dimensionality (therefore it does not compress data at all). Although this paper does not present an application in anomaly detection, it shows an improvement in learning of the latent space prior. The authors of~\cite{zong2018deep} couple an ordinary autoencoder with a Gaussian mixture model represented by a neural network. The AE reduces the problem dimension to help overcome the curse of dimensionality, while the GMM model serves as a density estimate in the latent space. Both the autoencoder and the GMM model are learnt jointly which improves the performance of the model. Secondly, the input of the GMM model is not only the latent representation,
 but also the reconstruction error of the sample. Although this model is not based on VAE, the proposed loss function can be viewed as being similar to the general form~\eqref{eq:general_wae_loss}, as it imposes some kind of structure on the distribution of encodings.
 
-\subsection{Normalizing flows}
-The name normalizing flows refers to methods relying on the change of variables formula
-\begin{equation}
-    p\left(\vec{x}\right) = p\left(\vec{z}\right)\!\left\vert \text{det} J_f\!\left(\vec{z}\right) \right\vert^{-1}, ~ \vec{z} = f^{-1}\!\left(\vec{x}\right),
-\label{eq:rv_transformation}
+\section{Normalizing flows} \label{sec:flow_models}
+Generative models that are based on \textbf{normalizing flows} aim to model the data distribution $p(\vc{x})$ in a general and expressive manner. While GANs do not explicitly consider a model for $p(\vc{x})$ and only build a proxy (generator) that enables sampling, VAEs instead optimize a posterior $p_{\vc{\theta}}(\vc{x}|\vc{z})$ through a lower bound on the data log-likelihood. In this regard, normalizing flows are the most  exact in handling of the data distribution. This is at the cost of some requirements that need to be followed when building and training a normalizing flow model that will be described in the following text. Normalizing flows have been used to model complex probability distributions in multiple publications~\cite{dinh2014nice,rezende2015variational,kingma2016improved,jin2022pfvae}. Since the exact log-likelihood of a new sample is readily available when using a normalizing flow model, they have been applied to anomaly detection tasks in~\cite{yamaguchi2019adaflow, schmidtNormalizingFlowsNovelty2019, diasAnomalyDetectionTrajectory2020a, pevny2020sum,rudolph2022fully}.
+
+A normalizing flow is a transformation $f_{\vc{\nu}}:\mathcal{Z} \rightarrow \mathcal{X}$ that can be used to express a data sample $\vc{x} \sim p(\vc{x})$ as
+\begin{equation} \label{eq:flow1}
+    \vc{x} = f_{\vc{\nu}}(\vc{z}), \vc{z} \sim p(\vc{z}),
 \end{equation}
-where $J_f\!\left(\vec{z}\right)$ is Jacobi matrix of function $f$ evaluated at $\vec{z}$. $p(\vec{z})$ is a known distribution of the latent variable $\vec{z}$ from space $\mathcal{Z}$ of the same dimension as $\mathcal{X}$.
+where $p(\vc{z})$ is the prior which has some desirable properties. The defining property of normalizing flow models, that differentiates them from VAEs and GANs, is that the transformation $f_{\vc{\nu}}$ must be invertible and both $f_{\vc{\nu}}$ and $f_{\vc{\nu}}^{-1}$ must be differentiable. This means that the dimension of $\vc{x}$ and $\vc{z}$ must be the same, so here we assume $\mathcal{Z} = \mathcal{X} = \mathbb{R}^d$. Therefore, from~\eqref{eq:flow1} and the formula for change of variables, we have
+\begin{equation} \label{eq:flow2}
+    p(\vc{x}) = p(\vc{z}) \left\vert \frac{\partial f_{\vc{\nu}}(\vc{z})}{\partial \vc{z}} \right\vert ^{-1} = p(f^{-1}_{\vc{\nu}}(\vc{x})) \left\vert \frac{\partial f^{-1}_{\vc{\nu}}(\vc{x})}{\partial \vc{x}} \right\vert 
+\end{equation}
+which contains the determinant of the square Jacobian matrix. In practice, the normalizing flow $f_{\vc{\nu}}$ is implemented as a neural network with weights $\vc{\nu}$. Notice that since it is fully invertible, we do not need an encoder-decoder pair like in a VAE. Again, like in the case of the vanilla VAE and GAN models, the prior might be e.g. $\mathcal{N}(0,\textbf{I})$. Thanks to~\eqref{eq:flow2}, the model can be directly optimized using the log-likelihood $- \ln p(\vc{x})$. When properly trained, it is possible to use a normalizing flow model to generate new samples using~\eqref{eq:flow1} or evaluate its density using~\eqref{eq:flow2}, which is the basis for anomaly detection.
 
-Theoretical reviews~\cite{papamakariosNormalizingFlowsProbabilistic2019, kobyzevNormalizingFlowsIntroduction2020} require $f$ to be invertible and both $f$ and $f^{-1}$ to be differentiable. Therefore, flow models primarily differ in how they define the class of functions $f$, which ranges from simple affine transformations to solutions of ordinary differential equations. The expressive power comes from their composition, as is usual in neural networks. In the comparison, we consider flows on tabular data only, for which we have implemented the well-known RealNVP~\cite{dinh2016density} and MAF~\cite{papamakariosMaskedAutoregressiveFlow2018} flows alongside a promising class of Sum-Product-Transform networks --- SPTN~\cite{pevny2020sum} combining normalizing flows with a graphical model. The likelihood is used as a natural anomaly score.
+One can see the transformation $f_{\vc{\nu}}$ as a process of reshaping the space $\mathbb{R}^d$ in order for $p(\vc{z})$ to closely fit $p(\vc{x})$. This process is commonly broken down into incremental steps described as a series of $K \in \mathbb{N}$ elementary invertible operations (flows)
+\begin{equation} \label{eq:flow3}
+    f_{\vc{\nu}} = f_{\vc{\nu},K} \circ f_{\vc{\nu},K-1} \circ \ldots \circ f_{\vc{\nu},1}
+\end{equation}
+which are composed together to form the full normalizing flow. This gives the model its name, as we can observe the "flow" of transformed variables
+\begin{equation} \label{eq:flow4}
+    \vc{z}_k = f_{\vc{\nu},k}(\vc{z}_{k-1}), k \in \hat{K}, \vc{z}_0 = \vc{z}, \vc{z}_K = \vc{x}.
+\end{equation}
+From~\eqref{eq:flow2}, we can express the normalizing flow objective as
+\begin{equation}
+    \mathcal{L}_{f} (\vc{x},\vc{\nu}) = - \ln p(\vc{x}) = -\ln p(\vc{z}) + \sum_{k=1}^K \ln \left\vert \frac{\partial f_{\vc{\nu},k}(\vc{z}_{k-1})}{\partial \vc{z}_{k-1}} \right\vert,
+\end{equation}
+where the inverse evaluation in the direction from $\vc{x}$ to $\vc{z}$ is given by $\vc{z}_{k-1} = f^{-1}_{\vc{\nu},k}(\vc{z}_{k})$. As mentioned earlier, this is used to train a normalizing flow model and is also a well-suited anomaly score.
 
-Flow models have not yet enjoyed much popularity in anomaly detection~\cite{yamaguchi2019adaflow, schmidtNormalizingFlowsNovelty2019, diasAnomalyDetectionTrajectory2020a, pevny2020sum} in comparison to the autoencoder-based models reviewed below. To us, this is surprising since these methods can exactly calculate likelihood functions, which under a good fit are the ideal anomaly score. Meanwhile, the focus of the surrounding community is on the topic of \textit{out of distribution detection} (OOD)\footnote{Out of distribution detection means identifying samples coming from a different dataset. For example, a model trained on MNIST / CIFAR10 should assign a low likelihood to samples from Fashion MNIST / SVHN respectively.}~\cite{nalisnickDeepGenerativeModels2019}, which is very related to anomaly detection if not being equal. Ref.~\cite{choiWAICWhyGenerative2019} suggests to use ensembles, while~\cite{renLikelihoodRatiosOutofDistribution2019} recommends to convert the single-class problem to classification problems in the spirit of \cite{steinwart2005a}. A deep investigation of OOD in~\cite{kirichenkoWhyNormalizingFlows2020} shows that with low-level features such as pixel intensities, flows tend to learn local models, i.e. according to taxonomy in~\cite{ruff2020unifying} they fail to detect semantic anomalies.
+The different flow models vary in the way the individual tranformations $f_{\vc{\nu},k}$ are constructed and trained, which is largely dependent on their application. In the \textbf{Non-linear Independent Component Estimator} (NICE)~\cite{dinh2014nice}, each individual flow is a called \textbf{aditive coupling layer}. It is an operation that splits the input $\vc{z}_{k-1}$ into two halves along its dimensions. The first half $\vc{z}_{k-1,1}$ remains unchanged and the second $\vc{z}_{k-1,2}$ undergoes a transformation using a parametrizable function $m$, which is a simple fully connected neural network with ReLU activations. Therefore
+\begin{align}
+    \vc{z}_{k,1} & = \vc{z}_{k-1,1} \\
+    \vc{z}_{k,2} & = \vc{z}_{k-1,2} + m(\vc{z}_{k-1,1}), 
+\end{align}
+and the reverse operation is 
+\begin{align}
+    \vc{z}_{k-1,1} & = \vc{z}_{k,1} \\
+    \vc{z}_{k-1,2} & = \vc{z}_{k,2} - m(\vc{z}_{k,1}), 
+\end{align}
+which is differentiable since $m$ is differentiable and its jacobian is easily computed. The \textbf{Real-valued Non-Volume Preserving} (RealNVP)~\cite{dinh2016density} is based on the NICE model and uses an \textbf{affine coupling layer}, where the second half of input dimesions undergo a scale-and-shift transformation
+\begin{align}
+    \vc{z}_{k,1} & = \vc{z}_{k-1,1} \\
+    \vc{z}_{k,2} & = \vc{z}_{k-1,2} \odot \exp(s(\vc{z}_{k-1,1})) + t(\vc{z}_{k-1,1}), 
+\end{align}
+where $s,t:\mathbb{R}^d \rightarrow \mathbb{R}^{d/2}$ are again represented by neural networks. The reverse operation for the second input is 
+\begin{align}
+    \vc{z}_{k-1,2} & = (\vc{z}_{k,2}  - t(\vc{z}_{k,1})) \odot \exp(-s(\vc{z}_{k,1})).
+\end{align}
+The \textbf{Glow}~\cite{kingma2018glow} demonstrates applicability of normalizing flows to image data, which is otherwise a very difficult domain. The flow used in this model consists of invertible 1x1 convolutions and it is demonstrated that it is able to generate realistic images of celebrity faces. Some normalizing flow models use an autoregressive constraint~\cite{kingma2016improved} to represent the flow of information from the prior to the data distribution. The most prominent is the \textbf{Masked Autoregressive Flow} (MAF)~\cite{papamakariosMaskedAutoregressiveFlow2018}. A promising class of \textbf{Sum-product-Transform Networks} (SPTN)~\cite{pevny2020sum} combines normalizing flows with a graphical model. For a more complex overview and introduction to generative models based on normalizing flows, see~\cite{papamakariosNormalizingFlowsProbabilistic2019, kobyzevNormalizingFlowsIntroduction2020}. 
+
+Although there are some applications of normalizing flows to anomaly detection~\cite{kirichenkoWhyNormalizingFlows2020, dias2020anomaly, rudolph2021same, gudovskiy2022cflow}, they are less popular than different autoencoding generative models. This might seem surprising, as they are at the same time praised for the theoretical exactness of the log-likelihood computation. However, it seems that maatching high-dimensional, complex distributions this way is very difficult and requires normalizing flow models with hundreds of flow levels. Thus, they are very slow to train on complex data, which is also due to the requirement $\text{dim}(\mathcal{Z}) = \text{dim}(\mathcal{X})$. The Glow model requires 200 million parameters optimized over 13,000 GPU-hours to achieve simillar performance to computationally much less expensive alternatives~\cite{kingma2018glow}. Still, normalizing flows present a very interesting branch of generative modeling.
 
 
-TODO:
+% input the alfven part here
 
-\begin{itemize}
-    \item read through the generativead paper and see if we are missing any models here
-    \item also compare the scores etc.
-\end{itemize}
+\input{chapters/chapter_alfven.tex}
