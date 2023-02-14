@@ -1,14 +1,16 @@
 \begin{tabular}{c c c c}
-	S1 divergence & S2 model & AUC & precision@50  \\
-	\hline
-	-- & kNN & 0.80$\pm$0.07 & 0.88$\pm$0.10 \\
+	\toprule
+	divergence & classifier & AUC & precision@50  \\
+	\midrule
+	-- & kNN & 0.80$\pm$0.07 &  \cellcolor{gray!15} 0.88$\pm$0.10 \\
 	KLD & kNN & 0.80$\pm$0.08 & 0.85$\pm$0.11 \\
-	MMD & kNN & \textbf{0.91$\pm$0.06} & \textbf{0.94$\pm$0.05}\\
-    JSD & kNN & 0.83$\pm$0.07 & 0.87$\pm$0.10\\
-    MMD + JSD & kNN & 0.86 $\pm$ 0.07 & 0.91$\pm$0.10 \\
+	MMD & kNN &  \cellcolor{gray!45} 0.91$\pm$0.06 &  \cellcolor{gray!45} 0.94$\pm$0.05\\
+    JSD & kNN &  \cellcolor{gray!15} 0.83$\pm$0.07 & 0.87$\pm$0.10\\
+    MMD + JSD & kNN &  \cellcolor{gray!30} 0.86 $\pm$ 0.07 &  \cellcolor{gray!30} 0.91$\pm$0.10 \\
     -- & GMM & 0.75$\pm$0.06 & 0.80$\pm$0.10\\
 	KLD & GMM & 0.74$\pm$0.06 & 0.83$\pm$0.11\\
 	MMD & GMM & 0.66$\pm$0.12 & 0.72$\pm$0.12\\
     JSD & GMM & 0.74$\pm$0.06 & 0.82$\pm$0.11\\
-    MMD + JSD & GMM & 0.76$\pm$0.06 & 0.84$\pm$0.10
+    MMD + JSD & GMM & 0.76$\pm$0.06 & 0.84$\pm$0.10 \\
+    \bottomrule
 \end{tabular}
