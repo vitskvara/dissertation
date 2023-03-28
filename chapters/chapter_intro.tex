@@ -155,11 +155,19 @@ A \textbf{Mahalabonis distance} anomaly detector~\cite{laurikkala2000informal} b
 \end{equation}
 which is equivalent to the evaluation of the negative log-likelihood under the Gaussian distribution. Even though this is one of the simplest and most non-robust methods, terms similar to~\eqref{eq:mahalabonis_score} will be encountered a lot in the remainder of this text.
 
-Instead of limiting the model to a single-mode distribution, a mixture of $k$ distributions 
+\begin{figure}
+\begin{centering}
+\includegraphics[scale=0.98]{data/chapter_intro/gmm_examples.pdf}
+\end{centering}
+\caption{The \textit{two bananas} dataset consists of two clusters of points. The black points are considered to be normal and the red are considered to be anomalies. The dataset is useful for introducing behaviour of anomaly detectors, because as an anomaly detection problem, it cannot be solved by a linear separation of the two groups of points. Here, GMM models with a varying number of components $K$ are fitted to the normal datapoints. The contours of the anomaly score based on~\eqref{eq:mixture} are shown together with the AUC computed with respect to the anomalous datapoints.}
+\label{fig:gmm_examples}
+\end{figure}
+
+Instead of limiting the model to a single-mode distribution, a mixture of $K$ distributions 
 \begin{equation} \label{eq:mixture}
-	p(\vc{x}) = \sum_{k=1}^K p(k) p(\vc{x}|k)
+	p(\vc{x}) = \sum_{k=1}^K p(k) p(\vc{x}|k), p(k) \in [0,1], \sum_{k=1}^K p(k) = 1,
 \end{equation}
-can be estimated instead. \textbf{Gaussian Mixture Models} (GMMs) have been used for anomaly detection in~\cite{roberts1994probabilistic,mahadevan2010anomaly}. There, we assume that $p(\vc{x}|k)$ are Gaussian distribution densities and their parameters are estimated using the EM algorithm~\cite{dempster1977maximum} or via Variational Bayes~\cite{bishop2006pattern}. As the anomaly score, we can use the maximum of Mahalabonis distances~\eqref{eq:mahalabonis_score} over $k$ components. However, their use cases are limited, mainly to the need to compute and invert the covariance matrix, which is $O(d^3)$ in the size of the input space $d$.
+can be estimated instead, where $p(k)$ is the prior probability of the $k$-th component. \textbf{Gaussian Mixture Models} (GMMs) have been used for anomaly detection in~\cite{roberts1994probabilistic,mahadevan2010anomaly}. There, we assume that $p(\vc{x}|k)$ are Gaussian distribution densities and their parameters are estimated using the EM algorithm~\cite{dempster1977maximum} or via Variational Bayes~\cite{bishop2006pattern}. The term $-\log p(\vc{x})$ is usually used as the anomaly score, although sometimes the maximum of the Mahalabonis distance~\eqref{eq:mahalabonis_score} over the $K$ components is used instead. However, the viable usecases for a GMM anomaly detector are limited, mainly due to the need to compute and invert the covariance matrix, which is $O(d^3)$ in the size of the input space $d$ (when the full covariance matrix is estimated). See Fig.~\ref{fig:gmm_examples}, where the same anomaly detection problem is solved by GMMs with different number of components. Even though the AUC score is already perfect for 2 components, the difficult shape of the normal data needs more components than that to be fully covered.
 
 Time series data anomaly detection was approached with the use of \textbf{Autoregressive Integrated Moving Average} (ARIMA) models in~\cite{roberts1994probabilistic,hoare2002line}, or using a \textbf{Hidden Markov Model} (HMM) in~\cite{yeung2003host,zhang2003new}. Both approaches offer predictions for future states of an observed system, and the anomaly score is the difference between the prediction and the actual state of the system. The problems to which these methods can be applied are encountered in medicine or computer network intrusion detection.
 
@@ -185,6 +193,15 @@ where $Z(\vc{\theta})$ is the partition function parametrized by $\vc{\theta}$ t
 Finally, the most recent advancements in anomaly detection were achieved with the use of deep generative models that model the distribution of the data via a generative process, where it is assumed that the data is generated from a hidden latent variable. \textbf{Flow models}~\cite{dinh2014nice}, \textbf{Variational autoencoders}~\cite{kingma2013vae} and \textbf{Generative Adversarial Networks}~\cite{goodfellow2014gan}  will be described in greater detail in Chapter~\ref{sec:chapter_survey}.
 
 \subsection{Distance-based methods} \label{sec:distance_methods}
+
+\begin{figure}
+\begin{centering}
+\includegraphics[scale=0.98]{data/chapter_intro/knn_examples.pdf}
+\end{centering}
+\caption{K-nearest neighbor detectors on the \textit{two bananas dataset}. The contours of the score~\eqref{eq:knn_kappa} are shown for different values of $k$ together with the resulting AUC.}
+\label{fig:knn_examples}
+\end{figure}
+
 Instead of modeling the probability distribution of the normal data, distance-based anomaly detectors use heuristics that compute a well-defined similarity measure between two data points. One of the simplest such models is the \textbf{k-Nearest Neighbor} (kNN)~\cite{ramaswamy2000efficient} model where the anomaly score of a sample is based on its proximity to its $k$--nearest neighbours from the training dataset. Different proximity measures are described in~\cite{harmeling2006outliers}, where 
 the Euclidean distance is used as the similarity measure and the set $X_{k}(\vc{x})$ is defined as the set of $k$-nearest neighbors of $\vc{x}$ from a training dataset $X = \lbrace \vc{x}_1, \vc{x}_2, \ldots, \vc{x}_n \rbrace \subset \mathbb{R}^d$.
 \begin{itemize}
@@ -201,7 +218,7 @@ the Euclidean distance is used as the similarity measure and the set $X_{k}(\vc{
 		s_{\delta}(\vc{x}) =  \left| \left| \frac{1}{k} \sum_{\vc{x}_i \in X_k(x)} (\vc{x}_i - \vc{x}) \right| \right|_2.
 	\end{equation}
 \end{itemize}
-All these definitions presume that normal data lie in concentrated regions of the data space $\mathcal{X}$, according to~\eqref{eq:normal_concentration}, while anomalies lie outside of them. The kNN anomaly detector is very popular thanks to its simplicity and performance~\cite{campos2016evaluation}. The biggest disadvantage is the computational cost. Even though there is no actual training procedure, the prediction complexity is $O(ndk)$. This can be ameliorated by the construction of a $k$-d tree~\cite{bentley1975multidimensional}, which partitions the space of the training data to speed-up prediction, or using GPU-based similarity search techniques such as~\cite{johnson2019billion}. Other methods, such as \textbf{REPEN}~\cite{pangLearningRepresentationsUltrahighdimensional2018}, use the kNN detector trained on low-dimensional representations of otherwise high-dimensional data produced by a deep neural network.
+All these definitions presume that normal data lie in concentrated regions of the data space $\mathcal{X}$, according to~\eqref{eq:normal_concentration}, while anomalies lie outside of them. The kNN anomaly detector is very popular thanks to its simplicity and good performance~\cite{campos2016evaluation}. See Fig.~\ref{fig:knn_examples}, where low values of $k$ result in a very local behaviour of the model, which is suitable for this problem. The biggest disadvantage of the model is the computational cost. Even though there is no actual training procedure, the prediction complexity is $O(ndk)$. This can be ameliorated by the construction of a $k$-d tree~\cite{bentley1975multidimensional}, which partitions the space of the training data to speed-up prediction, or using GPU-based similarity search techniques such as~\cite{johnson2019billion}. Other methods, such as \textbf{REPEN}~\cite{pangLearningRepresentationsUltrahighdimensional2018}, use the kNN detector trained on low-dimensional representations of otherwise high-dimensional data produced by a deep neural network.
 
 The \textbf{Local Outlier Factor} (LOF) algorithm~\cite{breunig2000lof} is based on comparing the local density of a sample $\vc{x}$ with the local density of its $k$--nearest neighbours. To correctly describe the way in which the density is defined and the anomaly score is computed, we use the formula~\eqref{eq:knn_kappa}. Then we define the \textit{local reachability density} as 
 \begin{equation}
