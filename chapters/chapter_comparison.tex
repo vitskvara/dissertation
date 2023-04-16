@@ -1,11 +1,10 @@
 \chapter{Empirical comparison of anomaly detectors} \label{sec:chapter_comparison}
 
-Deep generative models are challenging the classical methods in the field of anomaly detection nowadays. Every newly published method provides evidence of outperforming its predecessors, sometimes with contradictory results. The objective of this paper is twofold: to compare anomaly detection methods of various paradigms with a focus on deep generative models and identification of sources of variability that can yield different results. The methods were compared on popular tabular and image datasets. We identified that the main sources of variability are the experimental conditions: i) the type of dataset (tabular or image) and the nature of anomalies (statistical or semantic), and ii) strategy of selection of hyperparameters, especially the number of available anomalies in the validation set. Methods perform differently in different contexts, i.e. under a different combination of experimental conditions together with computational time. This explains the variability of the previous results and highlights the importance of careful specification of the context in the publication of a new method. All our code and results are available for download.
+Practical use of anomaly detetors (as well as other machine learning models) consists of finding the right choice of algorithm and its hyperparameters that is the most suitable for the problem at hand. This requires time consuming effort of training many models and evaluating them fairly on some test data. It is not clear however, if there is a method or a class of methods that is generally more suitable for solving certain anomaly detection problems than any other. Every newly published method provides evidence of outperforming its predecessors, sometimes with contradictory results. The objective of this chapter is twofold: to provide an empirical comparison of anomaly detection methods of various paradigms with a focus on deep generative models, and to identifify the sources of variability in data that have the largest influence on the suitability of a method. The methods are compared on popular tabular and image datasets and under varying number of anomalies available for hyperparameter optimization. This serves in establishing a direction for the novel anomaly detector described in Chapter~\ref{sec:chapter_sgvaegan}.
 
-\section{Introduction}
-Deep generative models are gaining popularity in anomaly detection since the introduction of the Variational Autoencoder (VAE)~\cite{kingma2013auto}. The number of modifications and extensions of VAE or generative adversarial networks (GAN)~\cite{goodfellow2014generative} is sharply increasing, each claiming superiority over the prior art. This raises a suspicion that some of the methods are overspecialized or poorly tested. This paper, inspired by the paper "Do we need hundreds of classifiers to solve real-world classification problems?"~\cite{fernandez2014we}, strives to compare anomaly detectors under fair conditions to observe how the field has evolved in the last twenty years (the oldest compared detector~\cite{ramaswamy2000efficient} was published in 2000). Specifically, it investigates if methods based on \textit{deep} generative models offer a benefit over methods based on alternative paradigms, either the \textit{classical} methods based on distances or deep architectures without the capability of generating samples.
+As far as anomaly detectors based on deep generative models are concerned, the number of modifications and extensions of VAE or GANs is sharply increasing (as is documented in Chapter~\ref{sec:chapter_survey}), each claiming superiority over the prior art. This raises a suspicion that some of the methods are overspecialized or poorly tested. This chapter, inspired by the paper "Do we need hundreds of classifiers to solve real-world classification problems?"~\cite{fernandez2014we}, strives to compare anomaly detectors under fair conditions to observe how the field has evolved in the last twenty years --- the oldest compared detector (kNN) was published in 2000. Specifically, it investigates if methods based on \textit{deep} generative models offer a benefit over methods based on alternative paradigms, either the \textit{classical} methods that were introduced in Chapter~\ref{sec:chapter_intro} or deep architectures without the capability of generating samples.
 
-Indeed, there already exist comparisons of anomaly detectors. Earlier surveys~\cite{pimentel2014review, campos2016evaluation, goldstein2016comparative, pevny2016loda} do not compare to deep generative methods because they were not developed or sufficiently popular at that time. Contrary to that, the study in~\cite{kiran2018overview} contains a detailed description of deep models but provides experiments only with the basic VAE and only on specialized video datasets. Ref.~\cite{chalapathy2019deep} introduces a taxonomy of deep anomaly detection models but does not compare them experimentally. Other recent surveys~\cite{moustafa2019holistic, kwon2019survey, fernandes2019comprehensive, wang2019progress, pang2020deep} either ignore deep generative models altogether or describe them only theoretically, without making any experimental comparison. The most relevant prior art is~\cite{ruff2020unifying}, which tries to theoretically link deep and shallow techniques\footnote{The \textit{shallow} techniques corresponds to those we call \textit{classical}. We prefer the later terminology, as models based on random forests are in their essence deep, although they cannot capture semantic structure --- a touted feature of deep models}. But again, an extensive experimental comparison of different generative models is missing. One would also expect papers introducing new methods to contain such a comparison. Some of them do~\cite{pevny2016loda}, but generally, we have found comparisons limited (e.g. using a small number of datasets or methods) or flawed, which is elaborated below.
+There is a number of works that try to achieve a simillar goal, but we have found none to be  Earlier surveys~\cite{pimentel2014review, campos2016evaluation, goldstein2016comparative, pevny2016loda} do not compare to deep generative methods because they were not developed or sufficiently popular at that time. Contrary to that, the study in~\cite{kiran2018overview} contains a detailed description of deep models but provides experiments only with the basic VAE and only on specialized video datasets. Ref.~\cite{chalapathy2019deep} introduces a taxonomy of deep anomaly detection models but does not compare them experimentally. Other recent surveys~\cite{moustafa2019holistic, kwon2019survey, fernandes2019comprehensive, wang2019progress, pang2020deep} either ignore deep generative models altogether or describe them only theoretically, without making any experimental comparison. The most relevant prior art is~\cite{ruff2020unifying}, which tries to theoretically link deep and shallow techniques\footnote{The \textit{shallow} techniques corresponds to those we call \textit{classical}. We prefer the later terminology, as models based on random forests are in their essence deep, although they cannot capture semantic structure --- a touted feature of deep models}. But again, an extensive experimental comparison of different generative models is missing. One would also expect papers introducing new methods to contain such a comparison. Some of them do~\cite{pevny2016loda}, but generally, we have found comparisons limited (e.g. using a small number of datasets or methods) or flawed, which is elaborated below.
 
 How does this paper avoid the aforementioned deficiencies? First, eight classical methods in comparison serve as a baseline, over which we expect the state-of-the-art deep methods should improve upon (latest compared method~\cite{wang2020advae} was published in 2020). Second, the comparison uses a large number of tabular (40) and image (6) datasets popular in the evaluation of deep models. Third, all methods have been given the same conditions, which primarily means the budget for optimization of hyperparameters, as~\cite{vskvara2018generative} has shown this to have a significant impact.
 
@@ -32,39 +31,39 @@ The paper is organized as follows. In Section~\ref{sec:contexts}, the anomaly de
           \node[anchor=west] at (0,0.2) {data};
           \draw (1.2,-0.6) -- (1.2,0.6);
           \node[anchor=west] at (1.2,0.8) {tabular};
-          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]2.7,0.6) rectangle ++(3pt,3pt);
-          \draw (1.2,0.6) -- (2.7,0.6);
+          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]2.8,0.6) rectangle ++(3pt,3pt);
+          \draw (1.2,0.6) -- (2.8,0.6);
           \node[anchor=west] at (1.2,0.2) {statistical image};
-          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]3.9,0) rectangle ++(3pt,3pt);
-          \draw (1.2,0) -- (3.9,0);
+          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]4.4,0) rectangle ++(3pt,3pt);
+          \draw (1.2,0) -- (4.4,0);
           \node[anchor=west] at (1.2,-0.4) {semantic image};
-          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]3.9,-0.6) rectangle ++(3pt,3pt);
-          \draw (1.2,-0.6) -- (3.9,-0.6);
+          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]4.4,-0.6) rectangle ++(3pt,3pt);
+          \draw (1.2,-0.6) -- (4.4,-0.6);
           
-          \draw (0,-1.8) -- (4,-1.8);
+          \draw (0,-1.8) -- (5.1,-1.8);
           \node[anchor=west] at (0,-1.6) {hyperparameter selection};
-          \draw (4,-1.5) -- (4,-2.1);
-          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]7.1,-1.5) rectangle ++(3pt,3pt);
-          \draw (4,-1.5) -- (7.1,-1.5);
-          \node[anchor=west] at (4.0,-1.3) {anomaly validation};
-          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]6.7,-2.1) rectangle ++(3pt,3pt);
-          \draw (4,-2.1) -- (6.7,-2.1);
-          \node[anchor=west] at (4.0,-1.9) {clean validation};
+          \draw (5.1,-1.5) -- (5.1,-2.1);
+          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]8.9,-1.5) rectangle ++(3pt,3pt);
+          \draw (5.1,-1.5) -- (8.9,-1.5);
+          \node[anchor=west] at (5.1,-1.3) {anomaly validation};
+          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]8.3,-2.1) rectangle ++(3pt,3pt);
+          \draw (5.1,-2.1) -- (8.3,-2.1);
+          \node[anchor=west] at (5.1,-1.9) {clean validation};
           
-          \draw (0,-3.1) -- (2,-3.1);
+          \draw (0,-3.1) -- (2.1,-3.1);
           \node[anchor=west] at (0,-2.9) {economic};
-          \draw (2,-2.8) -- (2,-3.3);
-          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]3.7,-2.8) rectangle ++(3pt,3pt);
-          \draw (2,-2.8) -- (3.7,-2.8);
-          \node[anchor=west] at (2,-2.6) {train time};
-          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]3.7,-3.3) rectangle ++(3pt,3pt);
-          \draw (2,-3.3) -- (3.7,-3.3);
-          \node[anchor=west] at (2,-3.1) {test time};
+          \draw (2.1,-2.8) -- (2.1,-3.3);
+          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]4.1,-2.8) rectangle ++(3pt,3pt);
+          \draw (2.1,-2.8) -- (4.1,-2.8);
+          \node[anchor=west] at (2.1,-2.6) {train time};
+          \filldraw ([xshift=-1.5pt,yshift=-1.5pt]4.1,-3.3) rectangle ++(3pt,3pt);
+          \draw (2.1,-3.3) -- (4.1,-3.3);
+          \node[anchor=west] at (2.1,-3.1) {test time};
           
 
     \end{tikzpicture}
     
-    \caption{Various aspects of anomaly detection comparison forming the \textit{context} of the experiment.}
+    \caption{Various aspects of anomaly detection comparison forming the \textit{context} of an experiment.}
     \label{fig:context}
 \end{figure}
 
@@ -78,26 +77,7 @@ The third axis is the economic aspect of a problem. There might be serious compu
 
 Finally, Sec.~\ref{sec:other_context} contains other influences that we have originally considered to be important but eventually did not prove to make a significant difference in comparison of multiple methods. These include the use of performance measures other than traditional AUC, the use of Bayesian optimization, and others. 
 
-\section{Compared methods}
-\label{sec:comparedmethods}
-This section briefly reviews deep generative models in the order of exactness of calculation of likelihood. Therefore, it starts with flow models, continues with probabilistic (variational) autoencoders, where the prior art on the application in anomaly detection is rich, and finishes with generative adversarial networks where the calculation of any score related to likelihood is dubious at best. We specifically focus on issues that affect the performance of the method for anomaly detection, most often the anomaly score, if it is not rigorously defined. We also briefly review other examples of deep methods that are relevant for the comparison, such as two-stage models and distance-based models that are not generative but can be used in anomaly detection. We do not review classical methods here, as this has been done many times elsewhere, but we list them in the relevant experimental section.
 
-Before the description, we introduce a notation. Training samples, $\vec{x},$ are assumed to be i.i.d from the underlying probability distribution $p({\vec{x}})$ defined on the input space $\mathcal{X}$. Following the conventional definition of an anomaly~\cite{barnett1974outliers}, each anomaly detection method is expected to provide a quantity (called score and denoted $s(\vec{x}')$) related to the probability of a sample $\vec{x}'$ being generated from $p(\vec{x}).$ The score does not need to be a normalized distribution, as the threshold is typically determined as an empirical estimate of the quantile. Most functions in this section are assumed to have parameters optimized during training. 
-
-\subsection{Autoencoder-based models}
-
-\paragraph{Other models and techniques}
- A plethora of models based on probabilistic autoencoders and specialized for anomaly detection was introduced in recent years, such as~\cite{zong2018deep, pereira2018unsupervised, xu2018unsupervised, principi2017acoustic, chen2018unsupervised, chalapathyGroupAnomalyDetection2018}. Below, we list models included in the comparison and not described above.
-
-The self-adversarial Variational Autoencoder (adVAE)~\cite{wang2020advae} was included because it claims superiority over the state-of-the-art methods, such as VAE, DAGMM~\cite{zong2018deep}, WGAN-GP~\cite{gulrajani2017improved} or MO-GAAL~\cite{liu2019generative} on tabular datasets. It augments the usual encoder-decoder pair with a transformer, whose goal is to simulate anomalies during training. The seeming flaw of the model is that it is trained only on normal data, and there is no link between the real and the simulated anomalies. The sampled reconstruction is used as an anomaly score.
-
-Despite its name, GANomaly~\cite{akcay2018ganomaly, ahnDeepGenerativeModelsBased2020} is more related to adversarial autoencoders than to GANs. It consists of encoder-decoder-encoder architecture with a discriminator, similar to an AAE. The anomaly score is the difference between latent representations of a sample after the first and second encoding. An upgrade to this model, skip-GANomaly~\cite{akcay2019skip}, uses skip connections in a U-Net type architecture. Here, the anomaly score is a combination of reconstruction error and feature-matching loss (see the next section on fmGAN). Although originally proposed only for use in images, we have implemented a variant for tabular data as well.  
-
-
-\subsection{Two-stage models}
-A recurring idea~\cite{ergen2017unsupervised, yaoUnsupervisedAnomalyDetection2019, ruff2018deep, vskvara2020detection} is to combine autoencoders with a secondary model acting on the latent space defined by the encoder. The motivation behind it is that the encoder should preserve the semantic information of the sample and remove noise (e.g. background in images). Additionally, reducing the size mitigates the curse of dimensionality, as high dimensions can be problematic for some models.
-
-We are not aware of a general term for this approach. We use the term \textit{two-stage models}, following~\cite{dai2019diagnosing}, although~\cite{chalapathy2019deep} uses the term \textit{deep hybrid models}. In~\cite{ruff2018deep}, the model optimizes the projection of data (by virtue of NNs) to a new space, where they can be easily enclosed in a sphere of minimum radius. The approach presented in~\cite{vskvara2020detection, yaoUnsupervisedAnomalyDetection2019} explicitly splits the creation of the detector into two parts. It first trains a VAE (and its variants), and then it fixes the encoder. The anomaly score is calculated by a kNN \cite{vskvara2020detection} or by OC-SVM \cite{yaoUnsupervisedAnomalyDetection2019} detectors in the latent space, obtained by projecting the sample by the fixed encoder. The two-stage models can also be viewed as a kNN with a trained metric or OC-SVM with a trained kernel. The embedding can be optimized differently, for example, by enforcing the margin between anomaly candidates and normal data as done in the REPEN~\cite{pangLearningRepresentationsUltrahighdimensional2018} method, which uses an ensemble of 1NN detectors as the second stage.
 
 \section{Experimental setup}
 \label{sec:experimentalsetup}
@@ -109,13 +89,8 @@ The experiments on tabular data and MNIST-C/MVTec-AD image datasets were repeate
 
 Due to the already substantial computational requirements on the rest of the image datasets, we have not trained models with the same hyperparameters on repeated random cross-validation splits. In our experience, the results on different splits of these datasets are almost the same since the number of samples is large and our trial experiments (see Supplementary Tab.~\ref{tab:images_seed_consistency}) have not exhibited a significant variation between the different random cross-validation experiment repetitions. 
 
-
 \subsection{Notes on implementation of models}
-As mentioned in the introduction, we have compared various types of \textit{deep} methods to \emph{classical} ones serving as an etalon. Classical methods included ABOD~\cite{kriegel2008angle}, HBOS~\cite{goldstein2012histogram}, LODA~\cite{pevny2016loda}, LOF~\cite{breunig2000lof}, IsolationForest~\cite{liu2008isolation}, OC-SVM~\cite{scholkopf2001estimating}, PIDForest~\cite{gopalanPIDForestAnomalyDetection2019}, and kNN~\cite{ramaswamy2000efficient}. For ABOD, HBOS, and LODA, we have used pyOD library~\cite{zhao2019pyod} implementation, for LOF, IsolationForest, and OC-SVM we used scikit-learn~\cite{scikit-learn} implementation, and last but not least we have used our own implementation of kNN. The acronyms used in the result section are summarized in Tab.~\ref{tab:model_acronyms_2col} together with the classification of the deep methods as described in Sec.~\ref{sec:comparedmethods}.
-
-Since image datasets are typically much larger than tabular, the OC-SVM was implemented as an ensemble of 10 OC-SVM models trained disjoint subsets of data, see Sec.~\ref{sec:appendix_implementation}, because it has at best $O(n^2)$ scaling in the number of samples. 
-
-To ensure consistency among deep models, we implemented all methods except the MOGAAL\footnote{The pyOD implementation was used.} ourselves using the Flux~\cite{innes:2018} framework in Julia~\cite{Julia-2017} language. Apart from the models mentioned in Sec.~\ref{sec:comparedmethods}, we have also implemented DeepSVDD~\cite{ruff2018deep}, DAGMM~\cite{zong2018deep} and REPEN~\cite{pangLearningRepresentationsUltrahighdimensional2018}, which have been included in multiple comparisons~\cite{ruff2020unifying, wang2020advae, chalapathy2018anomaly}.
+The acronyms used in the result section are summarized in Tab.~\ref{tab:model_acronyms_2col} together with the classification of the deep methods as described in Sec.~\ref{sec:comparedmethods}. Since image datasets are typically much larger than tabular, the OC-SVM was implemented as an ensemble of 10 OC-SVM models trained disjoint subsets of data, see Sec.~\ref{sec:appendix_implementation}, because it has at best $O(n^2)$ scaling in the number of samples. More details about the implementation of comapred models can be found in the original publication~\cite{vskvara2021comparison}.
 
 \begin{table}
     \centering
@@ -154,15 +129,12 @@ To ensure consistency among deep models, we implemented all methods except the M
     \label{tab:model_acronyms_2col}
 \end{table}
 
-We emphasize that while implementing models, we have carefully compared our implementations to the reference where possible and (or) verified that our experimental results are similar to those provided in the corresponding publication.
-
-Neural networks were trained with the ADAM~\cite{kingma2014adam} optimizer with early stopping measuring the continued decrease of loss on the validation dataset. All deep models trained on all image datasets used convolutional layers. More implementation details are in the Supplementary materials Sec.~\ref{sec:appendix_implementation}. The implementation code in the form of a Julia package can be found at \textbf{https://github.com/aicenter/GenerativeAD.jl}.
 
 \subsection{Hyperparameters and their optimization}
 \label{sub:hyperparameteroptimization}
 Properly exploring the space of hyperparameters of all models is paramount to achieving fair and comparable experimental comparison, yet this is often superficially treated. Researchers often use \textit{default} or \textit{recommended} values ignoring that they are sub-optimal on datasets they use in their comparison. The conflicting results of the MOGAAL method in the original publication~\cite{liu2019generative} and in~\cite{wang2020advae} are a nice demonstration of this.  A prototypical example in the classical methods is OC-SVM, which is typically used with Gaussian kernel and with $\nu$ set to some default value, e.g. 0.05~\cite{pevny2016loda}, but can achieve better results with different kernels. The choice of hyperparameters in anomaly detection is everything but easy. But this means that the experimental settings should be set up such that all methods have been optimized equally. We conjecture that recommended and default values of hyperparameters are strongly correlated with the choice of evaluation datasets in the publications that recommend them.
 
-\textit{Random grid search:} In order to explore the hyperparameter space of each method properly, we have employed a random search over a predefined grid for each method. This allows the construction of sections through the space for sensitivity studies. Moreover, it is frequently more efficient than grid search~\cite{bergstra2012random} and more flexible. For each model, dataset, and repetition, we have sampled 100 configurations from corresponding sets (see Tab.~\ref{tab:classical_hyperparameters}--\ref{tab:flow_hyperparameters}) and trained the models with them. In order to keep the neural-network-based models fixed across the repetitions on a single dataset, for each hyperparameter configuration we have also sampled a random seed that was used to initialize the network weights. To prevent running the training of expensive methods forever, there was a hard deadline of 24 hours in which the training of a single configuration for a given number of repetitions/classes should be finished. This automatically penalizes complicated models. 
+\textit{Random grid search:} In order to explore the hyperparameter space of each method properly, we have employed a random search over a predefined grid for each method. This allows the construction of sections through the space for sensitivity studies. Moreover, it is frequently more efficient than grid search~\cite{bergstra2012random} and more flexible. For each model, dataset, and repetition, we have sampled 100 configurations from corresponding sets and trained the models with them. In order to keep the neural-network-based models fixed across the repetitions on a single dataset, for each hyperparameter configuration we have also sampled a random seed that was used to initialize the network weights. To prevent running the training of expensive methods forever, there was a hard deadline of 24 hours in which the training of a single configuration for a given number of repetitions/classes should be finished. This automatically penalizes complicated models. 
 
 Encoders for the two-stage models were selected from models performing best in terms of validation AUC or reconstruction error on the validation set. The second-stage models (kNN and OC-SVM) used hyperparameters sampled from Tab.~\ref{tab:classical_hyperparameters}. 
 
@@ -173,8 +145,6 @@ Encoders for the two-stage models were selected from models performing best in t
 \textit{Ensembles:} Some results on ensembles of anomaly detectors were already reported in~\cite{choiWAICWhyGenerative2019, nalisnickDeepGenerativeModels2019}. Since the other experiments required training a large number of models, it was decided to test whether even a naive approach to this problem brings some improvements. In order to mitigate some uncertainty given by different hyperparameter values, ensembles of detectors were constructed by averaging scores of some number of best-performing detectors. We have experimented with different fixed sizes of ensembles --- either top 10 or top 5. In such a case, the anomaly score is the average of the anomaly scores of ensemble members.
 
 \textit{Performance criteria:} While the area under the ROC curve (AUC) is the most common criteria in anomaly detection, some authors use different metrics, such as partial AUC~\cite{dodd2003partial} or the true positive rate at a chosen false negative rate (TPR@). We have re-evaluated all results obtained for the random grid search on the TPR@5\%.
-
-We have kept track of the time spent on the training of individual models and also on the time needed to evaluate them on validation and test sets. In total, we have trained 1,364,989 model instances in 9619 CPU days, evaluated 4,256,470 different scoring functions in 2704 CPU days, and created 10.2TB of experimental data.
 
 \section{Experimental results}
 \label{sec:results}
@@ -340,3 +310,5 @@ The comparison is not only aimed at researchers but also at practitioners desiri
 \end{itemize}
 
 Many aspects have not been covered and remain a topic of future work, such as the identification of the relevant kind of anomalies in the semantic datasets or the design of ensembles of methods of various types. Although we have shown that the number of anomalies available for validation is an important context, there was no further budget for a comparison of anomaly detection methods with active learning.  We have also completely left out the comparison of models on temporal data, such as time series or video, which is a very challenging task. Finally, an interesting area to study further is the influence of the presence of unlabeled anomalies in the training data.
+
+We identified that the main sources of variability are the experimental conditions: i) the type of dataset (tabular or image) and the nature of anomalies (statistical or semantic), and ii) strategy of selection of hyperparameters, especially the number of available anomalies in the validation set. Methods perform differently in different contexts, i.e. under a different combination of experimental conditions together with computational time. This explains the variability of the previous results and highlights the importance of careful specification of the context in the publication of a new method. All our code and results are available for download.

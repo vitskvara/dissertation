@@ -1,5 +1,19 @@
 \chapter{Anomaly detection in multi-factor data} \label{sec:chapter_sgvaegan}
 
+So far, we have been gathering information about the state-of-the-art methods, available datasets and potential unsolved problems in anomaly detection. The ultimate goal of this endeavour was to find an intriguing anomaly detection problem and propose a novel method for its solution. This will be done in this chapter. Here is a list of the findings that have been gathered in the previous text that guided us towards our goal.
+
+\begin{enumerate}
+    \item In Section~\ref{sec:alfven}, the problem of identyfying anomalies in high resolution image data was solved and the two-stage model approach proved to be the most succesful. The best models were a combination of probabilistic autoencoder, that produced informative latent encoding, and a classical anomaly detector, that operated on the encoded data of highly reduced dimensionality. The dimensionality reduction alleviated computational burden from the second stage model which could be more deeply fine-tuned. Eventually, a simple kNN detector was the best choice of a second stage model. 
+    \item In Chapter~\ref{sec:chapter_comparison}, a thorough comparison of existing anomaly detectors was done. We have seen what are the most important contexts of an anomaly detection problem (data type, number of labeled anomalies, and budget available for hyperparameter tuning) that one should consider when choosing a method for solving a practical problem. It was shown that deep generative models gain an edge on other methods when solving anomaly detection problems on image data, and especially on problems where semantic anomalies occur. 
+    \item In the same chapter, it was shown that although probabilistic autoencoders are generally well-suited for image anomaly detection problems, adversarial training might be beneficial for detection of semantic anomalies with enough budget for hyperparameter tuning.
+\end{enumerate}
+Since detection of semantic anomalies on images is a relatively novel field, with some publications TODO fill the gaps from the recent years, we have decided to cover this problem in this chapter using the findings described in the list above. We will describe the construction of a deep generative adversarial autoencoder that will be combined with a kNN detector operating on its latent space.
+
+
+
+
+
+
 We propose a novel form of anomaly detection that considers several potential sources of anomalies. The approach is demonstrated on detection of semantic anomalies in image data, for which we have proposed the SGVAEGAN model. The model decomposes images into three independent components---the shape of an object and its foreground and background textures---and provides anomaly scores for each of those components separately. The source of anomality in the image can be identified by comparing the component scores. This novel concept  allows an explanation of the anomaly type in a completely unsupervised case. 
 The overall anomaly score of an image is obtained by a weighted combination of the individual component scores. When a few labeled samples of anomalies are available, the model is able to learn the weights in the scores as a hyper-parameter. We have shown that this overall score is useful in the detection of anomalies in the semantic sense, where their anomalousness depends on the context in which they are evaluated. On classical anomaly detection benchmarks, the model was proven to outperform all baseline models. This was shown in a rigorous experimental study that covered the behavior of the model under a varying range of conditions.
 
