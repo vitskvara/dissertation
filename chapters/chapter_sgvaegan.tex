@@ -53,7 +53,7 @@ p(x)\approx\int p_{\theta}(x\vert z)\delta(z-\mu_{\phi}(x))dz\ \propto\ \exp\lef
 \end{equation}
 where $\propto$ denotes equality up to a multiplicative constant. Notice that in this expression, the integration over $z$ is replaced by an evaluation of the likelihood at the "most probable" point given by the encoder $q_{\phi}(z\vert x).$
 
-\subsection{Orthogonal generative model}
+\subsection{Orthogonal generative model} \label{sec:orthogonal_score}
 The above generative model~\eqref{eq:vae} can be rewritten as $x=g_{\theta}(z)+e$ where $e$ is (usually isotropic) Gaussian noise. This formulation  emphasizes the need for marginalization since $g_{\theta}(z)$ is a random variable of dimension $k,$ and noise $e$ is a random variable of dimension $n,$ which is the same as the data. Equation~\eqref{eq:vae} therefore marginalizes away random variables corresponding to latent $z.$ An alternative formulation~\cite{pidhorskyi2018generative, vsmidl2019anomaly} assumes orthogonal decomposition of the noise as
 \begin{align}
 x&=g_{\theta}(z)+e & \rightarrow & &x=g_{\theta}(z')+e^{\bot},

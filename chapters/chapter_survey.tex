@@ -244,9 +244,9 @@ For adversarial autoencoders, these simplifications can be combined with the dis
 
 The reconstruction error-based anomaly scores were criticized in~\cite{pidhorskyi2018generative} for not capturing the true data density $p(\vc{x}).$ The proposed replacement is based on the orthogonal decomposition of the data into $\vc{x}=\vc{x}^\bot + \vc{x}^{\parallel} $ where the $\vc{x}^\parallel$  lies in the tangent space of to the manifold defined by the decoder. This allows to decompose the marginal likelihood into a product of two orthogonal parts
 \begin{equation} \label{eq:jacodeco_basic}
-    p(\vc{x}) \approx p(\vc{x}^{||})p(\vc{x}^{\perp}),
+    p(\vc{x}) \approx p'(\vc{x})p(\vc{e}^{\bot}) p(\vc{x}^{||})p(\vc{x}^{\perp}),
 \end{equation}
-where $p(\vc{x}^\bot)$ is the reconstruction error term, e.g.~\eqref{eq:score_sample}, and $p(\vc{x}^\parallel)$ is obtained by transformation of variables~\eqref{eq:rv_transformation}. The calculation of~\eqref{eq:jacodeco_basic} is expensive, as it needs to compute the singular value decomposition of a Jacobian. For more details, see~\cite{pidhorskyi2018generative} or~\cite{vsmidl2019anomaly} and Sec.~\ref{sec:anomaly_detection}.
+where $p(\vc{e})$ is the reconstruction error term, e.g.~\eqref{eq:score_sample}, and $p(\vc{x}^\bot)$ is obtained through transformation of variables, see Sec.~\ref{sec:orthogonal_score} for more details. The calculation of~\eqref{eq:jacodeco_basic} is expensive, as it needs to compute the singular value decomposition of a Jacobian.
 
 \begin{figure}
 \begin{centering}
