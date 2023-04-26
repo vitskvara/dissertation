@@ -53,7 +53,11 @@ The Area Under the Precision--Recall Curve is very similar to AUC, as it is give
 \subsubsection{Areas of low TPR}
 The two already mentioned metrics put the same weight on all areas on the x-axis. This might not be always ideal for the purposes of anomaly detection, as low FPR areas might be more interesting -- after all, when reporting detected anomalies for a manual check, there is always a limit on how many samples can be realistically processed. A performance measure popular among practitioners is \textbf{\tpra}, which is simply the true positive rate evaluated at a given false positive rate $\alpha \in [0,1]$. This measure can be easily read from an ROC curve. In practice, it is necessary to interpolate the ROC curve since FPR has discrete values, especially for datasets with a small number of samples. 
 
-Another alternative to AUC is \textbf{\auca}, which is the area under the ROC curve calculated only up to some value of false positive rate $\alpha$. Numerically, it is again important to interpolate the ROC curve for a given $\alpha$ before computing the integral. In Fig.~\ref{fig:ROC}, AUC@0.1 corresponds to the darker gray region. \auca\ can be easily normalized by dividing by the chosen $\alpha$, in which case the best detector has $\auca = 1$ similarly to AUC.
+Another alternative to AUC is \textbf{\auca}, which is the area under the ROC curve calculated only up to some value of false positive rate $\alpha$
+\begin{equation} \label{eq:auc_alpha}
+    \text{AUC@}\alpha = \int_0^{\alpha}\text{TPR}(\text{FPR})d\text{FPR}.
+    \end{equation}    
+Numerically, it is again important to interpolate the ROC curve for a given $\alpha$ before computing the integral. In Fig.~\ref{fig:ROC}, AUC@0.1 corresponds to the darker gray region. \auca\ can be easily normalized by dividing by the chosen $\alpha$, in which case the best detector has $\auca = 1$ similarly to AUC.
 
 \subsubsection{Volume of decision region}
 \begin{figure}
