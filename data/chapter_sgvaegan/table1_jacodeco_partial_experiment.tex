@@ -1,0 +1,21 @@
+\begin{table}[t] 
+ \center 
+ \begin{tabular}{c c c c c } 
+ \toprule 
+  class & AUC - no $s_j(x)$ & AUC - with $s_j(x)$ & $\alpha_r$ & $\alpha_j$  \\ 
+  \midrule
+  0 & 0.70 $\pm $0.04 & 0.70 $\pm $0.05 & 1.00 & 0.00  \\ 
+  1 & 0.82 $\pm $0.01 & 0.82 $\pm $0.02 & 1.09 & -0.03  \\ 
+  2 & 0.71 $\pm $0.02 & 0.72 $\pm $0.02 & 0.93 & -0.01  \\ 
+  3 & 0.64 $\pm $0.02 & 0.64 $\pm $0.02 & 0.94 & 0.01  \\ 
+  4 & 0.72 $\pm $0.03 & 0.72 $\pm $0.03 & 1.00 & 0.00  \\ 
+  5 & 0.67 $\pm $0.01 & 0.66 $\pm $0.01 & 0.98 & 0.00  \\ 
+  6 & 0.68 $\pm $0.02 & 0.68 $\pm $0.02 & 0.60 & 0.00  \\ 
+  7 & 0.73 $\pm $0.05 & 0.73 $\pm $0.05 & 1.00 & 0.00  \\ 
+  8 & 0.69 $\pm $0.04 & 0.71 $\pm $0.02 & 0.98 & -0.04  \\ 
+  9 & 0.63 $\pm $0.05 & 0.63 $\pm $0.04 & 0.80 & 0.00  \\ 
+  \bottomrule
+ \end{tabular}
+ \caption{Experiment with $s_j(x)$ on a subset of the SVHN2 dataset. The mean values of  $\alpha$ weights estimated with~\eqref{eq:alpha_regression} are also presented and show that the weight of the Jacobian term is suppressed during their computation.} 
+ \label{tab:jacoceco_partial_experiment} 
+\end{table}

@@ -1,0 +1,64 @@
+\begin{tabular}{lcc}
+\toprule
+\textbf{model} & \textbf{parameter} &  \textbf{value set} \\
+\midrule
+\multirow{10}{*}{common} 
+            & dim($ z $) & $\lbrace 8, 16, \ldots, 256 \rbrace$ \\
+            & h & $\lbrace 16, 32, \ldots, 512\rbrace$ \\
+            & $\eta$ & $\lbrace 10^{-4}, 10^{-3.9}, \ldots, 10^{-3}\rbrace$ \\
+            & batch size & $\lbrace 32, 64, 128\rbrace$ \\
+            & channels & (16, 32, 64, 128) \\
+            & no. conv layers & $\lbrace 3, 4 \rbrace $ \\
+            & kernelsizes & 3 \\
+            & scalings & 2 \\
+            & batch norm. & $\lbrace \text{on}, \text{off} \rbrace $ \\
+            \midrule
+\multirow{3}{*}{VAE} 
+            & activation & $\lbrace \text{relu}, \text{swish} \rbrace$ \\
+            & kernelsizes & (3, 5, 7, 9) \\
+            & scalings & (1, 2, 2, 2) \\
+            \midrule
+\multirow{3}{*}{fmGAN}
+            & activation & $\lbrace \text{leakyrelu}, \text{tanh} \rbrace$ \\
+            & $\alpha_{fm}$ & $\lbrace 10^{-3}, 10^{-2}, \ldots,  10^{3} \rbrace $ \\
+            & optimizer & $\lbrace \text{ADAM}, \text{RMSProp} \rbrace $ \\        
+            \midrule
+\multirow{6}{*}{DeepSVDD}
+            & activation & $\lbrace \text{relu}, \text{swish}, \text{tanh} \rbrace$ \\
+            & objective & $\lbrace \text{soft boundary}, \text{one class} \rbrace$ \\
+            & $\nu$ & $ \lbrace 0.01, 0.1, 0.5, 0.99  \rbrace $ \\
+            & decay & $ 10^{-6} $ \\
+            & kernelsizes & (3, 5, 7, 9) \\
+            & scalings & (1, 2, 2, 2) \\
+            \midrule
+\multirow{3}{*}{fAnoGAN}
+            & activation & $\lbrace \text{relu}, \text{swish}, \text{tanh} \rbrace$ \\
+            & weight clip & $ \lbrace 0.001, 0.005, 0.01, 0.05, 0.1  \rbrace $ \\
+            & $n_{critic}$ & 5\\
+            \midrule
+\multirow{4}{*}{CGN}
+            & init type & $\lbrace \text{orthogonal}, \text{normal} \rbrace$ \\
+            & init gain & $\lbrace 0.01, 0.02, \ldots, 0.1 \rbrace$ \\
+            & $\lambda_{\text{mask}}$ & $\lbrace 0.1, 0.2, \ldots, 1.0 \rbrace$ \\
+            & discriminator & $\lbrace \text{linear}, \text{conv} \rbrace$ \\
+            \midrule
+\multirow{6}{*}{VAEGAN}
+            & activation & $\lbrace \text{leakyrelu}, \text{tanh} \rbrace$ \\
+            & optimizer & $\lbrace \text{ADAM}, \text{RMSProp} \rbrace $ \\        
+            & init type & $\lbrace \text{orthogonal}, \text{normal} \rbrace$ \\
+            & init gain & $\lbrace 0.01, 0.02, \ldots, 0.1 \rbrace$ \\
+            & $\lambda_{\text{rec}}$ & $\lbrace 10^{-3}, 10^{-2}, \ldots,  10^{3} \rbrace$ \\
+            & $n$ & $\lbrace 2, 4, 6, 8 \rbrace$ \\
+            \midrule
+\multirow{5}{*}{SGVAE(GAN)}
+            & all VAEGAN parameters + &  \\
+            & $\lambda_{\text{bin}}$ & $\lbrace 0.5.10^{-1}, 10 ^ {-1}, 0.5.10^{0}, \ldots, 10^3\rbrace$ \\
+            & $\lambda_{\text{mask}}$ & $\lbrace 0.5.10^{-1}, 10 ^ {-1}, 0.5.10^{0}, \ldots, 10^3\rbrace$ \\
+            & $\lambda_{\text{text}}$ & $\lbrace 1, 5, 10, 50, 100, 500, 1000 \rbrace$ \\
+            & $\tau$ & $\lbrace 0.1,0.2,0.3 \rbrace$ \\
+            & $\beta_0$ & $ \lbrace 1.0, 10.0 \rbrace $ \\
+            & $k$ & $ \lbrace 1, 3, \ldots, \min(n_0, 1001) \rbrace $ \\
+            \bottomrule
+\end{tabular}
+\caption{Hyperparameters for the compared models. The size of the latent space is denoted as dim($ z $), $h$ is the hidden width of dense layers, $\eta$ is the learning rate,  $\alpha_{fm}$ is the multiplication constant for the feature--matching loss in fmGAN model, $n_0$ is the number of normal samples in the training dataset. For DeepSVDD and fAnoGAN parameters, see the original publications~\cite{ruff2019deep, schleglFAnoGANFastUnsupervised2019}.}
+
