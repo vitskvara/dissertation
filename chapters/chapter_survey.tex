@@ -54,7 +54,7 @@ where $\alpha > 0$ is a tunable weight and $d_{l,\vc{\varphi}}(\vc{x})$ is the i
 \begin{centering}
 \includegraphics[scale=0.98]{data/chapter_survey/gan_examples.pdf}
 \end{centering}
-\caption{Four different GAN models trained on the normal (black) data of the \textit{two bananas} dataset, the contours of the respective anomaly scores~\eqref{eq:disc_score} and the AUC of the model with respect to the anomalous (red) data. All the models have the same hyperparameters and yet they converged to very different states.}
+\caption{Four different GAN models trained on the normal (black) data of the \textit{two bananas} dataset, the contours of the respective anomaly scores~\eqref{eq:disc_score} and the AUC of the model with respect to the anomalous (red) data. All the models have the same hyperparameters and yet they converged to very different states. Most importantly, it is evident that the discriminator can output almost any value in the areas where training data is not present.}
 \label{fig:gan_examples}
 \end{figure}
 
@@ -100,19 +100,19 @@ By looking at the individual parts of Eq.~(\ref{eq:elbo2}), we can see that by m
 
 \begin{figure}
 \centering{}\include{data/chapter_survey/vae}
-\caption{A schematic of a Variational Autoencoder consisting of fully connected layers with a Gaussian encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$ with mean $\vc{\mu}_{\vc{\phi}}$ and variance $\vc{\sigma}^2_{\vc{\phi}}$, which are extracted from the last layer of the encoder. They are used to sample an encoding $\vc{z}$ through the reparametrization trick with a noise variable $\varepsilon$. The encoding is then passed forward and the reconstruction $\vc{x}'$ is sampled from the decoder $p_{\vc{\theta}}(\vc{x}|\vc{z})$.}
+\caption{A schematic of a Variational Autoencoder consisting of fully connected layers with a Gaussian encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$ with mean $\vc{\mu}_{\vc{\phi}}$ and variance $\vc{\sigma}^2_{\vc{\phi}}$, which are extracted from the last layer of the encoder. They are used to sample an encoding $\vc{z}$ through the reparametrization trick with a noise variable $\vc{\varepsilon}$. The encoding is then passed forward and the reconstruction $\vc{x}'$ is sampled from the decoder $p_{\vc{\theta}}(\vc{x}|\vc{z})$.}
 \label{fig:vae}
 \end{figure}
 
 \subsubsection{Vanilla VAE}
-To be able to optimize~\eqref{eq:elbo3}, we must make some additional assumptions about the model. Here, we will describe those that were made by the authors of the original "vanilla" VAE model, but note that different choices are also possible. First, the \textbf{prior} $p(\vc{z})$ is chosen to be an $h$-dimensional unit normal distribution $p(\vc{z})=\mathcal{N}(\vc{z}|0,\textbf{I})$. The encoded training data are expected to follow this distribution after optimization and it is used for generation of new samples. In tandem with this, the encoder is assumed to model a normal distribution with diagonal covariance matrix $q_{\vc{\phi}}(\vc{z}|\vc{x})=\mathcal{N}\left(\vc{z}|\mu_{\vc{\phi}}(x), \text{diag}(\vc{\sigma}^2_{\vc{\phi}}(x))\right), \vc{\mu}_{\vc{\phi}}, \vc{\sigma}^2_{\vc{\phi}}:\mathbb{R}^d \rightarrow \mathbb{R}^h$, where the mean and variance estimates are computed by neural networks with shared weights $\vc{\phi}$. These choices lead to an analytically solvable expression for the KL divergence in~\eqref{eq:elbo2}, see~\eqref{eq:kl_standard} in the Appendix
+To be able to optimize~\eqref{eq:elbo3}, we must make some additional assumptions about the model. Here, we will describe those that were made by the authors of the original "vanilla" VAE model, but note that different choices are also possible. First, suppose that $\mathcal{X} = \mathbb{R}^d$, although the following generally holds even for vectorized image data, where $\mathcal{X} = \mathbb{R}^{H \times W\times3}$, see the comment at the end of Sec.~\ref{sec:reconstruction_models}. Additionaly, the \textbf{prior} $p(\vc{z})$ is chosen to be an $h$-dimensional unit normal distribution $p(\vc{z})=\mathcal{N}(\vc{z}|0,\textbf{I})$. The encoded training data are expected to follow this distribution after optimization and it is used for generation of new samples. In tandem with this, the encoder is assumed to model a normal distribution with diagonal covariance matrix $q_{\vc{\phi}}(\vc{z}|\vc{x})=\mathcal{N}\left(\vc{z}|\mu_{\vc{\phi}}(x), \text{diag}(\vc{\sigma}^2_{\vc{\phi}}(x))\right), \vc{\mu}_{\vc{\phi}}, \vc{\sigma}^2_{\vc{\phi}}:\mathbb{R}^d \rightarrow \mathbb{R}^h$, where the mean and variance estimates are computed by neural networks with shared weights $\vc{\phi}$. These choices lead to an analytically solvable expression for the KL divergence in~\eqref{eq:elbo2}, see~\eqref{eq:kl_standard} in the Appendix
 \begin{equation} \label{eq:vae_kld}
 D_{\text{KL}}\left(q_{\vc{\phi}}(\vc{z}|\vc{x})||p(\vc{z}) \right) = \frac{1}{2}\sum_{i=1}^{d} 1-\sigma_{\vc{\phi},i}^{2}(\vc{x})+\ln \sigma_{\vc{\phi},i}^{2}(\vc{x}) -\mu_{\vc{\phi},i}^{2}(\vc{x}).
 \end{equation}
 
-Second, the optimization of the ELBO~\eqref{eq:elbo3} requires sampling from the encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$. This is however problematic for optimization by backpropagation, because sampling is not a differentiable operation. Therefore, a \textbf{reparametrization trick} was introduced in~\cite{kingma2013vae}. Instead of directly drawing samples from $q_{\vc{\phi}}(\vc{z}|\vc{x})$, we first take a sample from an $h$-dimensional noise distribution $\varepsilon\sim p(\varepsilon)=\mathcal{N}(0,\mathbf{I})$ and then compute the encoding as $\vc{z}=\vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}_{\vc{\phi}}(\vc{x}) \odot \varepsilon$, where $\odot$ denotes element-wise multiplication. This changes the first term of the ELBO, which is called the \textbf{log-likelihood} to
+Second, the optimization of the ELBO~\eqref{eq:elbo3} requires sampling from the encoder $q_{\vc{\phi}}(\vc{z}|\vc{x})$. This is however problematic for optimization by backpropagation, because sampling is not a differentiable operation. Therefore, a \textbf{reparametrization trick} was introduced in~\cite{kingma2013vae}. Instead of directly drawing samples from $q_{\vc{\phi}}(\vc{z}|\vc{x})$, we first take a sample from an $h$-dimensional noise distribution $\vc{\varepsilon}\sim p(\vc{\varepsilon})=\mathcal{N}(0,\mathbf{I})$ and then compute the encoding as $\vc{z}=\vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}_{\vc{\phi}}(\vc{x}) \odot \vc{\varepsilon}$, where $\odot$ denotes element-wise multiplication. This changes the first term of the ELBO, which is called the \textbf{log-likelihood} to
 \begin{equation} \label{eq:vae_reparam}
-\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})\right] = \mathbb{E}_{\varepsilon\sim\mathcal{N}(0,\textbf{I})}\left[\ln p_{\vc{\theta}}(\vc{x}| \vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}_{\vc{\phi}}(\vc{x}) \odot \varepsilon )\right].
+\mathbb{E}_{q_{\vc{\phi}}(\vc{z}|\vc{x})}\left[\ln p_{\vc{\theta}}(\vc{x}|\vc{z})\right] = \mathbb{E}_{\vc{\varepsilon}\sim\mathcal{N}(0,\textbf{I})}\left[\ln p_{\vc{\theta}}(\vc{x}| \vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}_{\vc{\phi}}(\vc{x}) \odot \vc{\varepsilon} )\right].
 \end{equation}
 In the following text, whenever it can apply, we use the notation $\vc{z} \sim q_{\vc{\phi}}(\vc{z}|\vc{x})$ as a shorthand for the reparametrization trick.
 
@@ -127,7 +127,7 @@ Now, we combine the assumptions and equations~\eqref{eq:vae_kld}--\eqref{eq:vae_
 \mathcal{L_{\text{VAE}}}(\vc{x},\vc{\phi},\vc{\theta})=\frac{1}{2\sigma^2 L}\sum_{l=1}^{L}||\vc{x}-\vc{\mu}_{\vc{\theta}}(\vc{z}^{l})||_{2}^{2} - \frac{1}{2}\sum_{i=1}^{d} 1-\sigma_{\vc{\phi},i}^{2}(x)+\ln\sigma_{\vc{\phi},i}^{2}(x)-\mu_{\vc{\phi},i}^{2}(x),
 \end{equation}
 \begin{equation} 
-\vc{z}^l=\vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}_{\vc{\phi}}(\vc{x}) \odot \varepsilon^l, \varepsilon^l \sim  \mathcal{N}(0,\mathbf{I}). \nonumber
+\vc{z}^l=\vc{\mu}_{\vc{\phi}}(\vc{x})+\vc{\sigma}_{\vc{\phi}}(\vc{x}) \odot \vc{\varepsilon}^l, \vc{\varepsilon}^l \sim  \mathcal{N}(0,\mathbf{I}). \nonumber
 \end{equation}
 This can be directly optimized via gradient descent techniques. We set $L=1$ in accordance with~\cite{kingma2013vae}. See Fig.~\ref{fig:vae} for a schematic example of a VAE model. The training procedure of a VAE is described in Alg.~\ref{alg:vae_train}. An example of the outputs of a VAE model trained on the MNIST hand--written digits dataset~\cite{lecun-mnisthandwrittendigit-2010} is in Fig.~\ref{fig:mnist_reconstruction}.
 
@@ -242,11 +242,11 @@ For adversarial autoencoders, these simplifications can be combined with the dis
 \label{eq:aae_score}
 \end{equation}
 
-The reconstruction error-based anomaly scores were criticized in~\cite{pidhorskyi2018generative} for not capturing the true data density $p(\vc{x}).$ The proposed replacement is based on the orthogonal decomposition of the data into $\vc{x}=\vc{x}^\bot + \vc{x}^{\parallel} $ where the $\vc{x}^\parallel$  lies in the tangent space of to the manifold defined by the decoder. This allows to decompose the marginal likelihood into a product of two orthogonal parts
+The reconstruction error-based anomaly scores were criticized in~\cite{pidhorskyi2018generative} for not capturing the true data density $p(\vc{x}).$ The proposed replacement is based on the orthogonal decomposition of the data into $\vc{x}= \vc{x}' + \vc{e}^\bot$ where the $\vc{x}'$ lies in the tangent space of to the manifold defined by the decoder and $\vc{e}^\bot$ is the orthogonal noise. This allows to decompose the marginal likelihood into a product of two orthogonal parts
 \begin{equation} \label{eq:jacodeco_basic}
-    p(\vc{x}) \approx p'(\vc{x})p(\vc{e}^{\bot}) p(\vc{x}^{||})p(\vc{x}^{\perp}),
+    p(\vc{x}) \approx p'(\vc{x}) p(\vc{e}^{\bot}),
 \end{equation}
-where $p(\vc{e})$ is the reconstruction error term, e.g.~\eqref{eq:score_sample}, and $p(\vc{x}^\bot)$ is obtained through transformation of variables, see Sec.~\ref{sec:orthogonal_score} for more details. The calculation of~\eqref{eq:jacodeco_basic} is expensive, as it needs to compute the singular value decomposition of a Jacobian.
+where $p(\vc{e}^{\bot})$ is the reconstruction error term, e.g.~\eqref{eq:score_sample}, and $p(\vc{x})$ is obtained through transformation of variables, see Sec.~\ref{sec:orthogonal_score} for more details. The calculation of~\eqref{eq:jacodeco_basic} is however quite computationally expensive, as it needs to compute the singular value decomposition of a Jacobian.
 
 \begin{figure}
 \begin{centering}

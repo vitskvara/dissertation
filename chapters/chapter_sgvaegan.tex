@@ -18,57 +18,62 @@ In this chapter, the proposed disentanglement into independent factors and the r
 
 \section{Decomposing the anomaly score} 
 \label{sec:theory}
-Variational autoencoder (VAE) (see Chapter~\ref{sec:chapter_survey}) fits a generative model with data $\vc{x} \in \mathbb{R}^n$
-\begin{align}
-p(\vc{x}) & = \int p_{\vc{\theta}}(\vc{x} \vert \vc{z})p(\vc{z})dz & p_{\vc{\theta}}(x\vert \vc{z}) & =\mathcal{N}(\vc{x};g_{\vc{\theta}}(\vc{z}),\vc{\sigma}^{2} \mathbf{I}),\label{eq:vae}
-\end{align}
-where the prior on the latent $k$-dimensional variable $z$ is either fixed $p(\vc{z})=\mathcal{N}(0,\mathbf{I})$, or further parametrized $p_{\vc{\theta}}(\vc{z})$ as in~\cite{tomczak2017vae}. Distribution $p_{\vc{\theta}}(\vc{x}\vert \vc{z})$ is frequently called \emph{decoder} with $g_{\vc{\theta}}(\vc{z})$ being realized by a neural network parametrizing the mean of the normal distribution. To fit the model, VAE introduces an \emph{encoder}, which is a conditional probability distribution $q_{\vc{\phi}}(\vc{z}\vert x)$ parametrized similarly to the decoder as $q_{\vc{\phi}}(\vc{z}\vert \vc{x})=\mathcal{N}(\vc{z};\vc{\mu}_{\vc{\phi}}(\vc{x}),\text{diag}(\vc{\sigma}_{\vc{\phi}}(\vc{x})))$ with $\vc{\mu}_{\vc{\phi}}(\vc{x}), \vc{\sigma}_{\vc{\phi}}(\vc{x})$ being neural networks. During training, the weights $(\vc{\theta},\vc{\phi})$ of both neural networks are optimized to maximize the evidence lower bound (ELBO) on given training samples.
+In this section, we will derive a general formula for computation of the anomaly score of a VAE model for the case when the latent space can be disentangled into independent components. This will be useful as a theoretical foundation of the proposed anomaly detector in Sec.~\ref{sec:model}.
 
-\subsection{Orthogonal generative model}
-The above generative model~\eqref{eq:vae} can be rewritten as $\vc{x}=g_{\vc{\theta}}(\vc{z})+e$ where $e$ is (usually isotropic) Gaussian noise. This formulation  emphasizes the need for marginalization since $g_{\vc{\theta}}(\vc{z})$ is a random variable of dimension $k$ and noise $e$ is a random variable of dimension $n,$ which is the same as the data. Equation~\eqref{eq:vae} therefore marginalizes away random variables corresponding to latent $z.$ Due to this ambiguity, the assignment between $x$ and $z$ is not unique. In fact, for any $\vc{x}$ exists  $z'$ such that \[
-\vc{x}=g_{\vc{\theta}}(\vc{z}')+e^{\bot}
+\subsection{Orthogonal generative model} \label{sec:orthogonal_score}
+Let us remind ourselves that the VAE (see Sec.~\ref{sec:vanilla_vae}) fits a generative model with data $\vc{x} \in \mathbb{R}^d$
+\begin{align}
+p_{\vc{\theta}}(\vc{x}) & = \int_{\mathcal{Z}} p_{\vc{\theta}}(\vc{x} \vert \vc{z})p(\vc{z})d\vc{z} & p_{\vc{\theta}}(\vc{x} \vert \vc{z}) & =\mathcal{N}(\vc{x};\vc{\mu}_{\vc{\theta}}(\vc{z}),\vc{\sigma}^{2} \mathbf{I}),\label{eq:vae}
+\end{align}
+where $p_{\vc{\theta}}(\vc{x}\vert \vc{z})$ is the decoder and the prior on the latent $h$-dimensional variable $z$ is either fixed $p(\vc{z})=\mathcal{N}(0,\mathbf{I})$, or further parametrized $p_{\vc{\theta}}(\vc{z})$, e.g. as in~\cite{tomczak2017vae}. The VAE also includes an encoder $q_{\vc{\phi}}(\vc{z}\vert \vc{x})$ and is optimized by minimization of the ELBO objective~\eqref{eq:elbo3}. 
+
+The above generative model~\eqref{eq:vae} can be rewritten as $\vc{x}=\vc{\mu}_{\vc{\theta}}(\vc{z})+\vc{e}$ where $\vc{e}$ is (usually isotropic) Gaussian noise. This formulation emphasizes the need for marginalization, since $\vc{\mu}_{\vc{\theta}}(\vc{z})$ is a random variable of dimension $h$ (same as that of the latent space $\mathcal{Z}$) and noise $\vc{e}$ is a random variable of dimension $d,$ which is the same as the data. Equation~\eqref{eq:vae} therefore marginalizes away random variables corresponding to latent $z.$ Due to this ambiguity, the assignment between $x$ and $z$ is not unique. In fact, for any $\vc{x}$ exists  $\vc{z}'$~\cite{pidhorskyi2018generative, vsmidl2019anomaly} such that \[
+\vc{x}=\vc{x}' + +\vc{e}^{\bot} = \vc{\mu}_{\vc{\theta}}(\vc{z}')+\vc{e}^{\bot}
 \]
-where $e^{\bot}$ is the observation noise that lies in the normal space perpendicular to the manifold defined by the decoder $g_{\vc{\theta}}(\vc{z})$~\cite{pidhorskyi2018generative, vsmidl2019anomaly}. This interpretation implies independence between $g_{\vc{\theta}}(\vc{z}')$ and $e^\bot$ which allows for the approximation $p(\vc{x})\approx p(g_{\vc{\theta}}(\vc{z}'))p(e^{\bot})$. 
+where $\vc{e}^{\bot}$ is the observation noise that lies in the normal space perpendicular to the manifold defined by the decoder mean $\vc{\mu}_{\vc{\theta}}(\vc{z})$. This interpretation implies independence between $\vc{\mu}_{\vc{\theta}}(\vc{z}')$ and $\vc{e}^\bot$, which allows for the approximation 
+\begin{equation}
+p_{\vc{\theta}}(\vc{x})\approx p(\vc{\mu}_{\vc{\theta}}(\vc{z}'))p(\vc{e}^{\bot}). 
+\end{equation}
 
-However, the independence relation was found~\cite{vsmidl2019anomaly} to be sufficiently accurate even for the original noise estimate, $\vc{x}=\vc{x}'+e$, where $\vc{x}'=g_{\vc{\theta}}(\vc{z})$.  The  probability of the reconstruction $p(\vc{x}')$ is given by the change of coordinate formula from $p_{z}(\vc{z})$,  yielding
+However, the independence relation was found~\cite{vsmidl2019anomaly} to be sufficiently accurate even for the original noise estimate, $\vc{x}=\vc{x}'+\vc{e}$.  The  probability of the reconstruction $p_{\vc{\theta}}(\vc{x}')$ is given by the change of coordinate formula from $p_{z}(\vc{z})$ (here we use the subscript $z$ in roder to distinguish that the distribution is on the latent space $\mathcal{Z}$), yielding
 \begin{align}
-p(\vc{x})\approx p(\vc{x}')p(e)=p_{z}(g_{\vc{\theta}}^{-1}(\vc{x}'))\left\vert \frac{\partial g_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert p(e).\label{eq:pxjacodeco}
+p_{\vc{\theta}}(\vc{x})\approx p_{\vc{\theta}}(\vc{x}')p(\vc{e})=p_{z}(\vc{\mu}_{\vc{\theta}}^{-1}(\vc{x}'))\left\vert \frac{\partial \vc{\mu}_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert p(\vc{e}).\label{eq:pxjacodeco}
 \end{align}
-A gaussian noise model might be assumed, e.g. $p(e) = \mathcal{N}(\vc{x}-\vc{x}',\vc{\sigma}^{2}\mathbf{I})$. In practice, an anomaly score for the orthogonal model $s(\vc{x}) = - \log p(\vc{x})$ is computed as
+A gaussian noise model might be assumed, e.g. $p(\vc{e}) = \mathcal{N}(\vc{x}-\vc{x}',\vc{\sigma}^{2}\mathbf{I})$. In practice, an anomaly score for the orthogonal model $s(\vc{x}) = - \log p_{\vc{\theta}}(\vc{x})$ is computed as
 \begin{align}
-s(\vc{x}) & = - \log p(e) -\log p_{z}(\vc{z})-\log\left\vert \frac{\partial g_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert ,\label{eq:jacodeco}
+s(\vc{x}) & = - \log p(\vc{e}) -\log p_{z}(\vc{z})-\log\left\vert \frac{\partial \vc{\mu}_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert ,\label{eq:jacodeco}
 \end{align}
 which is essentially the reconstruction error with additional terms.
 
 \subsection{Anomaly in the latent space}
-Let's now observe how the above generative model changes when we assume the distribution on latent $z$ to be multi-modal conditioned by hidden label $y$. Let
+Let's observe how the above generative model changes when we assume the distribution on latent $\vc{z}$ to be multi-modal conditioned by hidden label $y$. This simplification assumes that the latent distribution for normal and anomalous data is different. Let
 \begin{equation} \label{eq:pzy}
-p(\vc{z}\vert y)=p_{n}(\vc{z})^{y}p_{a}(\vc{z})^{1-y},y\in[0,1],
+p_z(\vc{z}\vert y)=p_{n}(\vc{z})^{y}p_{a}(\vc{z})^{1-y},y\in[0,1],
 \end{equation}
 where $y=1$ for normal data, $y=0$ for anomalies, and $p_n(\vc{z}),p_a(\vc{z})$ are the latent distributions of normal and anomalous data, respectively. Then from~\eqref{eq:jacodeco} we have
 \begin{align*}
-s(\vc{x} \vert y) & = - \log p(e) -y\log p_{n}(\vc{z})  -(1-y)\log p_{a}(\vc{z}) - \log\left\vert \frac{\partial g_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert,
+s(\vc{x} \vert y) & = - \log p(\vc{e}) -y\log p_{n}(\vc{z})  -(1-y)\log p_{a}(\vc{z}) - \log\left\vert \frac{\partial \vc{\mu}_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert,
 \end{align*}
 Since $y$ is usually unknown, we will integrate it away by expectation over $y$, 
 \begin{align}
-\mathbb{E}_{p(y)} \left[  s(\vc{x} \vert y) \right]  = &  - \log p(e) - \log\left\vert \frac{\partial g_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert \nonumber \\ 
+\mathbb{E}_{p(y)} \left[  s(\vc{x} \vert y) \right]  = &  - \log p(\vc{e}) - \log\left\vert \frac{\partial \vc{\mu}_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert \nonumber \\ 
  & - \int_{\mathcal{Y}} y\log p_{n}(\vc{z}) p(y) dy - \int_{\mathcal{Y}} (1-y)\log p_{a}(\vc{z}) p(y) dy \nonumber \\
-   \propto & - \log p(e) - \log\left\vert \frac{\partial g_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert  - \alpha\log p_{n}(\vc{z}) = s(\vc{x}). \label{eq:jacodeco2}
+   \propto & - \log p(\vc{e}) - \log\left\vert \frac{\partial \vc{\mu}_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert  - \alpha\log p_{n}(\vc{z}) = s(\vc{x}). \label{eq:jacodeco2}
 \end{align}
 where we assume $\mathbb{E}_{p(y)} \left[  y \right] =\alpha$, and $p_{a}(\vc{z}) \propto 1$, because the probability of an anomaly is assumed to be the same everywhere, which then allows us to drop this term since it is independent of $\vc{x}$.  
 
 
-Now consider a \emph{disentagled} model, where the data is generated from multiple independent latent spaces, $z_{i}=z_{1},\ldots,z_{l}$, 
+Now consider a \textbf{disentagled} model, where the data is generated from multiple independent latent spaces, $\vc{z}=\vc{z}_{1},\ldots,\vc{z}_{l}$, 
 \begin{equation} \label{eq:multilatent}
-\vc{x}=f(\vc{z}_{1},\ldots,z_{l})+e,
+\vc{x}=f(\vc{z}_{1},\ldots,\vc{z}_{l})+\vc{e},
 \end{equation}
-where each of the latents has distribution $p(\vc{z}_{i})=\mathcal{N}(0,\mathbf{I})$. Using the same derivations, each of the latent spaces $z_i$ can be a potential source of different types of anomalies, with hidden labels  $y=(y_{1},\ldots,y_{l})   $. Therefore, instead of~\eqref{eq:pzy},  we have
+where each of the latents has distribution $p(\vc{z}_{i})=\mathcal{N}(0,\mathbf{I})$. Using the same derivations, each of the latent spaces $\vc{z}_i$ can be a potential source of different types of anomalies, with hidden labels  $y=(y_{1},\ldots,y_{l})   $. Therefore, instead of~\eqref{eq:pzy},  we have
 \begin{equation} 
 p(\vc{z}\vert y)= \prod_{i=1}^l p_{n_i}(\vc{z}_i)^{y_i}p_{a_i}(\vc{z}_i)^{1-y_i},y_i\in[0,1].
 \end{equation}
 Repeating derivation of (\ref{eq:jacodeco2}) for multiple latent variables, the anomaly score becomes
 \begin{align} \label{eq:alphadeco}
-s(\vc{x}) & = - \log p(e) - \log\left\vert \frac{\partial g_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert  -  \sum_{i=1}^{l}\alpha_{i}\log p_{n_{i}}(\vc{z}_{i}),
+s(\vc{x}) & = - \log p(\vc{e}) - \log\left\vert \frac{\partial \vc{\mu}_{\vc{\theta}}^{-1}(\vc{x})}{\partial \vc{x}}\right\vert  -  \sum_{i=1}^{l}\alpha_{i}\log p_{n_{i}}(\vc{z}_{i}),
 \end{align}
 where $\alpha_{i}$ denotes the probability that the latent variable of the $i$th factor is generated from the normal class. In this work, we assume that $\alpha_i$ is not known during training but has to be estimated in the validation stage from examples of anomalous samples.\footnote{Based on the  industrial experience of authors, this assumption is safe, i.e. there are usually examples of anomalies, though their diversity might be low.}
 
@@ -84,7 +89,7 @@ In contrast, for a single data sample, we are more interested in the actual valu
     \label{fig:wmnist_grid}
 \end{figure}
 
-We demonstrate the advantage of disentanglement in detecting anomalies on image data, because (i) the disentanglement has been researched mostly in this domain~\cite{kim2018disentangling, kim2019bayes, choi2020discond}, (ii) most public datasets are in this domain, and (iii) the anomaly detection community is the most active in this field.
+We demonstrate the advantage of disentanglement in detecting semantic anomalies on image data, because (i) the disentanglement has been researched mostly in this domain~\cite{kim2018disentangling, kim2019bayes, choi2020discond}, (ii) the anomaly detection community is the most active in this field, and (iii) the findings of Chapter~\ref{sec:chapter_comparison} showed that most deep generative models are not very efficient when dealing with semantic anomalies.
 
 We assume an image $\vc{x}$ to be composed of three main components: a mask (shape of the object), a background texture, and a foreground texture (the object). The mask together with the foreground texture defines the semantic meaning of the object, as it is what defines the class of the image in datasets. According to the above assumptions, each component (mask, background texture, and foreground texture) is generated from an independent variable. Therefore, for the latent distribution $p(\vc{z})$ it holds that
 \begin{equation} \label{eq:latent_decomposition}
