@@ -43,11 +43,11 @@ Achieving convergence such that the generated samples $\tilde{\vc{x}}$ resemble 
 \begin{equation} \label{eq:fmgan}
 \mathcal{L}_{\text{gfm}}(\vc{z},\vc{x},\vc{\theta})=\alpha\mathcal{L}_{g}(\vc{z},\vc{\theta})+\mathcal{L}_{h}(\vc{z},\vc{x},\vc{\theta}),
 \end{equation}
-where the second term is the so-called \textbf{feature-matching} loss
+where $\alpha > 0$ is a tunable weight and the second term is the so-called \textbf{feature-matching} loss
 \begin{equation} \label{eq:fm_loss}
-\mathcal{L}_{fm}(\vc{z},\vc{x},\vc{\theta}) = ||d_{l,\vc{\varphi}}(\vc{x})-d_{l,\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))||_{2}^{2}
+\mathcal{L}_{fm}(\vc{z},\vc{x},\vc{\theta}) = ||d_{n,\vc{\varphi}}(\vc{x})-d_{n,\vc{\varphi}}(g_{\vc{\theta}}(\vc{z}))||_{2}^{2}.
 \end{equation}
-where $\alpha > 0$ is a tunable weight and $d_{l,\vc{\varphi}}(\vc{x})$ is the intermediate representation of $\vc{x}$ after propagation through $l \in \mathbb{N}$ layers of the discriminator. This loss is supposed to provide improved gradients for the generator to stabilize the training. In the following text, a GAN model with the loss~(\ref{eq:fmgan}) will be referred to as the \textbf{feature-matching GAN} (fmGAN).
+Here, $d_{n,\vc{\varphi}}(\vc{x})$ is the intermediate representation of $\vc{x}$ after propagation through $n \in \mathbb{N}$ layers of the discriminator. This loss is supposed to provide improved gradients for the generator to stabilize the training. In the following text, a GAN model with the loss~(\ref{eq:fmgan}) will be referred to as the \textbf{feature-matching GAN} (fmGAN).
 
 \subsection{GANs in anomaly detection}
 \begin{figure}

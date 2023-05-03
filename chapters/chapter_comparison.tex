@@ -255,7 +255,7 @@ We provide results averaged over the studied contexts on image data. Due to the 
 \section{Conclusion}
 The presented extensive comparison of anomaly detection methods based on deep generative methods, namely variants of flows, variational autoencoders, and generative adversarial networks with shallow methods based on alternative paradigms revealed that the performance of anomaly detection methods strongly depends on experimental conditions. We have identified the most important contexts (sources of variation) to be the type of data, availability of labeled anomalies for hyperparameter tuning and of course the available computational power. There are also factors of variance that have a smaller relevance in the conducted experiments in~\cite{vskvara2021comparison}, such as the use of ensembles, alternative performance metrics and Bayesian optimization of model hyperparameters, which did not have an effect on the relative performance of different models.
 
-This is the list of some of the most important practical observations and recommendations, some of which will be relevant in Chapter~\ref{chapter:sgvaegan}.
+This is the list of some of the most important practical observations and recommendations, some of which will be relevant in Chapter~\ref{sec:chapter_sgvaegan}.
 \begin{itemize}
     \item Methods with more exact likelihood modeling, such as kNN, flows, and autoencoder-based models, perform better in scenarios with a limited number of anomalies available for hyperparameter tuning.
     \item Majority of the methods fail to detect semantic anomalies. The exception is the fmGAN, which uses a generator-discriminator pair, but only if given enough computational resources and many anomalous samples for cross-validation.
