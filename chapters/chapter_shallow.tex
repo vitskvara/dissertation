@@ -195,7 +195,7 @@ Abstracting the above, one can use \textit{kernel functions}~\cite{shawe2004kern
 \label{fig:ocsvm_examples}
 \end{figure}
 
-\subsubsection{Deep methods}
+\subsubsection{Deep methods} \label{ref:sec_deep_domain}
 Instead of choosing a kernel and its parameters manually, one can instead parametrize the feature maps $\Phi$ using neural networks and train them using standard gradient descent techniques, or use pretrained networks from related tasks. This is the basis for deep OCSVM methods such as \textbf{One-class Neural Network} (OCNN)~\cite{chalapathy2018anomaly} or~\cite{erfani2016high}, or methods based on the SVDD formulation~\cite{ghafoori2020deep}. In \textbf{Deep SVDD} (DSVDD)~\cite{ruff2018deep}, the objective~\eqref{eq:hypersphere} is reformulated without the slack variables $\xi_i$, which means that the hypersphere is expected to enclose all datapoints in the training dataset. This simplification leads to faster convergence and yet still proves to be an effective anomaly detector. However, all the deep methods have a basic flaw. Without any further restrictions, the solution $\Phi(\vc{x}) = \vc{c}$ is valid but does not provide a useful detector. This behaviour is called the \textit{feature map collapse}. In order to prevent this, many techniques such as freezing the neural networks that provide the feature map, architectural choices or using adversarial learning are used (for an extensive list of possibilities, see~\cite{ruff2020unifying}).
 
 \subsubsection{Training with negative examples}
