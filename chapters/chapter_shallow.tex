@@ -82,7 +82,7 @@ Anomaly detection methods are based on a wide range of paradigms. In this sectio
 Since we have defined anomaly detection as detecting samples that deviate from the normal distribution $P^+$, it is straightforward to try to model the distribution by modeling its probability distribution function (pdf). One of the simplest such methods is the Grubbs' test~\cite{grubbs1969procedures}, which assumes a Gaussian distribution of normal one-dimensional data and declares a sample to be anomalous if its distance from the mean is larger than some threshold (e.g. three standard deviations). Many such methods based on statistical tests have been proposed~\cite{barnett1994outliers}, but we will focus on advanced modeling probabilistic techniques.
 
 \subsubsection{Shallow methods}
-A \textbf{Mahalabonis distance} anomaly detector~\cite{laurikkala2000informal} builds a parametric estimate of a multivariate normal distribution by computing the mean $\vc{\mu} \in \mathbb{R}^d$ and covariance matrix $\Sigma \in \mathbb{R}^{d,d}$ of the training data. The anomaly score of a test point $\vc{x} \in \mathbb{R}^d$ is then
+A \textbf{Mahalabonis distance} anomaly detector~\cite{laurikkala2000informal} assumes that the normal data have a Gaussian distribution. Therefore, it builds a simple parametric estimate of the normal distribution by computing the mean $\vc{\mu} \in \mathbb{R}^d$ and covariance matrix $\Sigma \in \mathbb{R}^{d,d}$ of the training data. The anomaly score of a test point $\vc{x} \in \mathbb{R}^d$ is then
 \begin{equation} \label{eq:mahalabonis_score}
 	s(\vc{x}) =  (\vc{x} - \vc{\mu}) ^T \Sigma ^{-1} (\vc{x}-\vc{\mu}),
 \end{equation}
