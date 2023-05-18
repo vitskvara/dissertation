@@ -21,11 +21,11 @@ where $\text{Tr}(.)$ is the trace operator.
 
 \section{The Kullback-Leibler divergence}
 
-The Kullback-Leibler (KL) divergence is a measure of distance of two probability distributions. For two continuous probability distributions with probability densities $p(\vc{x})$ and $q(\vc{x})$ defined on the same probability space we define it as
+The Kullback-Leibler (KL) divergence is a measure of distance between two probability distributions. For two continuous probability distributions with probability densities $p(\vc{x})$ and $q(\vc{x})$ defined on the same probability space we define it as
 \begin{equation}
 D_{\text{KL}}\left(p(\vc{x})||q(\vc{x})\right)=\int_{\mathcal{X}}p(\vc{x})\ln\frac{p(\vc{x})}{q(\vc{x})}d\vc{x}.\label{eq:kld}
 \end{equation}
-It is an asymmetric measure, therefore it is not a proper metric. These relations holds
+It is an asymmetric measure, therefore it is not a proper metric. These relations hold
 \begin{equation}
 p(\vc{x})=q(\vc{x})\text{ almost everywhere }\Longleftrightarrow D_{\text{KL}}\left(p(\vc{x})||q(\vc{x})\right)=0,
 \end{equation}
