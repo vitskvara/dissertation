@@ -6,9 +6,9 @@
 	\State{$X_B \gets$ A random batch of $B$ samples from $X$}
 	\State{$Z_B \gets$ A random batch of $B$ samples from $p(\vc{z})$}
 	\State$l_d \gets \frac{1}{B}\sum_{j=1}^N \mathcal{L}_d(\vc{x}_j,\vc{z}_j,\vc{\varphi}), \vc{x}_j \in X_B, \vc{z}_j \in Z_B$
-	\State$\vc{\varphi} \stackrel{+}\gets - \nabla_{\vc{\varphi}} l_d$ update of discriminator weights 
+	\State$\vc{\varphi} \stackrel{+}\gets - \nabla_{\vc{\varphi}} l_d$, update of discriminator weights 
 	\State$l_g \gets \frac{1}{L}\sum_{j=1}^L \mathcal{L}_g (\vc{z}_j,\vc{\theta}), \vc{z}_j \in Z_L$
-	\State$\vc{\theta} \stackrel{+}\gets - \nabla_{\vc{\theta}} l_g$ update of generator weights
+	\State$\vc{\theta} \stackrel{+}\gets - \nabla_{\vc{\theta}} l_g$, update of generator weights
 	\State{$i \gets i+1$}
 \EndWhile
 \State{\textbf{return} generator $g_{\vc{\theta}}(\vc{z})$, discriminator $d_{\vc{\varphi}}(\vc{x})$}
