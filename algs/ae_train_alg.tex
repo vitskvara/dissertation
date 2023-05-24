@@ -5,8 +5,8 @@
 \While{$i<I$ or $\vc{\phi},\vc{\theta}$ are not converged}
 	\State{$X_B \gets$ A random batch of $B$ samples from $X$}
 	\State$l \gets \frac{1}{B}\sum_{i=1}^B \mathcal{L}_{\text{AE}}(\vc{x}_i,\vc{\phi},\vc{\theta}), \vc{x}_i \in X_B$
-	\State$\vc{\phi} \stackrel{+}\gets - \nabla_{\vc{\phi}}l $ update of encoder weights
-	\State$\vc{\theta} \stackrel{+}\gets - \nabla_{\vc{\theta}}l $ update of decoder weights
+	\State$\vc{\phi} \stackrel{+}\gets - \nabla_{\vc{\phi}}l $, update of encoder weights
+	\State$\vc{\theta} \stackrel{+}\gets - \nabla_{\vc{\theta}}l $, update of decoder weights
 	\State{$i \gets i+1$}
 \EndWhile
 \State{\textbf{return} encoder $e_{\vc{\phi}}(\vc{x})$, decoder $g_{\vc{\theta}}(\vc{z})$}
