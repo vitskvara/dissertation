@@ -76,7 +76,10 @@
 % Page formating
 % ------------------------------------------------------------------------------
 \newcommand{\thesistype}[1]{\newcommand\@thesistype{#1}}
-\newcommand{\branch}[1]{\newcommand\@branch{#1}}
+\newcommand{\branchCZE}[1]{\newcommand\@branchCZE{#1}}
+\newcommand{\programCZE}[1]{\newcommand\@programCZE{#1}}
+\newcommand{\branchENG}[1]{\newcommand\@branchENG{#1}}
+\newcommand{\programENG}[1]{\newcommand\@programENG{#1}}
 \newcommand{\academicyear}[1]{\newcommand\@academicyear{#1}}
 \newcommand{\acknowledgment}[1]{\newcommand\@acknowledgment{#1}}
 
@@ -171,71 +174,97 @@
   \end{minipage}
   \cleardoublepage
 
-  % Czech abstract
+  % Czech bib entry
   \thispagestyle{plain}
   \noindent
-  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
-    \doccol \textbf{Název:}
-  \end{minipage}
-  \hspace{0.05\textwidth}
-  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
-    \textbf{\@titleCZE}
-  \end{minipage} \par
+  {\Huge \textbf{Bibliografický záznam}}\\
+  \rule{\textwidth}{1.5pt}\par
   \vspace{0.5cm}
+  % autor
   \noindent
   \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
     \doccol \textbf{Autor:}
   \end{minipage}
   \hspace{0.05\textwidth}
   \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
-    \@author
+    \@author\\ České vysoké učení technické v Praze\\ Fakulta jaderná a fyzikálně inženýrská\\ katedra matematiky
+  \end{minipage} \par
+  \vspace{0.5cm}
+  % název
+  \noindent
+  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
+    \doccol \textbf{Název práce:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
+    \@titleCZE
   \end{minipage} \par
   \vspace{0.5cm}
   \noindent
+  % program
+  \noindent
+  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
+    \doccol \textbf{Studijní program:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
+    \@programCZE
+  \end{minipage} \par
+  \vspace{0.5cm}
+  \noindent
+  % obor
   \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
     \doccol \textbf{Obor:}
   \end{minipage}
   \hspace{0.05\textwidth}
   \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
-    \@branch
+    \@branchCZE
   \end{minipage} \par
   \vspace{0.5cm}
-  \noindent
-  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
-    \doccol \textbf{Druh práce:}
-  \end{minipage}
-  \hspace{0.05\textwidth}
-  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
-    \@thesistype
-  \end{minipage} \par
-  \vspace{0.5cm}
+  % školitel
   \noindent
   \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
     \doccol \textbf{Školitel:}
   \end{minipage}
   \hspace{0.05\textwidth}
   \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
-    \@supervisor
+    \@supervisor\\ České vysoké učení technické v Praze\\ Fakulta elektrotechnická
   \end{minipage} \par
   \vspace{0.5cm}
+  % specialista
   \noindent
   \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
     \doccol \textbf{Školitel specialista:}
   \end{minipage}
   \hspace{0.05\textwidth}
   \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
-    \@supervisorspec
+    \@supervisorspec\\ Ústav fyziky plazmatu AV ČR
   \end{minipage} \par
   \vspace{0.5cm}
   \noindent
+  % year
+  \noindent
   \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
-    \doccol \textbf{Abstrakt:}
+    \doccol \textbf{Akademický rok:}
   \end{minipage}
   \hspace{0.05\textwidth}
   \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
-    \@abstractCZE
+    \@academicyear
   \end{minipage} \par
   \vspace{0.5cm}
+  % pages
+  \noindent
+  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
+    \doccol \textbf{Počet stran:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
+    127
+    %\pageref{LastPage} % this does not account for first X pages
+    %\lastpageref*{LastPages} % this does not work
+  \end{minipage} \par
+  \vspace{0.5cm}
+  % keywords
   \noindent
   \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
     \doccol \textbf{Klíčová slova:}
@@ -247,26 +276,97 @@
   \vfill
   \cleardoublepage
 
-  % English abstract
+  % English bib entry
   \thispagestyle{plain}
   \noindent
+  {\Huge \textbf{Bibliographic Entry}}\\
+  \rule{\textwidth}{1.5pt}\par
+  \vspace{0.5cm}
+  % autor
+  \noindent
   \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
-    \doccol \textbf{Title:}
+    \doccol \textbf{Author:}
   \end{minipage}
   \hspace{0.05\textwidth}
   \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
-    \textbf{\@titleENG}
+    \@author\\ Czech Technical University in Prague\\ Faculty of Nuclear Sciences and Physical Engineering\\ department of mathematics
+  \end{minipage} \par
+  \vspace{0.5cm}
+  % název
+  \noindent
+  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
+    \doccol \textbf{Title of \\Dissertation:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
+    \@titleENG
   \end{minipage} \par
   \vspace{0.5cm}
   \noindent
+  % program
+  \noindent
   \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
-    \doccol \textbf{Abstract:}
+    \doccol \textbf{Degree Programme:}
   \end{minipage}
   \hspace{0.05\textwidth}
   \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
-    \@abstractENG
+    \@programENG
   \end{minipage} \par
   \vspace{0.5cm}
+  \noindent
+  % obor
+  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
+    \doccol \textbf{Field of Study:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
+    \@branchENG
+  \end{minipage} \par
+  \vspace{0.5cm}
+  % školitel
+  \noindent
+  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
+    \doccol \textbf{Supervisor:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
+    \@supervisor\\ Czech Technical University in Prague\\ Faculty of Electrical Engineering
+  \end{minipage} \par
+  \vspace{0.5cm}
+  % specialista
+  \noindent
+  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
+    \doccol \textbf{Supervisor \\Specialist:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
+    \@supervisorspec\\ Insitute of Plasma Physics, Czech Academy of Sciences
+  \end{minipage} \par
+  \vspace{0.5cm}
+  \noindent
+  % year
+  \noindent
+  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
+    \doccol \textbf{Academic Year:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
+    \@academicyear
+  \end{minipage} \par
+  \vspace{0.5cm}
+  % pages
+  \noindent
+  \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
+    \doccol \textbf{Number of Pages:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.7\textwidth}\vspace{0pt}%
+    127
+    %\pageref{LastPage} % this does not account for first X pages
+    %\lastpageref*{LastPages} % this does not work
+  \end{minipage} \par
+  \vspace{0.5cm}
+  % keywords
   \noindent
   \begin{minipage}[t]{0.25\textwidth}\vspace{0pt}%
     \doccol \textbf{Keywords:}
@@ -277,6 +377,28 @@
   \end{minipage} \par
   \vfill
   \cleardoublepage
+
+  % Abstrakt
+  \thispagestyle{plain}
+  \begin{minipage}[t]{0.15\textwidth}\vspace{0pt}%
+    \doccol \textbf{Abstrakt:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.8\textwidth}\vspace{0pt}%
+    \@abstractCZE
+  \end{minipage} \par
+  \vspace{0.5cm}
+  \begin{minipage}[t]{0.15\textwidth}\vspace{0pt}%
+    \doccol \textbf{Abstract:}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[t]{0.8\textwidth}\vspace{0pt}%
+    \@abstractENG
+  \end{minipage} \par
+  \vspace{0.5cm}
+  \cleardoublepage
+  
+  % TOC
   \hypersetup{pageanchor=true}
   \tableofcontents
   \cleardoublepage
